@@ -699,6 +699,10 @@ body {
 
 /* Filter Bar */
 .filter-bar {
+  position: sticky;
+  top: 90px; /* 헤더의 높이만큼 내려오게 조절 */
+  z-index: 90; /* 헤더보다 아래, 콘텐츠보다 위 */
+
   background: linear-gradient(135deg, white 0%, var(--color-accent-light) 100%);
   border: 2px solid var(--color-light-peach);
   box-shadow: 0 4px 15px rgba(139, 69, 19, 0.1);
