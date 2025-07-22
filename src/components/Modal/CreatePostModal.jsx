@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState } from "react";
 
 const CreatePostModal = ({ onClose, currentPage, onPostCreate }) => {
   const [formData, setFormData] = useState({
@@ -10,12 +10,12 @@ const CreatePostModal = ({ onClose, currentPage, onPostCreate }) => {
     dateRange: "",
     image: null,
     badgeRequest: false,
-  })
+  });
 
-  const isCompanionPost = currentPage === "photo"
+  const isCompanionPost = currentPage === "photo";
 
   const handleSubmit = (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
     // 새 포스트 데이터 생성
     const newPost = {
@@ -30,24 +30,24 @@ const CreatePostModal = ({ onClose, currentPage, onPostCreate }) => {
       content: formData.content,
       badgeRequest: formData.badgeRequest,
       ...(isCompanionPost && { dateRange: formData.dateRange }),
-    }
+    };
 
     // 상위 컴포넌트로 새 포스트 전달
     if (onPostCreate) {
-      onPostCreate(newPost)
+      onPostCreate(newPost);
     }
 
-    console.log("Creating post:", newPost)
-    onClose()
-  }
+    console.log("Creating post:", newPost);
+    onClose();
+  };
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target
+    const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
-    }))
-  }
+    }));
+  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -68,7 +68,11 @@ const CreatePostModal = ({ onClose, currentPage, onPostCreate }) => {
               name="title"
               value={formData.title}
               onChange={handleChange}
-              placeholder={isCompanionPost ? "프랑스 1박2일 가성비" : "피드 제목을 입력하세요"}
+              placeholder={
+                isCompanionPost
+                  ? "프랑스 1박2일 가성비"
+                  : "피드 제목을 입력하세요"
+              }
               required
             />
           </div>
@@ -76,7 +80,13 @@ const CreatePostModal = ({ onClose, currentPage, onPostCreate }) => {
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="region">지역</label>
-              <select id="region" name="region" value={formData.region} onChange={handleChange} required>
+              <select
+                id="region"
+                name="region"
+                value={formData.region}
+                onChange={handleChange}
+                required
+              >
                 <option value="">지역을 선택하세요</option>
                 <option value="부산">부산</option>
                 <option value="대전">대전</option>
@@ -123,7 +133,9 @@ const CreatePostModal = ({ onClose, currentPage, onPostCreate }) => {
           )}
 
           <div className="form-group">
-            <label htmlFor="content">{isCompanionPost ? "여행 계획" : "내용"}</label>
+            <label htmlFor="content">
+              {isCompanionPost ? "여행 계획" : "내용"}
+            </label>
             <textarea
               id="content"
               name="content"
@@ -146,7 +158,9 @@ const CreatePostModal = ({ onClose, currentPage, onPostCreate }) => {
               id="image"
               name="image"
               accept="image/*"
-              onChange={(e) => setFormData((prev) => ({ ...prev, image: e.target.files[0] }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, image: e.target.files[0] }))
+              }
             />
           </div>
 
@@ -161,7 +175,7 @@ const CreatePostModal = ({ onClose, currentPage, onPostCreate }) => {
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CreatePostModal
+export default CreatePostModal;

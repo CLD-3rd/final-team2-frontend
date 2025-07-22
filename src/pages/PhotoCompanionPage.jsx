@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import FilterBar from "../components/Feed/FilterBar";
+import FilterBar from "@/components/Feed/FilterBar";
 
 const PhotoCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
   const [filters, setFilters] = useState({

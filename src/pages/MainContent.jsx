@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import FilterBar from "../components/Feed/FilterBar";
-import FeedGrid from "../components/Feed/FeedGrid";
-import PhotoCompanionPage from "./PhotoCompanionPage";
-import LocalCompanionPage from "./LocalCompanionPage";
-import ProfileManagementPage from "./ProfileManagementPage";
-import ScheduleManagementPage from "./ScheduleManagementPage";
-import ChatPage from "./ChatPage";
-import ErrorPage from "./ErrorPage";
+import FilterBar from "@/components/Feed/FilterBar";
+import FeedGrid from "@/components/Feed/FeedGrid";
+import PhotoCompanionPage from "@/pages/PhotoCompanionPage";
+import LocalCompanionPage from "@/pages/LocalCompanionPage";
+import ProfileManagementPage from "@/pages/ProfileManagementPage";
+import ScheduleManagementPage from "@/pages/ScheduleManagementPage";
+import ChatPage from "@/pages/ChatPage";
+import ErrorPage from "@/pages/ErrorPage";
 
 const MainContent = ({
   sidebarOpen,

@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState } from "react";
 
 const ChatPage = () => {
-  const [selectedChat, setSelectedChat] = useState("lily-schaden")
-  const [messageInput, setMessageInput] = useState("")
-  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedChat, setSelectedChat] = useState("lily-schaden");
+  const [messageInput, setMessageInput] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // 채팅 목록 데이터
   const chatList = [
@@ -79,7 +79,7 @@ const ChatPage = () => {
       unreadCount: 0,
       isOnline: false,
     },
-  ]
+  ];
 
   // 현재 선택된 채팅의 메시지들
   const currentChatMessages = [
@@ -116,24 +116,24 @@ const ChatPage = () => {
       content: "OK Lily, I'm going to a meeting",
       timestamp: "9:59 AM",
     },
-  ]
+  ];
 
-  const selectedChatData = chatList.find((chat) => chat.id === selectedChat)
+  const selectedChatData = chatList.find((chat) => chat.id === selectedChat);
 
   const handleSendMessage = () => {
     if (messageInput.trim()) {
       // 메시지 전송 로직
-      console.log("Sending message:", messageInput)
-      setMessageInput("")
+      console.log("Sending message:", messageInput);
+      setMessageInput("");
     }
-  }
+  };
 
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      handleSendMessage()
+      e.preventDefault();
+      handleSendMessage();
     }
-  }
+  };
 
   return (
     <div className="chat-page">
@@ -166,11 +166,16 @@ const ChatPage = () => {
             {chatList.map((chat) => (
               <div
                 key={chat.id}
-                className={`chat-item ${selectedChat === chat.id ? "active" : ""}`}
+                className={`chat-item ${
+                  selectedChat === chat.id ? "active" : ""
+                }`}
                 onClick={() => setSelectedChat(chat.id)}
               >
                 <div className="chat-avatar-container">
-                  <div className="chat-avatar" style={{ backgroundColor: chat.avatarColor }}>
+                  <div
+                    className="chat-avatar"
+                    style={{ backgroundColor: chat.avatarColor }}
+                  >
                     {chat.avatar}
                   </div>
                   {chat.isOnline && <div className="online-indicator"></div>}
@@ -182,7 +187,9 @@ const ChatPage = () => {
                   </div>
                   <div className="chat-preview-row">
                     <span className="chat-preview">{chat.lastMessage}</span>
-                    {chat.unreadCount > 0 && <span className="unread-badge">{chat.unreadCount}</span>}
+                    {chat.unreadCount > 0 && (
+                      <span className="unread-badge">{chat.unreadCount}</span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -197,12 +204,19 @@ const ChatPage = () => {
               {/* 채팅 헤더 */}
               <div className="chat-header">
                 <div className="chat-header-info">
-                  <div className="chat-avatar" style={{ backgroundColor: selectedChatData.avatarColor }}>
+                  <div
+                    className="chat-avatar"
+                    style={{ backgroundColor: selectedChatData.avatarColor }}
+                  >
                     {selectedChatData.avatar}
                   </div>
                   <div className="chat-header-details">
-                    <h3 className="chat-header-name">{selectedChatData.name}</h3>
-                    <span className="chat-status">{selectedChatData.isOnline ? "● Active" : "Offline"}</span>
+                    <h3 className="chat-header-name">
+                      {selectedChatData.name}
+                    </h3>
+                    <span className="chat-status">
+                      {selectedChatData.isOnline ? "● Active" : "Offline"}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -212,15 +226,24 @@ const ChatPage = () => {
                 {currentChatMessages.map((message) => (
                   <div
                     key={message.id}
-                    className={`message ${message.sender === "me" ? "message-sent" : "message-received"}`}
+                    className={`message ${
+                      message.sender === "me"
+                        ? "message-sent"
+                        : "message-received"
+                    }`}
                   >
                     {message.sender === "other" && (
-                      <div className="message-avatar" style={{ backgroundColor: message.avatarColor }}>
+                      <div
+                        className="message-avatar"
+                        style={{ backgroundColor: message.avatarColor }}
+                      >
                         {message.avatar}
                       </div>
                     )}
                     <div className="message-content">
-                      {message.type === "text" && <div className="message-text">{message.content}</div>}
+                      {message.type === "text" && (
+                        <div className="message-text">{message.content}</div>
+                      )}
                       {message.type === "file" && (
                         <div className="message-file">
                           <span className="file-icon">{message.fileIcon}</span>
@@ -241,10 +264,14 @@ const ChatPage = () => {
                               ))}
                             </div>
                           </div>
-                          <span className="voice-duration">{message.content}</span>
+                          <span className="voice-duration">
+                            {message.content}
+                          </span>
                         </div>
                       )}
-                      <div className="message-timestamp">{message.timestamp}</div>
+                      <div className="message-timestamp">
+                        {message.timestamp}
+                      </div>
                     </div>
                     {message.sender === "me" && (
                       <div className="message-avatar me-avatar">
@@ -284,7 +311,7 @@ const ChatPage = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ChatPage
+export default ChatPage;

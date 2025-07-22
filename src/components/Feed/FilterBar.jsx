@@ -1,51 +1,55 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef } from "react";
 
 const FilterBar = ({ filters, onFilterChange }) => {
-  const [searchCriteria, setSearchCriteria] = useState("title") // 'author', 'title', 'region'
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const [searchValue, setSearchValue] = useState("")
+  const [searchCriteria, setSearchCriteria] = useState("title"); // 'author', 'title', 'region'
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
 
-  const dropdownRef = useRef(null)
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsDropdownOpen(false)
+        setIsDropdownOpen(false);
       }
-    }
+    };
 
-    document.addEventListener("mousedown", handleClickOutside)
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [])
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const searchOptions = [
     { value: "title", label: "제목" },
     { value: "author", label: "글쓴이" },
     { value: "region", label: "지역" },
-  ]
+  ];
 
   const handleSearchCriteriaChange = (criteria) => {
-    setSearchCriteria(criteria)
-    setIsDropdownOpen(false)
-  }
+    setSearchCriteria(criteria);
+    setIsDropdownOpen(false);
+  };
 
   const handleSearch = () => {
     // Handle search based on selected criteria
-    console.log(`Searching for "${searchValue}" in ${searchCriteria}`)
-  }
+    console.log(`Searching for "${searchValue}" in ${searchCriteria}`);
+  };
 
   const getCurrentLabel = () => {
-    const current = searchOptions.find((option) => option.value === searchCriteria)
-    return current ? current.label : "제목"
-  }
+    const current = searchOptions.find(
+      (option) => option.value === searchCriteria
+    );
+    return current ? current.label : "제목";
+  };
 
   return (
     <div className="filter-bar">
-      <div className="filter-left">{/* Empty for now, can add other filters later */}</div>
+      <div className="filter-left">
+        {/* Empty for now, can add other filters later */}
+      </div>
 
       <div className="filter-right">
         <div className="search-container">
@@ -53,8 +57,8 @@ const FilterBar = ({ filters, onFilterChange }) => {
             <button
               className="search-criteria-button"
               onClick={(e) => {
-                e.preventDefault()
-                setIsDropdownOpen(!isDropdownOpen)
+                e.preventDefault();
+                setIsDropdownOpen(!isDropdownOpen);
               }}
             >
               {getCurrentLabel()} ▼
@@ -65,10 +69,12 @@ const FilterBar = ({ filters, onFilterChange }) => {
                 {searchOptions.map((option) => (
                   <button
                     key={option.value}
-                    className={`search-criteria-item ${searchCriteria === option.value ? "active" : ""}`}
+                    className={`search-criteria-item ${
+                      searchCriteria === option.value ? "active" : ""
+                    }`}
                     onClick={(e) => {
-                      e.preventDefault()
-                      handleSearchCriteriaChange(option.value)
+                      e.preventDefault();
+                      handleSearchCriteriaChange(option.value);
                     }}
                   >
                     {option.label}
@@ -101,7 +107,7 @@ const FilterBar = ({ filters, onFilterChange }) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default FilterBar
+export default FilterBar;

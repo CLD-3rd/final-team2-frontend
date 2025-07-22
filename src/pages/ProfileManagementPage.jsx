@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import TravelTagEditModal from "../components/Modal/TravelTagEditModal";
-import ProfileEditModal from "../components/Modal/ProfileEditModal";
+import TravelTagEditModal from "@/components/Modal/TravelTagEditModal";
+import ProfileEditModal from "@/components/Modal/ProfileEditModal";
 
 const ProfileManagementPage = ({
   userProfile: globalUserProfile,
