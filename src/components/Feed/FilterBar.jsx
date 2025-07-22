@@ -6,6 +6,7 @@ const FilterBar = ({ filters, onFilterChange }) => {
   const [searchCriteria, setSearchCriteria] = useState("title"); // 'author', 'title', 'region'
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  const [activeSort, setActiveSort] = useState("recent"); // ✅ 기본값: 최근 등록 순
 
   const dropdownRef = useRef(null);
 
@@ -36,6 +37,11 @@ const FilterBar = ({ filters, onFilterChange }) => {
   const handleSearch = () => {
     // Handle search based on selected criteria
     console.log(`Searching for "${searchValue}" in ${searchCriteria}`);
+  };
+
+  const handleSortChange = (sortKey) => {
+    setActiveSort(sortKey);
+    if (onSortChange) onSortChange(sortKey);
   };
 
   const getCurrentLabel = () => {
@@ -96,14 +102,28 @@ const FilterBar = ({ filters, onFilterChange }) => {
           </button>
         </div>
 
+        {/* 보기 전환 아이콘 */}
         <div className="view-options">
           <button className="view-button active">☰</button>
           <button className="view-button">⊞</button>
         </div>
 
+        {/* ✅ 정렬 버튼 */}
         <div className="sort-options">
-          <button className="sort-button">최근 등록 순</button>
-          <button className="sort-button">추천 순</button>
+          <button
+            className={`sort-button ${activeSort === "recent" ? "active" : ""}`}
+            onClick={() => handleSortChange("recent")}
+          >
+            최근 등록 순
+          </button>
+          <button
+            className={`sort-button ${
+              activeSort === "recommend" ? "active" : ""
+            }`}
+            onClick={() => handleSortChange("recommend")}
+          >
+            추천 순
+          </button>
         </div>
       </div>
     </div>

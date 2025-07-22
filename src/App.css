@@ -396,7 +396,7 @@ body {
 }
 
 .filter-btn:hover {
-  background: #f8f9fa;
+  background: #f0f0f0;
 }
 
 .filter-btn.active {
@@ -844,12 +844,18 @@ body {
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
+  transition: all 0.2s;
 }
 
 .sort-button:hover {
   background: #f0f0f0;
 }
 
+.sort-button.active {
+  background: var(--color-warm-brown);
+  border-color: var(--color-warm-brown);
+  color: var(--color-dark-brown);
+}
 /* Feed Grid */
 .feed-grid {
   display: grid;
