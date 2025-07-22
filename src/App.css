@@ -1769,7 +1769,8 @@ body {
 .form-group input,
 .form-group select,
 .form-group textarea,
-.form-group .badge-request-container {
+.form-group .badge-request-container,
+.form-group .rdrCalendarWrapper {
   width: 100%;
   padding: 12px;
   border: 1px solid #ddd;

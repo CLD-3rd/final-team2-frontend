@@ -1,4 +1,10 @@
 "use client";
+
+import { useState, useEffect } from "react";
+import { DateRange } from "react-date-range";
+import { addDays, format } from "date-fns";
+import "react-date-range/dist/styles.css";
+import "react-date-range/dist/theme/default.css";
 import regionOptions from "@/constants/regionOptions";
 
 const PostForm = ({
@@ -11,6 +17,28 @@ const PostForm = ({
   includeBadge,
   includeDateRange,
 }) => {
+  // ✅ 컴포넌트 내부로 이동
+  const [dateRange, setDateRange] = useState([
+    {
+      startDate: new Date(),
+      endDate: addDays(new Date(), 1),
+      key: "selection",
+    },
+  ]);
+
+  useEffect(() => {
+    if (includeDateRange) {
+      const formatted = `${format(dateRange[0].startDate, "yy.MM.dd")}~${format(
+        dateRange[0].endDate,
+        "yy.MM.dd"
+      )}`;
+      setFormData((prev) => ({
+        ...prev,
+        dateRange: formatted,
+      }));
+    }
+  }, [dateRange, includeDateRange, setFormData]);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -21,6 +49,7 @@ const PostForm = ({
 
   return (
     <form onSubmit={onSubmit} className="modal-form">
+      {/* 제목 */}
       <div className="form-group">
         <label htmlFor="title">{titleLabel}</label>
         <input
@@ -34,6 +63,7 @@ const PostForm = ({
         />
       </div>
 
+      {/* 지역 + 뱃지 */}
       <div className="form-row">
         <div className="form-group region-group">
           <label htmlFor="region">지역</label>
@@ -71,21 +101,22 @@ const PostForm = ({
         )}
       </div>
 
+      {/* 여행 기간 */}
       {includeDateRange && (
         <div className="form-group">
-          <label htmlFor="dateRange">여행 기간</label>
-          <input
-            type="text"
-            id="dateRange"
-            name="dateRange"
-            value={formData.dateRange}
-            onChange={handleChange}
-            placeholder="25.7.18~25.7.19"
-            required
+          <label>여행 기간</label>
+          <DateRange
+            editableDateInputs={true}
+            onChange={(item) => setDateRange([item.selection])}
+            moveRangeOnFirstSelection={false}
+            ranges={dateRange}
+            months={1}
+            direction="horizontal"
           />
         </div>
       )}
 
+      {/* 내용 */}
       <div className="form-group">
         <label htmlFor="content">{contentLabel}</label>
         <textarea
@@ -99,6 +130,7 @@ const PostForm = ({
         />
       </div>
 
+      {/* 이미지 */}
       <div className="form-group">
         <label htmlFor="image">이미지</label>
         <input
@@ -112,6 +144,7 @@ const PostForm = ({
         />
       </div>
 
+      {/* 버튼 */}
       <div className="modal-actions">
         <button type="button" onClick={onClose} className="btn-cancel">
           취소
