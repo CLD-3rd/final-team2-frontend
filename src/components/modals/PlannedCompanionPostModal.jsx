@@ -1,7 +1,8 @@
 import { useState } from "react";
 import PostForm from "./PostForm";
+import useLockBodyScroll from "@/hooks/useLockBodyScroll";
 
-const PhotoCompanionPostModal = ({ onClose, onPostCreate }) => {
+const PlannedCompanionPostModal = ({ onClose, onPostCreate }) => {
   const [formData, setFormData] = useState({
     title: "",
     content: "",
@@ -9,6 +10,8 @@ const PhotoCompanionPostModal = ({ onClose, onPostCreate }) => {
     dateRange: "",
     image: null,
   });
+
+  useLockBodyScroll();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -54,4 +57,4 @@ const PhotoCompanionPostModal = ({ onClose, onPostCreate }) => {
   );
 };
 
-export default PhotoCompanionPostModal;
+export default PlannedCompanionPostModal;

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import PostForm from "./PostForm";
+import useLockBodyScroll from "@/hooks/useLockBodyScroll";
 
 const FeedPostModal = ({ onClose, onPostCreate }) => {
   const [formData, setFormData] = useState({
@@ -9,6 +10,8 @@ const FeedPostModal = ({ onClose, onPostCreate }) => {
     image: null,
     badgeRequest: false,
   });
+
+  useLockBodyScroll();
 
   const handleSubmit = (e) => {
     e.preventDefault();

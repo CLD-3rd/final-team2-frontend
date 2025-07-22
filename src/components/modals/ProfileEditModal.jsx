@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import useLockBodyScroll from "@/hooks/useLockBodyScroll";
 
 const ProfileEditModal = ({ onClose, userProfile, onSave }) => {
+  useLockBodyScroll();
   const [formData, setFormData] = useState({
     username: userProfile.username,
     profileImage: null,

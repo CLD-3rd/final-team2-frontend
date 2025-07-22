@@ -1,5 +1,6 @@
 import { useState } from "react";
 import PostForm from "@/components/modals/PostForm";
+import useLockBodyScroll from "@/hooks/useLockBodyScroll";
 
 const LocalCompanionPostModal = ({ onClose, onPostCreate }) => {
   const [formData, setFormData] = useState({
@@ -9,6 +10,8 @@ const LocalCompanionPostModal = ({ onClose, onPostCreate }) => {
     dateRange: "",
     image: null,
   });
+
+  useLockBodyScroll();
 
   const handleSubmit = (e) => {
     e.preventDefault();
