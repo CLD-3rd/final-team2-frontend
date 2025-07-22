@@ -1,5 +1,15 @@
 "use client";
 
+import {
+  Newspaper,
+  Megaphone,
+  MapPin,
+  MessageCircle,
+  User,
+  Calendar,
+  LifeBuoy,
+} from "lucide-react";
+
 const Sidebar = ({
   isLoggedIn,
   isOpen,
@@ -10,33 +20,45 @@ const Sidebar = ({
 }) => {
   // Menu for non-logged-in users (version4 structure) - 고객센터 제거
   const guestMenuItems = [
-    { id: "feed", label: "피드", count: feedCount, icon: "📋" },
-    { id: "photo", label: "사전 동행 모집", icon: "📋" },
-    { id: "friend", label: "현지 동행 모집", icon: "▷" },
+    {
+      id: "feed",
+      label: "피드",
+      count: feedCount,
+      icon: <Newspaper size={20} />,
+    },
+    { id: "photo", label: "사전 동행 모집", icon: <Megaphone size={20} /> },
+    { id: "friend", label: "현지 동행 모집", icon: <MapPin size={20} /> },
   ];
 
   // Menu sections for logged-in users
   const loggedInMenuSections = [
     {
       items: [
-        { id: "feed", label: "피드", count: feedCount, icon: "📋" },
-        { id: "photo", label: "사전 동행 모집", icon: "📋" },
-        { id: "friend", label: "현지 동행 모집", icon: "▷" },
+        {
+          id: "feed",
+          label: "피드",
+          count: feedCount,
+          icon: <Newspaper size={20} />,
+        },
+        { id: "photo", label: "사전 동행 모집", icon: <Megaphone size={20} /> },
+        { id: "friend", label: "현지 동행 모집", icon: <MapPin size={20} /> },
       ],
     },
     {
       title: "소셜",
-      items: [{ id: "chat", label: "채팅", icon: "📁" }],
+      items: [{ id: "chat", label: "채팅", icon: <MessageCircle size={20} /> }],
     },
     {
       title: "My",
       items: [
-        { id: "profile", label: "프로필 관리", icon: "📁" },
-        { id: "schedule", label: "일정 관리", icon: "🗃️" },
+        { id: "profile", label: "프로필 관리", icon: <User size={20} /> },
+        { id: "schedule", label: "일정 관리", icon: <Calendar size={20} /> },
       ],
     },
     {
-      items: [{ id: "support", label: "고객센터", icon: "📁" }],
+      items: [
+        { id: "support", label: "고객센터", icon: <LifeBuoy size={20} /> },
+      ],
     },
   ];
 
