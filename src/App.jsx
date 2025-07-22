@@ -1,20 +1,20 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Header from "./components/Header"
-import Sidebar from "./components/Sidebar"
-import MainContent from "./components/MainContent"
-import CreatePostModal from "./components/CreatePostModal"
-import LoginModal from "./components/LoginModal"
-import "./App.css"
+import { useState } from "react";
+import Header from "./components/Header/Header";
+import Sidebar from "./components/Sidebar/Sidebar";
+import MainContent from "./pages/MainContent";
+import CreatePostModal from "./components/Modal/CreatePostModal";
+import LoginModal from "./components/Modal/LoginModal";
+import "./App.css";
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [currentPage, setCurrentPage] = useState("feed")
-  const [feedCount, setFeedCount] = useState(0)
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState("feed");
+  const [feedCount, setFeedCount] = useState(0);
   const [feedData, setFeedData] = useState([
     {
       id: 1,
@@ -22,7 +22,9 @@ function App() {
       region: "부산",
       author: "여행러버",
       date: "2025-05-10",
-      images: ["https://raw.githubusercontent.com/han199805/personal/main/%ED%95%B4%EC%9A%B4%EB%8C%80.jpg"],
+      images: [
+        "https://raw.githubusercontent.com/han199805/personal/main/%ED%95%B4%EC%9A%B4%EB%8C%80.jpg",
+      ],
     },
     {
       id: 2,
@@ -42,7 +44,9 @@ function App() {
       region: "보령",
       author: "축제매니아",
       date: "2025-05-10",
-      images: ["https://raw.githubusercontent.com/han199805/personal/main/%EB%B3%B4%EB%A0%81.jpg"],
+      images: [
+        "https://raw.githubusercontent.com/han199805/personal/main/%EB%B3%B4%EB%A0%81.jpg",
+      ],
     },
     {
       id: 4,
@@ -50,7 +54,9 @@ function App() {
       region: "안성",
       author: "가족여행",
       date: "2025-05-10",
-      images: ["https://raw.githubusercontent.com/han199805/personal/main/%EC%95%88%EC%84%B1.png"],
+      images: [
+        "https://raw.githubusercontent.com/han199805/personal/main/%EC%95%88%EC%84%B1.png",
+      ],
     },
     {
       id: 5,
@@ -58,7 +64,9 @@ function App() {
       region: "전주",
       author: "전통문화",
       date: "2025-05-10",
-      images: ["https://raw.githubusercontent.com/han199805/personal/main/%EC%A0%84%EC%A3%BC.jpg"],
+      images: [
+        "https://raw.githubusercontent.com/han199805/personal/main/%EC%A0%84%EC%A3%BC.jpg",
+      ],
     },
     {
       id: 6,
@@ -66,9 +74,11 @@ function App() {
       region: "대구",
       author: "쇼핑러버",
       date: "2025-05-10",
-      images: ["https://raw.githubusercontent.com/han199805/personal/main/%EB%8F%99%EC%84%B1%EB%A1%9C.jpeg"],
+      images: [
+        "https://raw.githubusercontent.com/han199805/personal/main/%EB%8F%99%EC%84%B1%EB%A1%9C.jpeg",
+      ],
     },
-  ])
+  ]);
 
   const [userProfile, setUserProfile] = useState({
     username: "사용자님",
@@ -78,66 +88,71 @@ function App() {
     reviewCount: 20,
     travelTags: [],
     ownedBadges: ["브론즈 뱃지", "랜드마크 뱃지", "여행 마니아", "사진 전문가"],
-  })
+  });
 
   const handleLogin = () => {
-    setIsLoggedIn(true)
-    setIsLoginModalOpen(false)
-  }
+    setIsLoggedIn(true);
+    setIsLoginModalOpen(false);
+  };
 
   const handleProfileUpdate = (updatedProfile) => {
-    setUserProfile(updatedProfile)
-  }
+    setUserProfile(updatedProfile);
+  };
 
   const handleLogout = () => {
-    setIsLoggedIn(false)
-  }
+    setIsLoggedIn(false);
+  };
 
   const openLoginModal = () => {
-    setIsLoginModalOpen(true)
-  }
+    setIsLoginModalOpen(true);
+  };
 
   const closeLoginModal = () => {
-    setIsLoginModalOpen(false)
-  }
+    setIsLoginModalOpen(false);
+  };
 
   const openCreateModal = () => {
-    setIsCreateModalOpen(true)
-  }
+    setIsCreateModalOpen(true);
+  };
 
   const closeCreateModal = () => {
-    setIsCreateModalOpen(false)
-  }
+    setIsCreateModalOpen(false);
+  };
 
   const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen)
-  }
+    setSidebarOpen(!sidebarOpen);
+  };
 
   const handlePageChange = (pageId) => {
-    setCurrentPage(pageId)
-  }
+    setCurrentPage(pageId);
+  };
 
   const handleFeedCountChange = (count) => {
-    setFeedCount(count)
-  }
+    setFeedCount(count);
+  };
 
   // 새 포스트 생성 핸들러
   const handlePostCreate = (newPost) => {
-    setFeedData((prev) => [newPost, ...prev]) // 새 포스트를 맨 앞에 추가
-  }
+    setFeedData((prev) => [newPost, ...prev]); // 새 포스트를 맨 앞에 추가
+  };
 
   // 피드 삭제 핸들러
   const handleFeedDelete = (feedId) => {
-    setFeedData((prev) => prev.filter((feed) => feed.id !== feedId))
-  }
+    setFeedData((prev) => prev.filter((feed) => feed.id !== feedId));
+  };
 
   // + 버튼을 보여줄 페이지들 정의
-  const showFabPages = ["feed", "photo", "friend"]
-  const shouldShowFab = isLoggedIn && showFabPages.includes(currentPage)
+  const showFabPages = ["feed", "photo", "friend"];
+  const shouldShowFab = isLoggedIn && showFabPages.includes(currentPage);
 
   return (
     <div className="app">
-      <Header isLoggedIn={isLoggedIn} onLogin={openLoginModal} onLogout={handleLogout} userProfile={userProfile} />
+      <Header
+        isLoggedIn={isLoggedIn}
+        onLogin={openLoginModal}
+        onLogout={handleLogout}
+        userProfile={userProfile}
+      />
 
       <div className="app-body">
         <Sidebar
@@ -168,12 +183,18 @@ function App() {
       )}
 
       {isCreateModalOpen && (
-        <CreatePostModal onClose={closeCreateModal} currentPage={currentPage} onPostCreate={handlePostCreate} />
+        <CreatePostModal
+          onClose={closeCreateModal}
+          currentPage={currentPage}
+          onPostCreate={handlePostCreate}
+        />
       )}
 
-      {isLoginModalOpen && <LoginModal onClose={closeLoginModal} onLogin={handleLogin} />}
+      {isLoginModalOpen && (
+        <LoginModal onClose={closeLoginModal} onLogin={handleLogin} />
+      )}
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

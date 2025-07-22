@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState } from "react";
 
 const FeedDetailModal = ({ onClose, feedData, isLoggedIn, onFeedDelete }) => {
-  const [newComment, setNewComment] = useState("")
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  const [editingCommentId, setEditingCommentId] = useState(null)
-  const [editingCommentText, setEditingCommentText] = useState("")
-  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false)
+  const [newComment, setNewComment] = useState("");
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editingCommentText, setEditingCommentText] = useState("");
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [comments, setComments] = useState([
     {
       id: 1,
@@ -36,13 +36,13 @@ const FeedDetailModal = ({ onClose, feedData, isLoggedIn, onFeedDelete }) => {
       isLiked: false,
       isMyComment: true, // 내 댓글로 표시
     },
-  ])
+  ]);
 
-  const images = feedData.images || ["/images/feed-sample.jpg"]
-  const hasMultipleImages = images.length > 1
+  const images = feedData.images || ["/images/feed-sample.jpg"];
+  const hasMultipleImages = images.length > 1;
 
   const handleCommentSubmit = (e) => {
-    e.preventDefault()
+    e.preventDefault();
     if (newComment.trim()) {
       const comment = {
         id: comments.length + 1,
@@ -52,11 +52,11 @@ const FeedDetailModal = ({ onClose, feedData, isLoggedIn, onFeedDelete }) => {
         likes: 0,
         isLiked: false,
         isMyComment: true,
-      }
-      setComments([...comments, comment])
-      setNewComment("")
+      };
+      setComments([...comments, comment]);
+      setNewComment("");
     }
-  }
+  };
 
   const handleCommentLike = (commentId) => {
     setComments(
@@ -67,15 +67,15 @@ const FeedDetailModal = ({ onClose, feedData, isLoggedIn, onFeedDelete }) => {
               isLiked: !comment.isLiked,
               likes: comment.isLiked ? comment.likes - 1 : comment.likes + 1,
             }
-          : comment,
-      ),
-    )
-  }
+          : comment
+      )
+    );
+  };
 
   const handleEditComment = (commentId, currentContent) => {
-    setEditingCommentId(commentId)
-    setEditingCommentText(currentContent)
-  }
+    setEditingCommentId(commentId);
+    setEditingCommentText(currentContent);
+  };
 
   const handleSaveEdit = (commentId) => {
     if (editingCommentText.trim()) {
@@ -87,76 +87,76 @@ const FeedDetailModal = ({ onClose, feedData, isLoggedIn, onFeedDelete }) => {
                 content: editingCommentText,
                 timestamp: "방금 전 (수정됨)",
               }
-            : comment,
-        ),
-      )
+            : comment
+        )
+      );
     }
-    setEditingCommentId(null)
-    setEditingCommentText("")
-  }
+    setEditingCommentId(null);
+    setEditingCommentText("");
+  };
 
   const handleCancelEdit = () => {
-    setEditingCommentId(null)
-    setEditingCommentText("")
-  }
+    setEditingCommentId(null);
+    setEditingCommentText("");
+  };
 
   const handleDeleteComment = (commentId) => {
     if (window.confirm("댓글을 삭제하시겠습니까?")) {
-      setComments(comments.filter((comment) => comment.id !== commentId))
+      setComments(comments.filter((comment) => comment.id !== commentId));
     }
-  }
+  };
 
   const handlePrevImage = () => {
-    setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
-  }
+    setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
 
   const handleNextImage = () => {
-    setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
-  }
+    setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
 
   const handleImageClick = (e) => {
-    if (!hasMultipleImages) return
+    if (!hasMultipleImages) return;
 
-    const rect = e.currentTarget.getBoundingClientRect()
-    const clickX = e.clientX - rect.left
-    const imageWidth = rect.width
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const imageWidth = rect.width;
 
     if (clickX < imageWidth / 2) {
-      handlePrevImage()
+      handlePrevImage();
     } else {
-      handleNextImage()
+      handleNextImage();
     }
-  }
+  };
 
   const handleMoreMenuClick = (e) => {
-    e.stopPropagation()
-    setIsMoreMenuOpen(!isMoreMenuOpen)
-  }
+    e.stopPropagation();
+    setIsMoreMenuOpen(!isMoreMenuOpen);
+  };
 
   const handleEditPost = () => {
-    console.log("Edit post:", feedData.id)
-    setIsMoreMenuOpen(false)
+    console.log("Edit post:", feedData.id);
+    setIsMoreMenuOpen(false);
     // 여기에 수정 로직 추가
-  }
+  };
 
   const handleDeletePost = () => {
     if (window.confirm("이 피드를 삭제하시겠습니까?")) {
-      console.log("Delete post:", feedData.id)
-      setIsMoreMenuOpen(false)
-      onClose()
+      console.log("Delete post:", feedData.id);
+      setIsMoreMenuOpen(false);
+      onClose();
       // 실제 삭제 로직 추가
       if (onFeedDelete) {
-        onFeedDelete(feedData.id)
+        onFeedDelete(feedData.id);
       }
     }
-  }
+  };
 
   // 모달 외부 클릭 시 더보기 메뉴 닫기
   const handleModalClick = () => {
     if (isMoreMenuOpen) {
-      setIsMoreMenuOpen(false)
+      setIsMoreMenuOpen(false);
     }
-  }
+  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -172,7 +172,10 @@ const FeedDetailModal = ({ onClose, feedData, isLoggedIn, onFeedDelete }) => {
             <span className="location-name">{feedData.region}</span>
             {isLoggedIn && (
               <div className="more-menu-container">
-                <button className="more-menu-button" onClick={handleMoreMenuClick}>
+                <button
+                  className="more-menu-button"
+                  onClick={handleMoreMenuClick}
+                >
                   ⋮
                 </button>
                 {isMoreMenuOpen && (
@@ -180,7 +183,10 @@ const FeedDetailModal = ({ onClose, feedData, isLoggedIn, onFeedDelete }) => {
                     <button className="more-menu-item" onClick={handleEditPost}>
                       수정
                     </button>
-                    <button className="more-menu-item delete" onClick={handleDeletePost}>
+                    <button
+                      className="more-menu-item delete"
+                      onClick={handleDeletePost}
+                    >
                       삭제
                     </button>
                   </div>
@@ -204,10 +210,16 @@ const FeedDetailModal = ({ onClose, feedData, isLoggedIn, onFeedDelete }) => {
             {/* 이미지가 2장 이상일 때만 네비게이션 표시 */}
             {hasMultipleImages && (
               <>
-                <button className="image-nav-btn prev-btn" onClick={handlePrevImage}>
+                <button
+                  className="image-nav-btn prev-btn"
+                  onClick={handlePrevImage}
+                >
                   ‹
                 </button>
-                <button className="image-nav-btn next-btn" onClick={handleNextImage}>
+                <button
+                  className="image-nav-btn next-btn"
+                  onClick={handleNextImage}
+                >
                   ›
                 </button>
                 <div className="image-pagination">
@@ -217,7 +229,9 @@ const FeedDetailModal = ({ onClose, feedData, isLoggedIn, onFeedDelete }) => {
                   {images.map((_, index) => (
                     <button
                       key={index}
-                      className={`image-dot ${index === currentImageIndex ? "active" : ""}`}
+                      className={`image-dot ${
+                        index === currentImageIndex ? "active" : ""
+                      }`}
                       onClick={() => setCurrentImageIndex(index)}
                     />
                   ))}
@@ -240,9 +254,10 @@ const FeedDetailModal = ({ onClose, feedData, isLoggedIn, onFeedDelete }) => {
 
           <div className="feed-content-body">
             <p>
-              {feedData.region}에서의 멋진 하루였습니다! 날씨도 좋고 사람들도 친절해서 정말 즐거운 여행이었어요. 특히
-              이곳의 전통 음식들이 정말 맛있었고, 현지 문화를 체험할 수 있어서 좋았습니다. 다음에 또 오고 싶은 곳이네요.
-              여러분도 기회가 되시면 꼭 한번 방문해보세요!
+              {feedData.region}에서의 멋진 하루였습니다! 날씨도 좋고 사람들도
+              친절해서 정말 즐거운 여행이었어요. 특히 이곳의 전통 음식들이 정말
+              맛있었고, 현지 문화를 체험할 수 있어서 좋았습니다. 다음에 또 오고
+              싶은 곳이네요. 여러분도 기회가 되시면 꼭 한번 방문해보세요!
             </p>
           </div>
         </div>
@@ -262,16 +277,23 @@ const FeedDetailModal = ({ onClose, feedData, isLoggedIn, onFeedDelete }) => {
                 <div className="comment-content">
                   <div className="comment-header">
                     <span className="comment-author">{comment.author}</span>
-                    <span className="comment-timestamp">{comment.timestamp}</span>
+                    <span className="comment-timestamp">
+                      {comment.timestamp}
+                    </span>
                     {comment.isMyComment && isLoggedIn && (
                       <div className="comment-actions-menu">
                         <button
                           className="comment-edit-btn"
-                          onClick={() => handleEditComment(comment.id, comment.content)}
+                          onClick={() =>
+                            handleEditComment(comment.id, comment.content)
+                          }
                         >
                           수정
                         </button>
-                        <button className="comment-delete-btn" onClick={() => handleDeleteComment(comment.id)}>
+                        <button
+                          className="comment-delete-btn"
+                          onClick={() => handleDeleteComment(comment.id)}
+                        >
                           삭제
                         </button>
                       </div>
@@ -287,10 +309,16 @@ const FeedDetailModal = ({ onClose, feedData, isLoggedIn, onFeedDelete }) => {
                         rows="2"
                       />
                       <div className="comment-edit-actions">
-                        <button className="comment-save-btn" onClick={() => handleSaveEdit(comment.id)}>
+                        <button
+                          className="comment-save-btn"
+                          onClick={() => handleSaveEdit(comment.id)}
+                        >
                           저장
                         </button>
-                        <button className="comment-cancel-btn" onClick={handleCancelEdit}>
+                        <button
+                          className="comment-cancel-btn"
+                          onClick={handleCancelEdit}
+                        >
                           취소
                         </button>
                       </div>
@@ -300,7 +328,9 @@ const FeedDetailModal = ({ onClose, feedData, isLoggedIn, onFeedDelete }) => {
                       <p className="comment-text">{comment.content}</p>
                       <div className="comment-actions">
                         <button
-                          className={`like-button ${comment.isLiked ? "liked" : ""}`}
+                          className={`like-button ${
+                            comment.isLiked ? "liked" : ""
+                          }`}
                           onClick={() => handleCommentLike(comment.id)}
                         >
                           ❤️ {comment.likes}
@@ -313,7 +343,10 @@ const FeedDetailModal = ({ onClose, feedData, isLoggedIn, onFeedDelete }) => {
             ))}
           </div>
 
-          <form className="comment-input-section" onSubmit={handleCommentSubmit}>
+          <form
+            className="comment-input-section"
+            onSubmit={handleCommentSubmit}
+          >
             <div className="comment-input-container">
               <input
                 type="text"
@@ -330,7 +363,7 @@ const FeedDetailModal = ({ onClose, feedData, isLoggedIn, onFeedDelete }) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default FeedDetailModal
+export default FeedDetailModal;

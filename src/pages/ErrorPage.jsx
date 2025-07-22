@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 const ErrorPage = ({
   statusCode = 500,
@@ -8,34 +8,34 @@ const ErrorPage = ({
   onGoHome,
 }) => {
   const getErrorIcon = (status) => {
-    if (status === 404) return "🔍"
-    if (status === 403) return "🔒"
-    if (status === 500) return "⚠️"
-    return "❌"
-  }
+    if (status === 404) return "🔍";
+    if (status === 403) return "🔒";
+    if (status === 500) return "⚠️";
+    return "❌";
+  };
 
   const getErrorTitle = (status) => {
-    if (status === 404) return "페이지를 찾을 수 없습니다"
-    if (status === 403) return "접근이 거부되었습니다"
-    if (status === 500) return "서버 오류가 발생했습니다"
-    return "오류가 발생했습니다"
-  }
+    if (status === 404) return "페이지를 찾을 수 없습니다";
+    if (status === 403) return "접근이 거부되었습니다";
+    if (status === 500) return "서버 오류가 발생했습니다";
+    return "오류가 발생했습니다";
+  };
 
   const handleGoHome = () => {
     if (onGoHome) {
-      onGoHome()
+      onGoHome();
     } else {
-      window.location.href = "/"
+      window.location.href = "/";
     }
-  }
+  };
 
   const handleRetry = () => {
     if (onRetry) {
-      onRetry()
+      onRetry();
     } else {
-      window.location.reload()
+      window.location.reload();
     }
-  }
+  };
 
   return (
     <div className="error-page">
@@ -70,7 +70,9 @@ const ErrorPage = ({
           </div>
 
           <div className="error-help">
-            <p className="help-text">문제가 계속 발생하면 고객센터로 문의해주세요.</p>
+            <p className="help-text">
+              문제가 계속 발생하면 고객센터로 문의해주세요.
+            </p>
             <div className="help-links">
               <a href="/support" className="help-link">
                 고객센터
@@ -90,7 +92,7 @@ const ErrorPage = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ErrorPage
+export default ErrorPage;

@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState } from "react";
 
 const ScheduleManagementPage = () => {
-  const [selectedDate, setSelectedDate] = useState("")
-  const [currentMonth, setCurrentMonth] = useState(7) // August (0-indexed)
-  const [currentYear, setCurrentYear] = useState(2025)
-  const [activeFilter, setActiveFilter] = useState("all")
-  const [isDateFocused, setIsDateFocused] = useState(false)
-  const [selectedDay, setSelectedDay] = useState(17) // Currently selected day
+  const [selectedDate, setSelectedDate] = useState("");
+  const [currentMonth, setCurrentMonth] = useState(7); // August (0-indexed)
+  const [currentYear, setCurrentYear] = useState(2025);
+  const [activeFilter, setActiveFilter] = useState("all");
+  const [isDateFocused, setIsDateFocused] = useState(false);
+  const [selectedDay, setSelectedDay] = useState(17); // Currently selected day
 
   // Sample schedule data
   const schedules = [
@@ -18,7 +18,12 @@ const ScheduleManagementPage = () => {
       location: "파리",
       participants: [
         { name: "홍길동", status: "드래곤", approved: true },
-        { name: "홍길동", status: "의상차이에요", tag: "크리에", approved: true },
+        {
+          name: "홍길동",
+          status: "의상차이에요",
+          tag: "크리에",
+          approved: true,
+        },
         { name: "홍길동", status: "", approved: true },
       ],
       progress: "4 / 5",
@@ -47,109 +52,112 @@ const ScheduleManagementPage = () => {
       type: "completed",
       status: "completed",
     },
-  ]
+  ];
 
   const filterButtons = [
     { key: "scheduled", label: "예정 등록 일정" },
     { key: "progress", label: "진행 등록 일정" },
     { key: "completed", label: "완료 된 일정" },
-  ]
+  ];
 
   const getDaysInMonth = (month, year) => {
-    return new Date(year, month + 1, 0).getDate()
-  }
+    return new Date(year, month + 1, 0).getDate();
+  };
 
   const getFirstDayOfMonth = (month, year) => {
-    return new Date(year, month, 1).getDay()
-  }
+    return new Date(year, month, 1).getDay();
+  };
 
   // Parse date from input format MM/DD/YYYY
   const parseDateInput = (dateString) => {
-    const parts = dateString.split("/")
+    const parts = dateString.split("/");
     if (parts.length === 3) {
-      const month = Number.parseInt(parts[0]) - 1 // Convert to 0-indexed
-      const day = Number.parseInt(parts[1])
-      const year = Number.parseInt(parts[2])
+      const month = Number.parseInt(parts[0]) - 1; // Convert to 0-indexed
+      const day = Number.parseInt(parts[1]);
+      const year = Number.parseInt(parts[2]);
 
       if (!isNaN(month) && !isNaN(day) && !isNaN(year)) {
-        return { month, day, year }
+        return { month, day, year };
       }
     }
-    return null
-  }
+    return null;
+  };
 
   // Format date to MM/DD/YYYY
   const formatDate = (month, day, year) => {
-    return `${String(month + 1).padStart(2, "0")}/${String(day).padStart(2, "0")}/${year}`
-  }
+    return `${String(month + 1).padStart(2, "0")}/${String(day).padStart(
+      2,
+      "0"
+    )}/${year}`;
+  };
 
   const handleDateChange = (e) => {
-    const value = e.target.value
-    setSelectedDate(value)
+    const value = e.target.value;
+    setSelectedDate(value);
 
     // Parse and update calendar if valid date
-    const parsed = parseDateInput(value)
+    const parsed = parseDateInput(value);
     if (parsed) {
-      setCurrentMonth(parsed.month)
-      setCurrentYear(parsed.year)
-      setSelectedDay(parsed.day)
+      setCurrentMonth(parsed.month);
+      setCurrentYear(parsed.year);
+      setSelectedDay(parsed.day);
     }
-  }
+  };
 
   const handleDateFocus = () => {
-    setIsDateFocused(true)
-  }
+    setIsDateFocused(true);
+  };
 
   const handleDateBlur = () => {
     if (!selectedDate) {
-      setIsDateFocused(false)
+      setIsDateFocused(false);
     }
-  }
+  };
 
   const handleCalendarDayClick = (day) => {
-    setSelectedDay(day)
-    const formattedDate = formatDate(currentMonth, day, currentYear)
-    setSelectedDate(formattedDate)
-    setIsDateFocused(true)
-  }
+    setSelectedDay(day);
+    const formattedDate = formatDate(currentMonth, day, currentYear);
+    setSelectedDate(formattedDate);
+    setIsDateFocused(true);
+  };
 
   const handleSelectDate = () => {
     if (selectedDay) {
-      const formattedDate = formatDate(currentMonth, selectedDay, currentYear)
-      setSelectedDate(formattedDate)
-      setIsDateFocused(true)
+      const formattedDate = formatDate(currentMonth, selectedDay, currentYear);
+      setSelectedDate(formattedDate);
+      setIsDateFocused(true);
     }
-  }
+  };
 
   const handleMonthChange = (direction) => {
     if (direction === "prev") {
       if (currentMonth === 0) {
-        setCurrentMonth(11)
-        setCurrentYear(currentYear - 1)
+        setCurrentMonth(11);
+        setCurrentYear(currentYear - 1);
       } else {
-        setCurrentMonth(currentMonth - 1)
+        setCurrentMonth(currentMonth - 1);
       }
     } else {
       if (currentMonth === 11) {
-        setCurrentMonth(0)
-        setCurrentYear(currentYear + 1)
+        setCurrentMonth(0);
+        setCurrentYear(currentYear + 1);
       } else {
-        setCurrentMonth(currentMonth + 1)
+        setCurrentMonth(currentMonth + 1);
       }
     }
-  }
+  };
 
   const renderCalendar = () => {
-    const daysInMonth = getDaysInMonth(currentMonth, currentYear)
-    const firstDay = getFirstDayOfMonth(currentMonth, currentYear)
-    const days = []
+    const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+    const firstDay = getFirstDayOfMonth(currentMonth, currentYear);
+    const days = [];
 
     // Previous month's trailing days
     for (let i = 0; i < firstDay; i++) {
-      const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1
-      const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear
-      const prevMonthDays = getDaysInMonth(prevMonth, prevYear)
-      const day = prevMonthDays - firstDay + i + 1
+      const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+      const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+      const prevMonthDays = getDaysInMonth(prevMonth, prevYear);
+      const day = prevMonthDays - firstDay + i + 1;
       days.push(
         <div
           key={`prev-${i}`}
@@ -157,22 +165,22 @@ const ScheduleManagementPage = () => {
           onClick={() => {
             // Navigate to previous month and select day
             if (currentMonth === 0) {
-              setCurrentMonth(11)
-              setCurrentYear(currentYear - 1)
+              setCurrentMonth(11);
+              setCurrentYear(currentYear - 1);
             } else {
-              setCurrentMonth(currentMonth - 1)
+              setCurrentMonth(currentMonth - 1);
             }
-            setTimeout(() => handleCalendarDayClick(day), 0)
+            setTimeout(() => handleCalendarDayClick(day), 0);
           }}
         >
           {day}
-        </div>,
-      )
+        </div>
+      );
     }
 
     // Current month days
     for (let day = 1; day <= daysInMonth; day++) {
-      const isSelected = day === selectedDay
+      const isSelected = day === selectedDay;
       days.push(
         <div
           key={day}
@@ -180,13 +188,13 @@ const ScheduleManagementPage = () => {
           onClick={() => handleCalendarDayClick(day)}
         >
           {day}
-        </div>,
-      )
+        </div>
+      );
     }
 
     // Next month's leading days to fill the grid
-    const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7
-    const remainingCells = totalCells - (firstDay + daysInMonth)
+    const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+    const remainingCells = totalCells - (firstDay + daysInMonth);
 
     for (let i = 1; i <= remainingCells; i++) {
       days.push(
@@ -196,23 +204,36 @@ const ScheduleManagementPage = () => {
           onClick={() => {
             // Navigate to next month and select day
             if (currentMonth === 11) {
-              setCurrentMonth(0)
-              setCurrentYear(currentYear + 1)
+              setCurrentMonth(0);
+              setCurrentYear(currentYear + 1);
             } else {
-              setCurrentMonth(currentMonth + 1)
+              setCurrentMonth(currentMonth + 1);
             }
-            setTimeout(() => handleCalendarDayClick(i), 0)
+            setTimeout(() => handleCalendarDayClick(i), 0);
           }}
         >
           {i}
-        </div>,
-      )
+        </div>
+      );
     }
 
-    return days
-  }
+    return days;
+  };
 
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
 
   return (
     <div className="schedule-management-page">
@@ -229,7 +250,11 @@ const ScheduleManagementPage = () => {
               placeholder={!isDateFocused && !selectedDate ? "MM/DD/YYYY" : ""}
               className="date-input"
             />
-            <button className="date-select-btn" onClick={handleSelectDate} title="Select current calendar date">
+            <button
+              className="date-select-btn"
+              onClick={handleSelectDate}
+              title="Select current calendar date"
+            >
               📅
             </button>
           </div>
@@ -239,7 +264,9 @@ const ScheduleManagementPage = () => {
           {filterButtons.map((button) => (
             <button
               key={button.key}
-              className={`filter-btn ${activeFilter === button.key ? "active" : ""}`}
+              className={`filter-btn ${
+                activeFilter === button.key ? "active" : ""
+              }`}
               onClick={() => setActiveFilter(button.key)}
             >
               {button.label}
@@ -284,8 +311,8 @@ const ScheduleManagementPage = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 const ScheduleCard = ({ schedule }) => {
   return (
@@ -310,12 +337,23 @@ const ScheduleCard = ({ schedule }) => {
             <div key={index} className="participant-row">
               <div className="participant-info">
                 <div className="participant-avatar">
-                  <img src="/placeholder.svg?height=32&width=32" alt={participant.name} />
+                  <img
+                    src="/placeholder.svg?height=32&width=32"
+                    alt={participant.name}
+                  />
                 </div>
                 <span className="participant-name">{participant.name}</span>
                 <div className="participant-tags">
-                  {participant.status && <span className="participant-tag">{participant.status}</span>}
-                  {participant.tag && <span className="participant-tag secondary">{participant.tag}</span>}
+                  {participant.status && (
+                    <span className="participant-tag">
+                      {participant.status}
+                    </span>
+                  )}
+                  {participant.tag && (
+                    <span className="participant-tag secondary">
+                      {participant.tag}
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="participant-actions">
@@ -339,7 +377,7 @@ const ScheduleCard = ({ schedule }) => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default ScheduleManagementPage
+export default ScheduleManagementPage;

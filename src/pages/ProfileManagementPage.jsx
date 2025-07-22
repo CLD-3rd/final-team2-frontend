@@ -1,47 +1,60 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import TravelTagEditModal from "./TravelTagEditModal"
-import ProfileEditModal from "./ProfileEditModal"
+import { useState } from "react";
+import TravelTagEditModal from "@/components/Modal/TravelTagEditModal";
+import ProfileEditModal from "@/components/Modal/ProfileEditModal";
 
-const ProfileManagementPage = ({ userProfile: globalUserProfile, onProfileUpdate }) => {
-  const [userProfile, setUserProfile] = useState(globalUserProfile)
+const ProfileManagementPage = ({
+  userProfile: globalUserProfile,
+  onProfileUpdate,
+}) => {
+  const [userProfile, setUserProfile] = useState(globalUserProfile);
 
-  const [isEditingTags, setIsEditingTags] = useState(false)
-  const [isEditingBadges, setIsEditingBadges] = useState(false)
-  const [isTravelTagModalOpen, setIsTravelTagModalOpen] = useState(false)
-  const [isProfileEditModalOpen, setIsProfileEditModalOpen] = useState(false)
+  const [isEditingTags, setIsEditingTags] = useState(false);
+  const [isEditingBadges, setIsEditingBadges] = useState(false);
+  const [isTravelTagModalOpen, setIsTravelTagModalOpen] = useState(false);
+  const [isProfileEditModalOpen, setIsProfileEditModalOpen] = useState(false);
 
   const renderStars = (rating) => {
     return Array.from({ length: 5 }, (_, index) => (
-      <span key={index} className={`profile-star ${index < rating ? "filled" : ""}`}>
+      <span
+        key={index}
+        className={`profile-star ${index < rating ? "filled" : ""}`}
+      >
         ★
       </span>
-    ))
-  }
+    ));
+  };
 
   const handleTravelTagSave = (finalTags) => {
     const updatedProfile = {
       ...userProfile,
       travelTags: finalTags,
-    }
-    setUserProfile(updatedProfile)
-    onProfileUpdate(updatedProfile) // 전역 상태 업데이트
-    console.log("Travel tag data saved:", finalTags)
-  }
+    };
+    setUserProfile(updatedProfile);
+    onProfileUpdate(updatedProfile); // 전역 상태 업데이트
+    console.log("Travel tag data saved:", finalTags);
+  };
 
   const handleProfileSave = (updatedProfile) => {
-    setUserProfile(updatedProfile)
-    onProfileUpdate(updatedProfile) // 전역 상태 업데이트
-    console.log("Profile updated:", updatedProfile)
-  }
+    setUserProfile(updatedProfile);
+    onProfileUpdate(updatedProfile); // 전역 상태 업데이트
+    console.log("Profile updated:", updatedProfile);
+  };
 
   return (
     <div className="profile-management-page">
       <div className="profile-header">
         <div className="profile-image-section">
-          <div className="profile-image-container" style={{ position: "relative" }}>
-            <img src={userProfile.profileImage || "/placeholder.svg"} alt="프로필" className="profile-image-large" />
+          <div
+            className="profile-image-container"
+            style={{ position: "relative" }}
+          >
+            <img
+              src={userProfile.profileImage || "/placeholder.svg"}
+              alt="프로필"
+              className="profile-image-large"
+            />
             <button
               className="profile-edit-icon"
               onClick={() => setIsProfileEditModalOpen(true)}
@@ -66,7 +79,9 @@ const ProfileManagementPage = ({ userProfile: globalUserProfile, onProfileUpdate
 
           <div className="profile-rating">
             <span className="rating-label">평가</span>
-            <div className="rating-stars">{renderStars(userProfile.rating)}</div>
+            <div className="rating-stars">
+              {renderStars(userProfile.rating)}
+            </div>
             <span className="rating-count">({userProfile.reviewCount}명)</span>
           </div>
         </div>
@@ -79,7 +94,10 @@ const ProfileManagementPage = ({ userProfile: globalUserProfile, onProfileUpdate
               <span className="section-icon">✨</span>
               여행 성향 태그
             </h2>
-            <button className="edit-button" onClick={() => setIsTravelTagModalOpen(true)}>
+            <button
+              className="edit-button"
+              onClick={() => setIsTravelTagModalOpen(true)}
+            >
               편집
             </button>
           </div>
@@ -100,7 +118,10 @@ const ProfileManagementPage = ({ userProfile: globalUserProfile, onProfileUpdate
               <span className="section-icon">🏅</span>
               현재 보유 중인 뱃지 목록
             </h2>
-            <button className="edit-button" onClick={() => setIsEditingBadges(!isEditingBadges)}>
+            <button
+              className="edit-button"
+              onClick={() => setIsEditingBadges(!isEditingBadges)}
+            >
               편집
             </button>
           </div>
@@ -132,7 +153,7 @@ const ProfileManagementPage = ({ userProfile: globalUserProfile, onProfileUpdate
         />
       )}
     </div>
-  )
-}
+  );
+};
 
-export default ProfileManagementPage
+export default ProfileManagementPage;

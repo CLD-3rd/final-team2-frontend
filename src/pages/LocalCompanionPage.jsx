@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import FilterBar from "./FilterBar"
+import { useState } from "react";
+import FilterBar from "@/components/Feed/FilterBar";
 
 const LocalCompanionPage = () => {
   const [filters, setFilters] = useState({
     author: "",
     title: "",
     region: "",
-  })
+  });
 
   const handleFilterChange = (newFilters) => {
-    setFilters(newFilters)
-  }
+    setFilters(newFilters);
+  };
 
   // Sample data for local companion posts
   const localCompanionPosts = [
@@ -48,7 +48,7 @@ const LocalCompanionPage = () => {
       profileImage: "/placeholder.svg?height=40&width=40",
       tags: ["느긋해요", "술 좋아해요", "의상차이에요"],
     },
-  ]
+  ];
 
   return (
     <div className="local-companion-page">
@@ -59,8 +59,8 @@ const LocalCompanionPage = () => {
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
 const LocalCompanionCard = ({ title, rating, author, profileImage, tags }) => {
   const renderStars = (rating) => {
@@ -68,8 +68,8 @@ const LocalCompanionCard = ({ title, rating, author, profileImage, tags }) => {
       <span key={index} className={`star ${index < rating ? "filled" : ""}`}>
         ★
       </span>
-    ))
-  }
+    ));
+  };
 
   return (
     <div className="local-companion-card">
@@ -79,7 +79,11 @@ const LocalCompanionCard = ({ title, rating, author, profileImage, tags }) => {
         <h3 className="card-title">{title}</h3>
 
         <div className="card-author-info">
-          <img src={profileImage || "/placeholder.svg"} alt={author} className="author-profile-image" />
+          <img
+            src={profileImage || "/placeholder.svg"}
+            alt={author}
+            className="author-profile-image"
+          />
           <span className="author-name">{author}</span>
         </div>
       </div>
@@ -92,7 +96,7 @@ const LocalCompanionCard = ({ title, rating, author, profileImage, tags }) => {
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default LocalCompanionPage
+export default LocalCompanionPage;

@@ -1,19 +1,23 @@
-"use client"
+"use client";
 
 const LoginPage = ({ onLogin }) => {
   const handleGoogleLogin = () => {
     // Handle Google login logic here
-    console.log("Google login clicked")
+    console.log("Google login clicked");
     // For now, just simulate login
-    onLogin()
-  }
+    onLogin();
+  };
 
   return (
     <div className="login-page">
       <div className="login-container">
         <div className="login-logo-section">
           <div className="login-logo">
-            <img src="/placeholder.svg?height=120&width=120" alt="GotEEgo Character" className="logo-character" />
+            <img
+              src="/placeholder.svg?height=120&width=120"
+              alt="GotEEgo Character"
+              className="logo-character"
+            />
           </div>
           <h1 className="login-title">GotEEgo</h1>
           <p className="login-subtitle">Travel Buddy</p>
@@ -46,7 +50,7 @@ const LoginPage = ({ onLogin }) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default LoginPage
+export default LoginPage;
