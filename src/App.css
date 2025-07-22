@@ -1704,32 +1704,37 @@ body {
 .form-row {
   display: flex;
   gap: 15px;
-  align-items: end;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.region-group {
+  flex: 1;
 }
 
 .form-row .form-group {
-  flex: 1;
   margin-bottom: 0;
 }
 
 .badge-request-group {
-  flex: 0 0 auto;
-  min-width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex-shrink: 0;
+  width: auto;
+  margin-top: 4px;
 }
 
 .badge-request-container {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  margin-top: 24px;
+  gap: 6px;
+  height: 44px;
+  margin-bottom: 4px;
 }
 
-.badge-request-label {
-  font-size: 14px;
-  font-weight: 500;
-  color: #333;
-  text-align: center;
+.badge-icon {
+  font-size: 1.2rem;
 }
 
 .checkbox-label {
@@ -1763,7 +1768,8 @@ body {
 
 .form-group input,
 .form-group select,
-.form-group textarea {
+.form-group textarea,
+.form-group .badge-request-container {
   width: 100%;
   padding: 12px;
   border: 1px solid #ddd;

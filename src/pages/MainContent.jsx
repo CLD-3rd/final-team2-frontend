@@ -1,7 +1,7 @@
 "use client";
 
 import FeedPage from "@/pages/FeedPage";
-import PhotoCompanionPage from "@/pages/PhotoCompanionPage";
+import PlannedCompanionPage from "@/pages/PlannedCompanionPage";
 import LocalCompanionPage from "@/pages/LocalCompanionPage";
 import ProfileManagementPage from "@/pages/ProfileManagementPage";
 import ScheduleManagementPage from "@/pages/ScheduleManagementPage";
@@ -23,7 +23,7 @@ const MainContent = ({
     switch (currentPage) {
       case "photo":
         return (
-          <PhotoCompanionPage
+          <PlannedCompanionPage
             isLoggedIn={isLoggedIn}
             onLoginModalOpen={onLoginModalOpen}
           />

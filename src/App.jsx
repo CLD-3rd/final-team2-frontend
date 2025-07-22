@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import Header from "./components/Header/Header";
-import Sidebar from "./components/Sidebar/Sidebar";
-import MainContent from "./pages/MainContent";
-import CreatePostModal from "./components/Modal/CreatePostModal";
-import LoginModal from "./components/Modal/LoginModal";
-import "./App.css";
+import Header from "@/components/Header/Header";
+import Sidebar from "@/components/Sidebar/Sidebar";
+import MainContent from "@/pages/MainContent";
+import CreateFeedModal from "@/components/modals/FeedPostModal";
+import CreatePlannedModal from "@/components/modals/PlannedCompanionPostModal";
+import CreateLocalModal from "@/components/modals/LocalCompanionPostModal";
+import LoginModal from "@/components/modals/LoginModal";
+import "@/App.css";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -183,11 +185,26 @@ function App() {
       )}
 
       {isCreateModalOpen && (
-        <CreatePostModal
-          onClose={closeCreateModal}
-          currentPage={currentPage}
-          onPostCreate={handlePostCreate}
-        />
+        <>
+          {currentPage === "feed" && (
+            <CreateFeedModal
+              onClose={closeCreateModal}
+              onPostCreate={handlePostCreate}
+            />
+          )}
+          {currentPage === "photo" && (
+            <CreatePlannedModal
+              onClose={closeCreateModal}
+              onPostCreate={handlePostCreate}
+            />
+          )}
+          {currentPage === "friend" && (
+            <CreateLocalModal
+              onClose={closeCreateModal}
+              onPostCreate={handlePostCreate}
+            />
+          )}
+        </>
       )}
 
       {isLoginModalOpen && (
