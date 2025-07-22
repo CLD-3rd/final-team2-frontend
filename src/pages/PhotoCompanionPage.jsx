@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import FilterBar from "./FilterBar"
+import { useState } from "react";
+import FilterBar from "../components/Feed/FilterBar";
 
 const PhotoCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
   const [filters, setFilters] = useState({
     author: "",
     title: "",
     region: "",
-  })
+  });
 
   const handleFilterChange = (newFilters) => {
-    setFilters(newFilters)
-  }
+    setFilters(newFilters);
+  };
 
   // Sample data for 사전 동행 모집 posts
   const companionPosts = [
@@ -21,7 +21,8 @@ const PhotoCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
       title: "프랑스 1박2일 가성비",
       location: "김해시",
       dateRange: "25.7.18~25.7.19",
-      description: "프랑스 당일치기 여행갑니다\n일정 : 인천공항 >> 프랑스 공항 >> 인천공항",
+      description:
+        "프랑스 당일치기 여행갑니다\n일정 : 인천공항 >> 프랑스 공항 >> 인천공항",
       author: "A",
       participants: 2,
       maxParticipants: 4,
@@ -32,7 +33,8 @@ const PhotoCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
       title: "프랑스 1박2일 가성비",
       location: "김해시",
       dateRange: "25.7.18~25.7.19",
-      description: "프랑스 당일치기 여행갑니다\n일정 : 인천공항 >> 프랑스 공항 >> 인천공항",
+      description:
+        "프랑스 당일치기 여행갑니다\n일정 : 인천공항 >> 프랑스 공항 >> 인천공항",
       author: "A",
       participants: 1,
       maxParticipants: 3,
@@ -43,7 +45,8 @@ const PhotoCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
       title: "프랑스 1박2일 가성비",
       location: "김해시",
       dateRange: "25.7.18~25.7.19",
-      description: "프랑스 당일치기 여행갑니다\n일정 : 인천공항 >> 프랑스 공항 >> 인천공항",
+      description:
+        "프랑스 당일치기 여행갑니다\n일정 : 인천공항 >> 프랑스 공항 >> 인천공항",
       author: "A",
       participants: 3,
       maxParticipants: 5,
@@ -54,25 +57,31 @@ const PhotoCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
       title: "프랑스 1박2일 가성비",
       location: "김해시",
       dateRange: "25.7.18~25.7.19",
-      description: "프랑스 당일치기 여행갑니다\n일정 : 인천공항 >> 프랑스 공항 >> 인천공항",
+      description:
+        "프랑스 당일치기 여행갑니다\n일정 : 인천공항 >> 프랑스 공항 >> 인천공항",
       author: "A",
       participants: 0,
       maxParticipants: 2,
       image: "/placeholder.svg?height=200&width=300&text=여행+이미지",
     },
-  ]
+  ];
 
   return (
     <div className="photo-companion-page">
       <FilterBar filters={filters} onFilterChange={handleFilterChange} />
       <div className="companion-grid">
         {companionPosts.map((post) => (
-          <CompanionCard key={post.id} {...post} isLoggedIn={isLoggedIn} onLoginModalOpen={onLoginModalOpen} />
+          <CompanionCard
+            key={post.id}
+            {...post}
+            isLoggedIn={isLoggedIn}
+            onLoginModalOpen={onLoginModalOpen}
+          />
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
 const CompanionCard = ({
   title,
@@ -88,13 +97,13 @@ const CompanionCard = ({
 }) => {
   const handleJoinClick = () => {
     if (!isLoggedIn) {
-      onLoginModalOpen()
-      return
+      onLoginModalOpen();
+      return;
     }
 
     // 로그인된 유저의 경우 - 실제 신청 로직은 나중에 구현
-    console.log("같이 갈래요 신청!")
-  }
+    console.log("같이 갈래요 신청!");
+  };
 
   return (
     <div className="companion-card">
@@ -110,7 +119,11 @@ const CompanionCard = ({
       </div>
 
       <div className="card-image-container">
-        <img src={image || "/placeholder.svg"} alt={title} className="companion-card-image" />
+        <img
+          src={image || "/placeholder.svg"}
+          alt={title}
+          className="companion-card-image"
+        />
       </div>
 
       <div className="card-content">
@@ -131,7 +144,7 @@ const CompanionCard = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default PhotoCompanionPage
+export default PhotoCompanionPage;

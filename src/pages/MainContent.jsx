@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import FilterBar from "./FilterBar"
-import FeedGrid from "./FeedGrid"
-import PhotoCompanionPage from "./PhotoCompanionPage"
-import LocalCompanionPage from "./LocalCompanionPage"
-import ProfileManagementPage from "./ProfileManagementPage"
-import ScheduleManagementPage from "./ScheduleManagementPage"
-import ChatPage from "./ChatPage"
-import ErrorPage from "./ErrorPage"
+import { useState } from "react";
+import FilterBar from "../components/Feed/FilterBar";
+import FeedGrid from "../components/Feed/FeedGrid";
+import PhotoCompanionPage from "./PhotoCompanionPage";
+import LocalCompanionPage from "./LocalCompanionPage";
+import ProfileManagementPage from "./ProfileManagementPage";
+import ScheduleManagementPage from "./ScheduleManagementPage";
+import ChatPage from "./ChatPage";
+import ErrorPage from "./ErrorPage";
 
 const MainContent = ({
   sidebarOpen,
@@ -24,15 +24,25 @@ const MainContent = ({
   const renderPage = () => {
     switch (currentPage) {
       case "photo":
-        return <PhotoCompanionPage isLoggedIn={isLoggedIn} onLoginModalOpen={onLoginModalOpen} />
+        return (
+          <PhotoCompanionPage
+            isLoggedIn={isLoggedIn}
+            onLoginModalOpen={onLoginModalOpen}
+          />
+        );
       case "friend":
-        return <LocalCompanionPage />
+        return <LocalCompanionPage />;
       case "profile":
-        return <ProfileManagementPage userProfile={userProfile} onProfileUpdate={onProfileUpdate} />
+        return (
+          <ProfileManagementPage
+            userProfile={userProfile}
+            onProfileUpdate={onProfileUpdate}
+          />
+        );
       case "schedule":
-        return <ScheduleManagementPage />
+        return <ScheduleManagementPage />;
       case "chat":
-        return <ChatPage />
+        return <ChatPage />;
       case "support":
         return (
           <ErrorPage
@@ -42,7 +52,7 @@ const MainContent = ({
             onGoHome={() => (window.location.href = "/")}
             onRetry={() => window.location.reload()}
           />
-        )
+        );
       case "feed":
       default:
         return (
@@ -52,27 +62,36 @@ const MainContent = ({
             feedData={feedData}
             onFeedDelete={onFeedDelete}
           />
-        )
+        );
     }
-  }
+  };
 
   return (
-    <main className={`main-content bg-stone-300 ${sidebarOpen ? "sidebar-expanded" : "sidebar-collapsed"}`}>
+    <main
+      className={`main-content bg-stone-300 ${
+        sidebarOpen ? "sidebar-expanded" : "sidebar-collapsed"
+      }`}
+    >
       {renderPage()}
     </main>
-  )
-}
+  );
+};
 
-const FeedPage = ({ onFeedCountChange, isLoggedIn, feedData, onFeedDelete }) => {
+const FeedPage = ({
+  onFeedCountChange,
+  isLoggedIn,
+  feedData,
+  onFeedDelete,
+}) => {
   const [filters, setFilters] = useState({
     author: "",
     title: "",
     region: "",
-  })
+  });
 
   const handleFilterChange = (newFilters) => {
-    setFilters(newFilters)
-  }
+    setFilters(newFilters);
+  };
 
   return (
     <>
@@ -85,7 +104,7 @@ const FeedPage = ({ onFeedCountChange, isLoggedIn, feedData, onFeedDelete }) => 
         onFeedDelete={onFeedDelete}
       />
     </>
-  )
-}
+  );
+};
 
-export default MainContent
+export default MainContent;
