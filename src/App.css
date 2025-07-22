@@ -1657,6 +1657,9 @@ body {
 }
 
 .modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   background: linear-gradient(
     135deg,
     var(--color-light-peach) 0%,
