@@ -118,12 +118,10 @@ const FilterBar = ({ filters, onFilterChange }) => {
             최근 등록 순
           </button>
           <button
-            className={`sort-button ${
-              activeSort === "recommend" ? "active" : ""
-            }`}
-            onClick={() => handleSortChange("recommend")}
+            className={`sort-button ${activeSort === "view" ? "active" : ""}`}
+            onClick={() => handleSortChange("view")}
           >
-            추천 순
+            조회 순
           </button>
         </div>
       </div>

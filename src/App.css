@@ -934,6 +934,18 @@ body {
   font-weight: 500;
 }
 
+.card-overlay-stats {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  display: flex;
+  gap: 8px;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
 .card-image img {
   width: 100%;
   height: 100%;
@@ -955,7 +967,7 @@ body {
   font-size: 18px;
   font-weight: 500;
   color: #666;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .card-meta {
@@ -1427,28 +1439,6 @@ body {
 .comment-actions {
   display: flex;
   gap: 10px;
-}
-
-.like-button {
-  background: none;
-  border: none;
-  font-size: 12px;
-  cursor: pointer;
-  color: #666;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-}
-
-.like-button:hover {
-  background: #f0f0f0;
-}
-
-.like-button.liked {
-  color: #ff4444;
 }
 
 .comment-input-section {

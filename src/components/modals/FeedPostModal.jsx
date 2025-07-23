@@ -1,6 +1,7 @@
 import { useState } from "react";
 import PostForm from "./PostForm";
 import useLockBodyScroll from "@/hooks/useLockBodyScroll";
+import { createFeed } from "@/api/feed";
 
 const FeedPostModal = ({ onClose, onPostCreate }) => {
   const [formData, setFormData] = useState({
@@ -13,24 +14,39 @@ const FeedPostModal = ({ onClose, onPostCreate }) => {
 
   useLockBodyScroll();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const newPost = {
-      id: Date.now(),
-      title: formData.title,
-      region: formData.region,
-      author: "사용자님",
-      date: new Date().toISOString().split("T")[0],
-      images: formData.image
-        ? [URL.createObjectURL(formData.image)]
-        : ["/placeholder.svg?height=200&width=300&text=새로운+피드"],
-      content: formData.content,
-      badgeRequest: formData.badgeRequest,
-    };
+    try {
+      // ✅ FormData 생성
+      const formPayload = new FormData();
+      formPayload.append("title", formData.title);
+      formPayload.append("content", formData.content);
+      formPayload.append("location", formData.region);
+      formPayload.append("badge_request", formData.badgeRequest);
+      if (formData.image) {
+        formPayload.append("images", formData.image);
+      }
 
-    onPostCreate?.(newPost);
-    onClose();
+      // ✅ API 호출
+      const response = await createFeed(formPayload);
+
+      // ✅ UI 반영
+      const newPost = {
+        id: response.data.feed_id,
+        title: response.data.title,
+        region: response.data.location,
+        author: response.data.author.nickname,
+        date: response.data.created_at,
+        images: response.data.image_url || [],
+      };
+
+      onPostCreate?.(newPost);
+      onClose();
+    } catch (error) {
+      console.error("피드 작성 실패", error);
+      alert("피드 등록에 실패했습니다. 다시 시도해주세요.");
+    }
   };
 
   return (

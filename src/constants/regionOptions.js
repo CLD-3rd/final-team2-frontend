@@ -1,11 +1,13 @@
 const regionOptions = [
-  { value: "busan", label: "부산" },
-  { value: "daejeon", label: "대전" },
-  { value: "boryeong", label: "보령" },
-  { value: "anseong", label: "안성" },
-  { value: "jeonju", label: "전주" },
-  { value: "daegu", label: "대구" },
-  { value: "gimhae", label: "김해시" },
+  { value: "JEJU", label: "제주" },
+  { value: "SEOUL", label: "서울" },
+  { value: "BUSAN", label: "부산" },
+  { value: "DAEGU", label: "대구" },
+  { value: "DAEJEON", label: "대전" },
+  { value: "JEONJU", label: "전주" },
+  { value: "GWANGJU", label: "광주" },
+  { value: "GYEONGJU", label: "경주" },
+  { value: "GANGNEUNG", label: "강릉" },
+  { value: "SOKCHO", label: "속초" },
 ];
-
 export default regionOptions;

@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import React from "react";
+import { useState, useEffect } from "react";
 import FeedCard from "@/components/Feed/FeedCard";
 import FeedDetailModal from "@/components/modals/FeedDetailModal";
 
@@ -12,38 +11,31 @@ const FeedGrid = ({
   feedData,
   onFeedDelete,
 }) => {
-  const [selectedFeed, setSelectedFeed] = useState(null);
+  const [selectedFeedId, setSelectedFeedId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // initialFeedData 제거하고 feedData 사용
-  // const initialFeedData = [...] 이 부분 삭제
-
-  // newPosts와 합치는 로직 제거하고 feedData 직접 사용
-  // const allFeedData = [...newPosts, ...initialFeedData] 이 부분을
-  const allFeedData = feedData;
+  const allFeedData = Array.isArray(feedData) ? feedData : [];
 
   // Filter logic
   const filteredData = allFeedData.filter((item) => {
-    if (filters.region && item.region !== filters.region) return false;
+    if (filters.location && item.location !== filters.location) return false;
     if (filters.author && !item.author.includes(filters.author)) return false;
     return true;
   });
 
   // 피드 갯수를 상위 컴포넌트로 전달
-  React.useEffect(() => {
-    if (onFeedCountChange) {
-      onFeedCountChange(allFeedData.length);
-    }
+  useEffect(() => {
+    onFeedCountChange?.(allFeedData.length);
   }, [allFeedData.length, onFeedCountChange]);
 
-  const handleFeedClick = (feedItem) => {
-    setSelectedFeed(feedItem);
+  const handleFeedClick = (feedId) => {
+    setSelectedFeedId(feedId);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setSelectedFeed(null);
+    setSelectedFeedId(null);
   };
 
   return (
@@ -52,16 +44,22 @@ const FeedGrid = ({
         {filteredData.map((item) => (
           <FeedCard
             key={item.id}
-            {...item}
-            onClick={() => handleFeedClick(item)}
+            title={item.title}
+            region={item.region}
+            author={`유저 ${item.userId}`}
+            date={item.createdAt}
+            images={[item.image]} // FeedCard expects images: []
+            views={item.views}
+            likes={item.likes}
+            onClick={() => handleFeedClick(item.id)} // ✅ feedId만 넘김
           />
         ))}
       </div>
 
-      {isModalOpen && selectedFeed && (
+      {isModalOpen && selectedFeedId && (
         <FeedDetailModal
           onClose={handleCloseModal}
-          feedData={selectedFeed}
+          feedId={selectedFeedId} // ✅ feedId 전달
           isLoggedIn={isLoggedIn}
           onFeedDelete={onFeedDelete}
         />
