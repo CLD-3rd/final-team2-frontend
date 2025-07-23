@@ -1,6 +1,6 @@
 // src/api/feed.js
 import axios from "./axiosInstance";
-import { parseFeedsResponse } from "@/dto/feedDto";
+import { parseFeedsResponse, parseFeedDetailResponse } from "@/dto/feedDto";
 
 // ✅ feed 전체 조회
 export const getFeeds = async (page = 1, size = 10) => {
@@ -8,66 +8,114 @@ export const getFeeds = async (page = 1, size = 10) => {
     const res = await axios.get(`/api/feed`, {
       params: { page, size },
     });
-
-    return {
-      feeds: parseFeedsResponse(res.data),
-      pageInfo: res.data?.data?.pageInfo,
-    };
+    if (res.status === 200 && res.data?.data) {
+      return {
+        feeds: parseFeedsResponse(res.data),
+        pageInfo: res.data?.data?.pageInfo,
+      };
+    }
+    return null;
   } catch (error) {
     console.error("피드 조회 실패", error);
     // ✅ 테스트용 데이터
     const testFeeds = {
-      status: 200,
-      message: "피드 목록 조회 성공 (mock)",
-      data: {
-        feeds: [
-          {
-            feed_id: 1,
-            user_id: 101,
-            title: "제주도 여행 후기",
-            content: "제주도에서의 멋진 경험을 공유합니다.",
-            image_url: "/images/test-feed.jpg",
-            location: "JEJU",
-            badge_request: "Y",
-            view_count: 134,
-            like_count: 57,
-            created_at: "2025-07-20",
-            modified_at: "2025-07-21",
-          },
-          {
-            feed_id: 2,
-            user_id: 102,
-            title: "부산 해운대 여행기",
-            content: "부산 바다 너무 예뻐요!",
-            image_url: "/images/test-feed2.jpg",
-            location: "BUSAN",
-            badge_request: "N",
-            view_count: 200,
-            like_count: 89,
-            created_at: "2025-07-18",
-            modified_at: "2025-07-19",
-          },
-        ],
-        pageInfo: {
-          currentPage: 1,
-          pageSize: 10,
-          totalPages: 1,
-          totalElements: 2,
+      feeds: [
+        {
+          feed_id: 1,
+          user_id: 101,
+          title: "제주도 여행 후기",
+          content: "제주도에서의 멋진 경험을 공유합니다.",
+          image_url: "/images/test-feed.jpg",
+          location: "JEJU",
+          badge_request: "Y",
+          view_count: 134,
+          like_count: 57,
+          created_at: "2025-07-20",
+          modified_at: "2025-07-21",
         },
+        {
+          feed_id: 2,
+          user_id: 102,
+          title: "부산 해운대 여행기",
+          content: "부산 바다 너무 예뻐요!",
+          image_url: "/images/test-feed2.jpg",
+          location: "BUSAN",
+          badge_request: "N",
+          view_count: 200,
+          like_count: 89,
+          created_at: "2025-07-18",
+          modified_at: "2025-07-19",
+        },
+      ],
+      pageInfo: {
+        currentPage: 1,
+        pageSize: 10,
+        totalPages: 1,
+        totalElements: 2,
       },
     };
 
     return {
       feeds: parseFeedsResponse(testFeeds),
-      pageInfo: null,
+      pageInfo: testFeeds.pageInfo,
     };
   }
 };
 
 // ✅ feed 상세 조회
 export const getFeedDetail = async (feedId) => {
-  const response = await axios.get(`/api/feed/${feedId}`);
-  return response.data;
+  try {
+    const res = await axios.get(`/api/feed/${feedId}`);
+    if (res.status === 200 && res.data?.data) {
+      return parseFeedDetailResponse(res.data.data);
+    }
+    return null;
+  } catch (error) {
+    console.error("피드 상세 조회 실패", error);
+
+    // ✅ 테스트용 Mock 데이터
+    const testFeedDetail = {
+      feed_id: 1,
+      user_id: 45,
+      title: "부산 여행기",
+      content: "부산의 아름다운 바다와 맛집을 소개합니다.",
+      image_url: [
+        "https://cdn.example.com/feed/123/img1.jpg",
+        "https://cdn.example.com/feed/123/img2.jpg",
+      ],
+      location: "BUSAN",
+      badge_request: "N",
+      view_count: 254,
+      like_count: 88,
+      created_at: "2025-07-15",
+      modified_at: "2025-07-16",
+      author: {
+        nickname: "여행러버",
+        profile_image: "https://cdn.example.com/users/45/profile.jpg",
+      },
+      comments: [
+        {
+          comment_id: 1,
+          user_id: 201,
+          nickname: "댓글유저1",
+          content: "부산 진짜 최고죠!",
+          created_at: "2025-07-15T13:45:00",
+          modified_at: "2025-07-15T13:45:00",
+        },
+        {
+          comment_id: 2,
+          user_id: 202,
+          nickname: "댓글유저2",
+          content: "사진 너무 예뻐요!",
+          created_at: "2025-07-15T14:10:00",
+          modified_at: "",
+        },
+      ],
+    };
+
+    // ✅ testFeedDetail의 data만 전달
+    return parseFeedDetailResponse(testFeedDetail);
+  }
 };
 
 // ✅ feed 등록

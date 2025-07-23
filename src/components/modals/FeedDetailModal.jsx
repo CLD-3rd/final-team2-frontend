@@ -1,10 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import useLockBodyScroll from "@/hooks/useLockBodyScroll";
+import { getFeedDetail } from "@/api/feed"; // ✅ API 추가
+import FallbackImage from "@/components/common/FallbackImage";
+import ProfileImage from "@/components/common/ProfileImage";
 
-const FeedDetailModal = ({ onClose, feedData, isLoggedIn, onFeedDelete }) => {
+const FeedDetailModal = ({ onClose, feedId, isLoggedIn, onFeedDelete }) => {
   useLockBodyScroll();
+  const [feedData, setFeedData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const [newComment, setNewComment] = useState("");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [editingCommentId, setEditingCommentId] = useState(null);
@@ -39,6 +46,46 @@ const FeedDetailModal = ({ onClose, feedData, isLoggedIn, onFeedDelete }) => {
       isMyComment: true, // 내 댓글로 표시
     },
   ]);
+
+  useEffect(() => {
+    const fetchFeedDetail = async () => {
+      try {
+        const data = await getFeedDetail(feedId);
+        setFeedData(data);
+      } catch (err) {
+        console.error("피드 정보를 불러오지 못했습니다.", err);
+        setError("피드 정보를 불러올 수 없습니다.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFeedDetail();
+  }, [feedId]);
+
+  // ✅ 로딩 처리
+  if (loading) {
+    return (
+      <div className="modal-overlay">
+        <div className="feed-detail-modal">
+          <p>로딩 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !feedData) {
+    return (
+      <div className="modal-overlay">
+        <div className="feed-detail-modal">
+          <p>{error || "데이터가 없습니다."}</p>
+          <button onClick={onClose}>닫기</button>
+        </div>
+      </div>
+    );
+  }
+
+  // // ✅ 댓글은 feedData에서 불러오기
+  // const [comments, setComments] = useState(feedData.comments || []);
 
   const images = feedData.images || ["/images/feed-sample.jpg"];
   const hasMultipleImages = images.length > 1;
@@ -201,7 +248,7 @@ const FeedDetailModal = ({ onClose, feedData, isLoggedIn, onFeedDelete }) => {
         {/* 이미지 섹션 */}
         <div className="feed-modal-image-section">
           <div className="image-container">
-            <img
+            <FallbackImage
               src={images[currentImageIndex] || "/placeholder.svg"}
               alt={feedData.title}
               className="feed-modal-image"
@@ -248,19 +295,14 @@ const FeedDetailModal = ({ onClose, feedData, isLoggedIn, onFeedDelete }) => {
           <div className="content-header">
             <h2 className="feed-title">{feedData.title}</h2>
             <div className="feed-meta">
-              <span className="author-name">{feedData.author}</span>
+              <span className="author-name">{feedData.author.nickname}</span>
               <span className="separator">·</span>
               <span className="post-date">{feedData.date}</span>
             </div>
           </div>
 
           <div className="feed-content-body">
-            <p>
-              {feedData.region}에서의 멋진 하루였습니다! 날씨도 좋고 사람들도
-              친절해서 정말 즐거운 여행이었어요. 특히 이곳의 전통 음식들이 정말
-              맛있었고, 현지 문화를 체험할 수 있어서 좋았습니다. 다음에 또 오고
-              싶은 곳이네요. 여러분도 기회가 되시면 꼭 한번 방문해보세요!
-            </p>
+            <p>{feedData.content}</p>
           </div>
         </div>
 
@@ -274,7 +316,10 @@ const FeedDetailModal = ({ onClose, feedData, isLoggedIn, onFeedDelete }) => {
             {comments.map((comment) => (
               <div key={comment.id} className="comment-item">
                 <div className="comment-avatar">
-                  <img src="/images/user-profile.jpg" alt={comment.author} />
+                  <ProfileImage
+                    src="/images/user-profile.jpg"
+                    alt={comment.author}
+                  />
                 </div>
                 <div className="comment-content">
                   <div className="comment-header">
