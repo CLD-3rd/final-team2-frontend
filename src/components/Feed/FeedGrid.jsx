@@ -49,6 +49,8 @@ const FeedGrid = ({
             author={`유저 ${item.userId}`}
             date={item.createdAt}
             images={[item.image]} // FeedCard expects images: []
+            views={item.views}
+            likes={item.likes}
             onClick={() => handleFeedClick(item.id)} // ✅ feedId만 넘김
           />
         ))}
