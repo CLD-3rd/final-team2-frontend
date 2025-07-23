@@ -80,9 +80,12 @@ const LocalCompanionCard = ({ title, rating, author, profileImage, tags }) => {
 
         <div className="card-author-info">
           <img
-            src={profileImage || "/placeholder.svg"}
+            src={profileImage || "/images/default-user-profile.png"}
             alt={author}
-            className="author-profile-image"
+            className="profile-image"
+            onError={(e) => {
+              e.currentTarget.src = "/images/default-user-profile.png";
+            }}
           />
           <span className="author-name">{author}</span>
         </div>
