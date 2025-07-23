@@ -120,9 +120,12 @@ const CompanionCard = ({
 
       <div className="card-image-container">
         <img
-          src={image || "/placeholder.svg"}
+          src={image || "/images/image-not-found.png"}
           alt={title}
           className="companion-card-image"
+          onError={(e) => {
+            e.currentTarget.src = "/images/image-not-found.png";
+          }}
         />
       </div>
 
