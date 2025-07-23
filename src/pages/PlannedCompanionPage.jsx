@@ -24,6 +24,7 @@ const PhotoCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
       description:
         "프랑스 당일치기 여행갑니다\n일정 : 인천공항 >> 프랑스 공항 >> 인천공항",
       author: "A",
+      authorImage: "/images/user-a.png", // 이미지 없을 경우 undefined
       participants: 2,
       maxParticipants: 4,
       image: "/placeholder.svg?height=200&width=300&text=여행+이미지",
@@ -109,7 +110,16 @@ const CompanionCard = ({
     <div className="companion-card">
       <div className="card-header">
         <div className="author-info">
-          <div className="author-avatar">{author}</div>
+          <div className="author-avatar">
+            <img
+              src={image || "/images/default-user-profile.png"}
+              alt={author}
+              className="avatar-image"
+              onError={(e) => {
+                e.currentTarget.src = "/images/default-user-profile.png";
+              }}
+            />
+          </div>
           <div className="post-info">
             <h3 className="post-title">{title}</h3>
             <p className="post-location">{location}</p>
@@ -120,9 +130,12 @@ const CompanionCard = ({
 
       <div className="card-image-container">
         <img
-          src={image || "/placeholder.svg"}
+          src={image || "/images/image-not-found.png"}
           alt={title}
           className="companion-card-image"
+          onError={(e) => {
+            e.currentTarget.src = "/images/image-not-found.png";
+          }}
         />
       </div>
 

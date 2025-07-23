@@ -16,6 +16,8 @@ const PostForm = ({
   contentLabel,
   includeBadge,
   includeDateRange,
+  includeContent,
+  includeImage,
 }) => {
   // ✅ 컴포넌트 내부로 이동
   const [dateRange, setDateRange] = useState([
@@ -117,32 +119,36 @@ const PostForm = ({
       )}
 
       {/* 내용 */}
-      <div className="form-group">
-        <label htmlFor="content">{contentLabel}</label>
-        <textarea
-          id="content"
-          name="content"
-          value={formData.content}
-          onChange={handleChange}
-          rows="5"
-          placeholder="내용을 입력하세요"
-          required
-        />
-      </div>
+      {includeContent && (
+        <div className="form-group">
+          <label htmlFor="content">{contentLabel}</label>
+          <textarea
+            id="content"
+            name="content"
+            value={formData.content}
+            onChange={handleChange}
+            rows="5"
+            placeholder="내용을 입력하세요"
+            required
+          />
+        </div>
+      )}
 
       {/* 이미지 */}
-      <div className="form-group">
-        <label htmlFor="image">이미지</label>
-        <input
-          type="file"
-          id="image"
-          name="image"
-          accept="image/*"
-          onChange={(e) =>
-            setFormData((prev) => ({ ...prev, image: e.target.files[0] }))
-          }
-        />
-      </div>
+      {includeImage && (
+        <div className="form-group">
+          <label htmlFor="image">이미지</label>
+          <input
+            type="file"
+            id="image"
+            name="image"
+            accept="image/*"
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, image: e.target.files[0] }))
+            }
+          />
+        </div>
+      )}
 
       {/* 버튼 */}
       <div className="modal-actions">

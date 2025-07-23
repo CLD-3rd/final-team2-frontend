@@ -50,7 +50,9 @@ const LocalCompanionPostModal = ({ onClose, onPostCreate }) => {
           titleLabel="모집 제목"
           contentLabel="여행 계획"
           includeBadge={false}
-          includeDateRange={true}
+          includeDateRange={false}
+          includeContent={false}
+          includeImage={false}
         />
       </div>
     </div>
