@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { Header, Sidebar } from "@/shared";
-import MainContent from "@/pages/MainContent";
+import AppRouter from "@/AppRouter";
 import CreateFeedModal from "@/features/feed";
-import CreatePlannedModal from "@/components/modals/PlannedCompanionPostModal";
-import CreateLocalModal from "@/components/modals/LocalCompanionPostModal";
-import LoginModal from "@/components/modals/LoginModal";
+import { CreateLocalModal } from "@/features/local-companion";
+import { CreatePlannedModal } from "@/features/planned-companion";
+import { LoginModal } from "@/features/user";
 import "@/App.css";
 
 function App() {
@@ -16,70 +16,7 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState("feed");
   const [feedCount, setFeedCount] = useState(0);
-  const [feedData, setFeedData] = useState([
-    {
-      id: 1,
-      title: "부산 해운대 여행기",
-      region: "부산",
-      author: "여행러버",
-      date: "2025-05-10",
-      images: [
-        "https://raw.githubusercontent.com/han199805/personal/main/%ED%95%B4%EC%9A%B4%EB%8C%80.jpg",
-      ],
-    },
-    {
-      id: 2,
-      title: "대전 맛집 투어",
-      region: "대전",
-      author: "맛집헌터",
-      date: "2025-05-10",
-      images: [
-        "https://raw.githubusercontent.com/han199805/personal/main/%EB%8C%80%EC%A0%84.jpg",
-        "/images/daejeon-1.jpg",
-        "/images/daejeon-2.jpg",
-      ],
-    },
-    {
-      id: 3,
-      title: "보령 머드축제 후기",
-      region: "보령",
-      author: "축제매니아",
-      date: "2025-05-10",
-      images: [
-        "https://raw.githubusercontent.com/han199805/personal/main/%EB%B3%B4%EB%A0%81.jpg",
-      ],
-    },
-    {
-      id: 4,
-      title: "안성 팜랜드 체험",
-      region: "안성",
-      author: "가족여행",
-      date: "2025-05-10",
-      images: [
-        "https://raw.githubusercontent.com/han199805/personal/main/%EC%95%88%EC%84%B1.png",
-      ],
-    },
-    {
-      id: 5,
-      title: "전주 한옥마을 산책",
-      region: "전주",
-      author: "전통문화",
-      date: "2025-05-10",
-      images: [
-        "https://raw.githubusercontent.com/han199805/personal/main/%EC%A0%84%EC%A3%BC.jpg",
-      ],
-    },
-    {
-      id: 6,
-      title: "대구 동성로 쇼핑",
-      region: "대구",
-      author: "쇼핑러버",
-      date: "2025-05-10",
-      images: [
-        "https://raw.githubusercontent.com/han199805/personal/main/%EB%8F%99%EC%84%B1%EB%A1%9C.jpeg",
-      ],
-    },
-  ]);
+  const [feedData, setFeedData] = useState();
 
   const [userProfile, setUserProfile] = useState({
     username: "사용자님",
@@ -164,7 +101,7 @@ function App() {
           onPageChange={handlePageChange}
           feedCount={feedCount}
         />
-        <MainContent
+        <AppRouter
           sidebarOpen={sidebarOpen}
           currentPage={currentPage}
           onFeedCountChange={handleFeedCountChange}

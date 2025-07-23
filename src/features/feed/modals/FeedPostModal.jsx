@@ -1,5 +1,5 @@
 import { useState } from "react";
-import PostForm from "@/components/modals/PostForm";
+import { PostForm } from "@/shared";
 import { useLockBodyScroll } from "@/shared";
 import { createFeed } from "@/features/feed";
 

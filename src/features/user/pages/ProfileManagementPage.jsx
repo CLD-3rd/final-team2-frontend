@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import TravelTagEditModal from "@/components/modals/TravelTagEditModal";
-import ProfileEditModal from "@/components/modals/ProfileEditModal";
-// import 추가
-import BadgeEditModal from "@/components/modals/BadgeEditModal";
+import {
+  BadgeEditModal,
+  ProfileEditModal,
+  TravelTagEditModal,
+} from "@/features/user";
+
 const ProfileManagementPage = ({
   userProfile: globalUserProfile,
   onProfileUpdate,
@@ -14,7 +16,7 @@ const ProfileManagementPage = ({
   const [isTravelTagModalOpen, setIsTravelTagModalOpen] = useState(false);
   const [isProfileEditModalOpen, setIsProfileEditModalOpen] = useState(false);
   // 상태 추가
-  const [isBadgeEditModalOpen, setIsBadgeEditModalOpen] = useState(false)
+  const [isBadgeEditModalOpen, setIsBadgeEditModalOpen] = useState(false);
 
   const renderStars = (rating) => {
     return Array.from({ length: 5 }, (_, index) => (
@@ -48,11 +50,11 @@ const ProfileManagementPage = ({
     const updatedProfile = {
       ...userProfile,
       badges: selectedBadges,
-    }
-    setUserProfile(updatedProfile)
-    onProfileUpdate(updatedProfile)
-    console.log("Badge selection saved:", selectedBadges)
-  }
+    };
+    setUserProfile(updatedProfile);
+    onProfileUpdate(updatedProfile);
+    console.log("Badge selection saved:", selectedBadges);
+  };
 
   return (
     <div className="profile-management-page">
@@ -64,7 +66,7 @@ const ProfileManagementPage = ({
           >
             <img
               src={userProfile.profileImage || "/placeholder.svg"}
-               // alt 삭제
+              // alt 삭제
               className="profile-image-large"
             />
             <button
@@ -84,7 +86,7 @@ const ProfileManagementPage = ({
             {userProfile.badges.map((badge, index) => (
               <span key={index} className="profile-badge">
                 {badge}
-                {index < userProfile.badges.length - 1 }
+                {index < userProfile.badges.length - 1}
               </span>
             ))}
           </div>
@@ -131,7 +133,10 @@ const ProfileManagementPage = ({
               현재 보유 중인 뱃지 목록
             </h2>
             {/* badgemodal추가 */}
-            <button className="edit-button text-white bg-yellow-600" onClick={() => setIsBadgeEditModalOpen(true)}>
+            <button
+              className="edit-button text-white bg-yellow-600"
+              onClick={() => setIsBadgeEditModalOpen(true)}
+            >
               편집
             </button>
           </div>

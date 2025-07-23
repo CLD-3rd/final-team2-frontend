@@ -1,12 +1,11 @@
 "use client";
 
 import FeedPage from "@/features/feed";
-import PlannedCompanionPage from "@/pages/PlannedCompanionPage";
-import LocalCompanionPage from "@/pages/LocalCompanionPage";
-import ProfileManagementPage from "@/pages/ProfileManagementPage";
-import ScheduleManagementPage from "@/pages/ScheduleManagementPage";
-import ChatPage from "@/pages/ChatPage";
-import ErrorPage from "@/pages/ErrorPage";
+import { LocalCompanionPage } from "@/features/local-companion";
+import { PlannedCompanionPage } from "@/features/planned-companion";
+import { ProfileManagementPage, ScheduleManagementPage } from "@/features/user";
+import { ChatPage } from "@/features/chat";
+import { ErrorPage } from "@/shared";
 
 const MainContent = ({
   sidebarOpen,
