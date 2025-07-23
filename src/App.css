@@ -953,18 +953,11 @@ body {
   color: #333;
 }
 
-.region-like-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
 .card-region {
   font-size: 18px;
   font-weight: 500;
   color: #666;
-  margin: 0; /* ✅ 기존 margin-bottom 제거 */
+  margin-bottom: 10px;
 }
 
 /* ✅ 좋아요 버튼 스타일 */

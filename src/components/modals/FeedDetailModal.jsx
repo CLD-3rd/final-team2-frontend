@@ -373,16 +373,7 @@ const FeedDetailModal = ({ onClose, feedId, isLoggedIn, onFeedDelete }) => {
                   ) : (
                     <>
                       <p className="comment-text">{comment.content}</p>
-                      <div className="comment-actions">
-                        <button
-                          className={`like-button ${
-                            comment.isLiked ? "liked" : ""
-                          }`}
-                          onClick={() => handleCommentLike(comment.id)}
-                        >
-                          ❤️ {comment.likes}
-                        </button>
-                      </div>
+                      <div className="comment-actions"></div>
                     </>
                   )}
                 </div>

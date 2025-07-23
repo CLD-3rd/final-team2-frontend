@@ -49,21 +49,12 @@ const FeedCard = ({
         {/* ✅ 조회수 & 좋아요 오버레이 */}
         <div className="card-overlay-stats">
           <span className="views">👁 {views}</span>
-          <span className="likes">❤️ {likes}</span>
         </div>
       </div>
 
       <div className="card-content">
         <h3 className="card-title">{title}</h3>
-        <div className="region-like-row">
-          <p className="card-region">{getRegionLabel(region)}</p>
-          <button
-            className={`like-button ${isLiked ? "liked" : ""}`}
-            onClick={handleLikeClick}
-          >
-            {isLiked ? "❤️ 좋아요" : "🤍 좋아요"}
-          </button>
-        </div>
+        <p className="card-region">{getRegionLabel(region)}</p>
         <div className="card-meta">
           <span className="card-author">{author}</span>
           <span className="card-date">{date}</span>
