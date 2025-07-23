@@ -960,19 +960,6 @@ body {
   margin-bottom: 10px;
 }
 
-/* ✅ 좋아요 버튼 스타일 */
-.like-button {
-  background: none;
-  border: none;
-  font-size: 16px;
-  cursor: pointer;
-  color: #999;
-}
-
-.like-button.liked {
-  color: #e0245e;
-}
-
 .card-meta {
   display: flex;
   justify-content: space-between;
@@ -1442,28 +1429,6 @@ body {
 .comment-actions {
   display: flex;
   gap: 10px;
-}
-
-.like-button {
-  background: none;
-  border: none;
-  font-size: 12px;
-  cursor: pointer;
-  color: #666;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-}
-
-.like-button:hover {
-  background: #f0f0f0;
-}
-
-.like-button.liked {
-  color: #ff4444;
 }
 
 .comment-input-section {
