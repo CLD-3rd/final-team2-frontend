@@ -20,11 +20,11 @@ const FeedGrid = ({
 
   // newPosts와 합치는 로직 제거하고 feedData 직접 사용
   // const allFeedData = [...newPosts, ...initialFeedData] 이 부분을
-  const allFeedData = feedData;
+  const allFeedData = Array.isArray(feedData) ? feedData : [];
 
   // Filter logic
   const filteredData = allFeedData.filter((item) => {
-    if (filters.region && item.region !== filters.region) return false;
+    if (filters.location && item.location !== filters.location) return false;
     if (filters.author && !item.author.includes(filters.author)) return false;
     return true;
   });
@@ -52,7 +52,11 @@ const FeedGrid = ({
         {filteredData.map((item) => (
           <FeedCard
             key={item.id}
-            {...item}
+            title={item.title}
+            region={item.location}
+            author={`유저 ${item.userId}`}
+            date={item.createdAt}
+            images={[item.image]} // FeedCard expects images: [], even if one
             onClick={() => handleFeedClick(item)}
           />
         ))}

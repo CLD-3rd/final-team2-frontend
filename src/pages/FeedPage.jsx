@@ -20,11 +20,11 @@ const FeedPage = ({ onFeedCountChange, isLoggedIn, onFeedDelete }) => {
   };
 
   useEffect(() => {
-    const fetchFeeds = async () => {
+    const updateFeeds = async () => {
       try {
-        const data = await getFeeds(); // API 호출
-        setFeedData(data);
-        onFeedCountChange?.(data.length); // 개수 전달
+        const { feeds, pageInfo } = await getFeeds(); // ✅ 구조 분해
+        setFeedData(feeds); // ✅ 진짜 피드 배열만 저장
+        onFeedCountChange?.(feeds.length);
       } catch (error) {
         console.error("피드 데이터를 불러오는 데 실패했습니다.", error);
       } finally {
@@ -32,8 +32,8 @@ const FeedPage = ({ onFeedCountChange, isLoggedIn, onFeedDelete }) => {
       }
     };
 
-    fetchFeeds();
-  }, [onFeedCountChange]);
+    updateFeeds();
+  }, []);
 
   return (
     <>
