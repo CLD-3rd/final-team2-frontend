@@ -55,10 +55,8 @@ const MainContent = ({
       default:
         return (
           <FeedPage
-            onFeedCountChange={onFeedCountChange}
             isLoggedIn={isLoggedIn}
-            feedData={feedData}
-            onFeedDelete={onFeedDelete}
+            onLoginModalOpen={onLoginModalOpen}
           />
         );
     }
