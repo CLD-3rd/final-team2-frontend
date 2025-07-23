@@ -909,6 +909,7 @@ body {
   overflow: hidden;
   background: #f0f0f0;
   position: relative;
+  margin-bottom: 10px;
 }
 
 .image-count-badge {
