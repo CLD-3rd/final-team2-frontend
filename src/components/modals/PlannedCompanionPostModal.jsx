@@ -51,6 +51,8 @@ const PlannedCompanionPostModal = ({ onClose, onPostCreate }) => {
           contentLabel="여행 계획"
           includeBadge={false}
           includeDateRange={true}
+          includeContent={true}
+          includeImage={true}
         />
       </div>
     </div>

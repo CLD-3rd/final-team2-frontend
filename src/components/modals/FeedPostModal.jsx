@@ -51,6 +51,8 @@ const FeedPostModal = ({ onClose, onPostCreate }) => {
           contentLabel="내용"
           includeBadge={true}
           includeDateRange={false}
+          includeContent={true}
+          includeImage={true}
         />
       </div>
     </div>

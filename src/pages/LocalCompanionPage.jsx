@@ -19,7 +19,7 @@ const LocalCompanionPage = () => {
     {
       id: 1,
       title: "25년 제주 여행 가실 분 여자분들",
-      rating: 5,
+      rating: 4,
       author: "사용자A",
       profileImage: "/placeholder.svg?height=40&width=40",
       tags: ["느긋해요", "술 좋아해요", "의상차이에요"],
@@ -80,9 +80,12 @@ const LocalCompanionCard = ({ title, rating, author, profileImage, tags }) => {
 
         <div className="card-author-info">
           <img
-            src={profileImage || "/placeholder.svg"}
+            src={profileImage || "/images/default-user-profile.png"}
             alt={author}
-            className="author-profile-image"
+            className="profile-image"
+            onError={(e) => {
+              e.currentTarget.src = "/images/default-user-profile.png";
+            }}
           />
           <span className="author-name">{author}</span>
         </div>

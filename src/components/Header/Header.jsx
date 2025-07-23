@@ -18,9 +18,14 @@ const Header = ({ isLoggedIn, onLogin, onLogout, userProfile }) => {
         {isLoggedIn ? (
           <div className="user-menu">
             <img
-              src={userProfile?.profileImage || "/images/user-profile.jpg"}
+              src={
+                userProfile?.profileImage || "/images/default-user-profile.png"
+              }
               alt="프로필"
               className="profile-image"
+              onError={(e) => {
+                e.currentTarget.src = "/images/default-user-profile.png";
+              }}
             />
             <span>{userProfile?.username || "사용자님"}</span>
             <button onClick={onLogout} className="auth-button font-medium">
