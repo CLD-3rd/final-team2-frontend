@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import useLockBodyScroll from "@/hooks/useLockBodyScroll";
-import { getFeedDetail } from "@/api/feed"; // ✅ API 추가
+import { getFeedDetail } from "@/features/feed"; // ✅ API 추가
 import FallbackImage from "@/components/common/FallbackImage";
 import ProfileImage from "@/components/common/ProfileImage";
 

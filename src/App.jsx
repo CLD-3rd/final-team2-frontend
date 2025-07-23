@@ -4,7 +4,7 @@ import { useState } from "react";
 import Header from "@/components/Header/Header";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import MainContent from "@/pages/MainContent";
-import CreateFeedModal from "@/components/modals/FeedPostModal";
+import CreateFeedModal from "@/features/feed";
 import CreatePlannedModal from "@/components/modals/PlannedCompanionPostModal";
 import CreateLocalModal from "@/components/modals/LocalCompanionPostModal";
 import LoginModal from "@/components/modals/LoginModal";

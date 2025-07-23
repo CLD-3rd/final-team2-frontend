@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import FeedCard from "@/components/Feed/FeedCard";
-import FeedDetailModal from "@/components/modals/FeedDetailModal";
+import { FeedCard, FeedDetailModal } from "@/features/feed";
 
 const FeedGrid = ({
   filters,

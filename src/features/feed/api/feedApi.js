@@ -1,6 +1,6 @@
 // src/api/feed.js
-import axios from "./axiosInstance";
-import { parseFeedsResponse, parseFeedDetailResponse } from "@/dto/feedDto";
+import axios from "@/api/axiosInstance";
+import { parseFeedsResponse, parseFeedDetailResponse } from "@/features/feed";
 
 // ✅ feed 전체 조회
 export const getFeeds = async (page = 1, size = 10) => {

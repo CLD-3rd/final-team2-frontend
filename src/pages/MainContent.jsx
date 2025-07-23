@@ -1,6 +1,6 @@
 "use client";
 
-import FeedPage from "@/pages/FeedPage";
+import FeedPage from "@/features/feed";
 import PlannedCompanionPage from "@/pages/PlannedCompanionPage";
 import LocalCompanionPage from "@/pages/LocalCompanionPage";
 import ProfileManagementPage from "@/pages/ProfileManagementPage";

@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import FilterBar from "@/components/Feed/FilterBar";
-import FeedGrid from "@/components/Feed/FeedGrid";
-import { getFeeds } from "@/api/feed"; // API 함수 import
+import { FeedGrid, getFeeds } from "@/features/feed";
 
 const FeedPage = ({ onFeedCountChange, isLoggedIn, onFeedDelete }) => {
   const [filters, setFilters] = useState({

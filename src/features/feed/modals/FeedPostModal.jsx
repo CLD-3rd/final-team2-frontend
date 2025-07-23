@@ -1,7 +1,7 @@
 import { useState } from "react";
-import PostForm from "./PostForm";
+import PostForm from "@/components/modals/PostForm";
 import useLockBodyScroll from "@/hooks/useLockBodyScroll";
-import { createFeed } from "@/api/feed";
+import { createFeed } from "@/features/feed";
 
 const FeedPostModal = ({ onClose, onPostCreate }) => {
   const [formData, setFormData] = useState({
