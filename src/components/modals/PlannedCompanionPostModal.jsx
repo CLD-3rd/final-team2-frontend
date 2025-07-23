@@ -1,6 +1,6 @@
 import { useState } from "react";
 import PostForm from "./PostForm";
-import useLockBodyScroll from "@/hooks/useLockBodyScroll";
+import { useLockBodyScroll } from "@/shared";
 
 const PlannedCompanionPostModal = ({ onClose, onPostCreate }) => {
   const [formData, setFormData] = useState({

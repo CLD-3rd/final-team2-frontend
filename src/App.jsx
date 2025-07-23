@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Header from "@/components/Header/Header";
-import Sidebar from "@/components/Sidebar/Sidebar";
+import { Header, Sidebar } from "@/shared";
 import MainContent from "@/pages/MainContent";
 import CreateFeedModal from "@/features/feed";
 import CreatePlannedModal from "@/components/modals/PlannedCompanionPostModal";

@@ -1,10 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import useLockBodyScroll from "@/hooks/useLockBodyScroll";
-import { getFeedDetail } from "@/features/feed"; // ✅ API 추가
-import FallbackImage from "@/components/common/FallbackImage";
-import ProfileImage from "@/components/common/ProfileImage";
+import { useLockBodyScroll, FallbackImage, ProfileImage } from "@/shared";
+import { getFeedDetail } from "@/features/feed";
 
 const FeedDetailModal = ({ onClose, feedId, isLoggedIn, onFeedDelete }) => {
   useLockBodyScroll();

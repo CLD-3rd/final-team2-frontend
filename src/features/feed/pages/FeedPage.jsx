@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import FilterBar from "@/components/Feed/FilterBar";
+import { Filterbar } from "@/shared";
 import { FeedGrid, getFeeds } from "@/features/feed";
 
 const FeedPage = ({ onFeedCountChange, isLoggedIn, onFeedDelete }) => {
@@ -36,7 +36,7 @@ const FeedPage = ({ onFeedCountChange, isLoggedIn, onFeedDelete }) => {
 
   return (
     <>
-      <FilterBar filters={filters} onFilterChange={handleFilterChange} />
+      <Filterbar filters={filters} onFilterChange={handleFilterChange} />
       {!loading && feedData.length === 0 ? (
         <div className="empty-feed-message">
           아직 작성된 피드가 없습니다. 🥲

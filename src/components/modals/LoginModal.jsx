@@ -1,5 +1,5 @@
 "use client";
-import useLockBodyScroll from "@/hooks/useLockBodyScroll";
+import { useLockBodyScroll } from "@/shared";
 
 const LoginModal = ({ onClose, onLogin }) => {
   const handleGoogleLogin = () => {

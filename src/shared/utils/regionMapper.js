@@ -1,4 +1,4 @@
-import regionOptions from "@/constants/regionOptions";
+import { regionOptions } from "@/shared";
 
 export const getRegionLabel = (value) => {
   const region = regionOptions.find((r) => r.value === value);

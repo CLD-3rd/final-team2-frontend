@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import useLockBodyScroll from "@/hooks/useLockBodyScroll";
+import { useLockBodyScroll } from "@/shared";
 
 const TravelTagEditModal = ({ onClose, userProfile, onSave }) => {
   useLockBodyScroll();

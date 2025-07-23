@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import FilterBar from "@/components/Feed/FilterBar";
+import { Filterbar } from "@/shared";
 
 const PhotoCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
   const [filters, setFilters] = useState({
@@ -69,7 +69,7 @@ const PhotoCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
 
   return (
     <div className="photo-companion-page">
-      <FilterBar filters={filters} onFilterChange={handleFilterChange} />
+      <Filterbar filters={filters} onFilterChange={handleFilterChange} />
       <div className="companion-grid">
         {companionPosts.map((post) => (
           <CompanionCard

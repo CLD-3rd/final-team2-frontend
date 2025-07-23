@@ -5,7 +5,7 @@ import { DateRange } from "react-date-range";
 import { addDays, format } from "date-fns";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
-import regionOptions from "@/constants/regionOptions";
+import { regionOptions } from "@/shared";
 
 const PostForm = ({
   formData,

@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import FallbackImage from "@/components/common/FallbackImage";
-import { getRegionLabel } from "@/utils/regionMapper";
+import { FallbackImage, getRegionLabel } from "@/shared";
 
 const FeedCard = ({
   title,

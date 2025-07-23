@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import FilterBar from "@/components/Feed/FilterBar";
+import { Filterbar } from "@/shared";
 
 const LocalCompanionPage = () => {
   const [filters, setFilters] = useState({
@@ -52,7 +52,7 @@ const LocalCompanionPage = () => {
 
   return (
     <div className="local-companion-page">
-      <FilterBar filters={filters} onFilterChange={handleFilterChange} />
+      <Filterbar filters={filters} onFilterChange={handleFilterChange} />
       <div className="local-companion-grid">
         {localCompanionPosts.map((post) => (
           <LocalCompanionCard key={post.id} {...post} />
