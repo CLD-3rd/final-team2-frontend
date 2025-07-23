@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import FallbackImage from "@/components/common/FallbackImage";
+import { getRegionLabel } from "@/utils/regionMapper";
+
 const FeedCard = ({
   title,
   region,
@@ -31,7 +34,7 @@ const FeedCard = ({
   return (
     <div className="feed-card" onClick={onClick}>
       <div className="card-image">
-        <img
+        <FallbackImage
           src={displayImage}
           alt={title}
           onError={handleImageError}
@@ -53,7 +56,7 @@ const FeedCard = ({
       <div className="card-content">
         <h3 className="card-title">{title}</h3>
         <div className="region-like-row">
-          <p className="card-region">{region}</p>
+          <p className="card-region">{getRegionLabel(region)}</p>
           <button
             className={`like-button ${isLiked ? "liked" : ""}`}
             onClick={handleLikeClick}
