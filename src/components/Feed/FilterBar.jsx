@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 
 const FilterBar = ({ filters, onFilterChange }) => {
-  const [searchCriteria, setSearchCriteria] = useState("title"); // 'author', 'title', 'region'
+  const [searchCriteria, setSearchCriteria] = useState("title");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  const [activeSort, setActiveSort] = useState("recent");
 
   const dropdownRef = useRef(null);
 
@@ -16,9 +17,9 @@ const FilterBar = ({ filters, onFilterChange }) => {
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("click", handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("click", handleClickOutside);
     };
   }, []);
 
@@ -34,8 +35,12 @@ const FilterBar = ({ filters, onFilterChange }) => {
   };
 
   const handleSearch = () => {
-    // Handle search based on selected criteria
-    console.log(`Searching for "${searchValue}" in ${searchCriteria}`);
+    console.log(`🔍 검색 실행: "${searchValue}" in ${searchCriteria}`);
+  };
+
+  const handleSortChange = (sortKey) => {
+    setActiveSort(sortKey);
+    if (onSortChange) onSortChange(sortKey);
   };
 
   const getCurrentLabel = () => {
@@ -47,40 +52,44 @@ const FilterBar = ({ filters, onFilterChange }) => {
 
   return (
     <div className="filter-bar">
-      <div className="filter-left">
-        {/* Empty for now, can add other filters later */}
-      </div>
+      <div className="filter-left"></div>
 
       <div className="filter-right">
         <div className="search-container">
           <div className="search-criteria-dropdown" ref={dropdownRef}>
             <button
+              type="button"
               className="search-criteria-button"
               onClick={(e) => {
                 e.preventDefault();
-                setIsDropdownOpen(!isDropdownOpen);
+                setIsDropdownOpen((prev) => {
+                  const next = !prev;
+                  return next;
+                });
               }}
             >
               {getCurrentLabel()} ▼
             </button>
 
             {isDropdownOpen && (
-              <div className="search-criteria-menu">
-                {searchOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    className={`search-criteria-item ${
-                      searchCriteria === option.value ? "active" : ""
-                    }`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleSearchCriteriaChange(option.value);
-                    }}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
+              <>
+                <div className="search-criteria-menu">
+                  {searchOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      className={`search-criteria-item ${
+                        searchCriteria === option.value ? "active" : ""
+                      }`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleSearchCriteriaChange(option.value);
+                      }}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </>
             )}
           </div>
 
@@ -102,8 +111,20 @@ const FilterBar = ({ filters, onFilterChange }) => {
         </div>
 
         <div className="sort-options">
-          <button className="sort-button">최근 등록 순</button>
-          <button className="sort-button">추천 순</button>
+          <button
+            className={`sort-button ${activeSort === "recent" ? "active" : ""}`}
+            onClick={() => handleSortChange("recent")}
+          >
+            최근 등록 순
+          </button>
+          <button
+            className={`sort-button ${
+              activeSort === "recommend" ? "active" : ""
+            }`}
+            onClick={() => handleSortChange("recommend")}
+          >
+            추천 순
+          </button>
         </div>
       </div>
     </div>

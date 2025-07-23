@@ -3,7 +3,7 @@
 import { useState } from "react";
 import React from "react";
 import FeedCard from "@/components/Feed/FeedCard";
-import FeedDetailModal from "@/components/Feed/FeedDetailModal";
+import FeedDetailModal from "@/components/modals/FeedDetailModal";
 
 const FeedGrid = ({
   filters,

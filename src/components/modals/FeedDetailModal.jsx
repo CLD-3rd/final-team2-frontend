@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import useLockBodyScroll from "@/hooks/useLockBodyScroll";
 
 const FeedDetailModal = ({ onClose, feedData, isLoggedIn, onFeedDelete }) => {
+  useLockBodyScroll();
   const [newComment, setNewComment] = useState("");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [editingCommentId, setEditingCommentId] = useState(null);

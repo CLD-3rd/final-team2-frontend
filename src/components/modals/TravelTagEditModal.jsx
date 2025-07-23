@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import useLockBodyScroll from "@/hooks/useLockBodyScroll";
 
 const TravelTagEditModal = ({ onClose, userProfile, onSave }) => {
+  useLockBodyScroll();
   // 모든 성향 옵션들
   const personalityOptions = [
     { value: "새로운 사람과도 금방 친해져요", icon: "💛" },

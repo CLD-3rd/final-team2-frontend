@@ -1,12 +1,15 @@
-"use client"
+"use client";
+import useLockBodyScroll from "@/hooks/useLockBodyScroll";
 
 const LoginModal = ({ onClose, onLogin }) => {
   const handleGoogleLogin = () => {
     // Handle Google login logic here
-    console.log("Google login clicked")
+    console.log("Google login clicked");
     // For now, just simulate login
-    onLogin()
-  }
+    onLogin();
+  };
+
+  useLockBodyScroll();
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -54,7 +57,7 @@ const LoginModal = ({ onClose, onLogin }) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default LoginModal
+export default LoginModal;
