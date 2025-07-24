@@ -14,6 +14,7 @@ export { default as useLockBodyScroll } from "./hooks/useLockBodyScroll";
 
 // ✅ Utils
 export * from "./utils/regionMapper";
+export * from "./utils/formatTime";
 
 // ✅ Constants
 export { default as regionOptions } from "./constants/regionOptions";
