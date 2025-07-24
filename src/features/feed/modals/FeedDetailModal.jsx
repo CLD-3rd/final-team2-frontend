@@ -2,7 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { useLockBodyScroll, FallbackImage, ProfileImage } from "@/shared";
-import { getFeedDetail, deleteFeed, UpdateFeedModal } from "@/features/feed";
+import {
+  getFeedDetail,
+  deleteFeed,
+  createComment,
+  updateComment,
+  deleteComment,
+  UpdateFeedModal,
+} from "@/features/feed";
 
 const FeedDetailModal = ({
   onClose,
@@ -17,47 +24,20 @@ const FeedDetailModal = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingCommentText, setEditingCommentText] = useState("");
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [comments, setComments] = useState([
-    {
-      id: 1,
-      author: "여행러버",
-      content: "정말 멋진 곳이네요! 저도 가보고 싶어요.",
-      timestamp: "2시간 전",
-      likes: 3,
-      isLiked: false,
-      isMyComment: false,
-    },
-    {
-      id: 2,
-      author: "사진작가",
-      content: "사진이 정말 잘 나왔네요. 어떤 카메라로 찍으셨나요?",
-      timestamp: "1시간 전",
-      likes: 1,
-      isLiked: true,
-      isMyComment: false,
-    },
-    {
-      id: 3,
-      author: "사용자님",
-      content: "다음에 같이 가요!",
-      timestamp: "30분 전",
-      likes: 0,
-      isLiked: false,
-      isMyComment: true, // 내 댓글로 표시
-    },
-  ]);
 
   useEffect(() => {
     const fetchFeedDetail = async () => {
       try {
         const data = await getFeedDetail(feedId);
         setFeedData(data);
+        setComments(data.comments || []); // ✅ 댓글 상태에 세팅
       } catch (err) {
         console.error("피드 정보를 불러오지 못했습니다.", err);
         setError("피드 정보를 불러올 수 없습니다.");
@@ -124,9 +104,6 @@ const FeedDetailModal = ({
     }
   };
 
-  // // ✅ 댓글은 feedData에서 불러오기
-  // const [comments, setComments] = useState(feedData.comments || []);
-
   const images = feedData.images || ["/images/feed-sample.jpg"];
   const hasMultipleImages = images.length > 1;
   // 여러 이미지 처리 핸들러
@@ -153,44 +130,56 @@ const FeedDetailModal = ({
   };
 
   // 댓글 관련 핸들러
-  const handleCommentSubmit = (e) => {
+  // 댓글 등록 시 UI 갱신
+  const handleCommentSubmit = async (e) => {
     e.preventDefault();
-    if (newComment.trim()) {
-      const comment = {
-        id: comments.length + 1,
-        author: "사용자님",
-        content: newComment,
-        timestamp: "방금 전",
-        likes: 0,
-        isLiked: false,
-        isMyComment: true,
-      };
-      setComments([...comments, comment]);
+    if (!newComment.trim()) return;
+
+    try {
+      const newCommentData = await createComment(feedId, newComment);
+      setComments((prev) => [
+        ...prev,
+        {
+          commentId: newCommentData.id,
+          author: newCommentData.author,
+          content: newCommentData.content,
+          createdAt: newCommentData.createdAt,
+          isMyComment: true,
+        },
+      ]);
       setNewComment("");
+    } catch (error) {
+      alert("댓글 등록에 실패했습니다.");
     }
   };
 
+  //댓글 수정
   const handleEditComment = (commentId, currentContent) => {
     setEditingCommentId(commentId);
     setEditingCommentText(currentContent);
   };
 
-  const handleSaveEdit = (commentId) => {
-    if (editingCommentText.trim()) {
-      setComments(
-        comments.map((comment) =>
-          comment.id === commentId
-            ? {
-                ...comment,
-                content: editingCommentText,
-                timestamp: "방금 전 (수정됨)",
-              }
+  const handleSaveEdit = async (commentId) => {
+    if (!editingCommentText.trim()) return;
+
+    try {
+      // ✅ API 호출
+      await updateComment(feedId, commentId, editingCommentText);
+
+      // ✅ UI 갱신
+      setComments((prev) =>
+        prev.map((comment) =>
+          comment.commentId === commentId
+            ? { ...comment, content: editingCommentText }
             : comment
         )
       );
+
+      setEditingCommentId(null);
+      setEditingCommentText("");
+    } catch (error) {
+      alert("댓글 수정에 실패했습니다.");
     }
-    setEditingCommentId(null);
-    setEditingCommentText("");
   };
 
   const handleCancelEdit = () => {
@@ -306,15 +295,15 @@ const FeedDetailModal = ({
         {/* 댓글 섹션 */}
         <div className="comments-section" onClick={handleModalClick}>
           <div className="comments-header">
-            <h3>댓글 {feedData.comments.length}개</h3>
+            <h3>댓글 {comments.length}개</h3>
           </div>
 
           <div className="comments-list">
-            {feedData.comments.map((comment) => (
+            {comments.map((comment) => (
               <div key={comment.id} className="comment-item">
                 <div className="comment-avatar">
                   <ProfileImage
-                    src="/images/user-profile.jpg"
+                    src={comment.profileImage}
                     alt={comment.author}
                   />
                 </div>
