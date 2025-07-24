@@ -2,10 +2,17 @@
 
 import { useState, useEffect } from "react";
 import { useLockBodyScroll, FallbackImage, ProfileImage } from "@/shared";
-import { getFeedDetail } from "@/features/feed";
+import { getFeedDetail, UpdateFeedModal } from "@/features/feed";
 
-const FeedDetailModal = ({ onClose, feedId, isLoggedIn, onFeedDelete }) => {
+const FeedDetailModal = ({
+  onClose,
+  feedId,
+  isLoggedIn,
+  onFeedDelete,
+  onUpdateSuccess, // ✅ FeedPage에서 갱신할 콜백 추가
+}) => {
   useLockBodyScroll();
+  console.log("[FeedDetail] login : ", isLoggedIn);
   const [feedData, setFeedData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,6 +22,7 @@ const FeedDetailModal = ({ onClose, feedId, isLoggedIn, onFeedDelete }) => {
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingCommentText, setEditingCommentText] = useState("");
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [comments, setComments] = useState([
     {
       id: 1,
@@ -84,9 +92,6 @@ const FeedDetailModal = ({ onClose, feedId, isLoggedIn, onFeedDelete }) => {
 
   // // ✅ 댓글은 feedData에서 불러오기
   // const [comments, setComments] = useState(feedData.comments || []);
-
-  const images = feedData.images || ["/images/feed-sample.jpg"];
-  const hasMultipleImages = images.length > 1;
 
   const handleCommentSubmit = (e) => {
     e.preventDefault();
@@ -175,6 +180,9 @@ const FeedDetailModal = ({ onClose, feedId, isLoggedIn, onFeedDelete }) => {
     }
   };
 
+  const images = feedData.images || ["/images/feed-sample.jpg"];
+  const hasMultipleImages = images.length > 1;
+
   const handleMoreMenuClick = (e) => {
     e.stopPropagation();
     setIsMoreMenuOpen(!isMoreMenuOpen);
@@ -183,7 +191,7 @@ const FeedDetailModal = ({ onClose, feedId, isLoggedIn, onFeedDelete }) => {
   const handleEditPost = () => {
     console.log("Edit post:", feedData.id);
     setIsMoreMenuOpen(false);
-    // 여기에 수정 로직 추가
+    setIsEditModalOpen(true); // FeedPostModal 열기
   };
 
   const handleDeletePost = () => {
@@ -397,6 +405,18 @@ const FeedDetailModal = ({ onClose, feedId, isLoggedIn, onFeedDelete }) => {
             </div>
           </form>
         </div>
+        {/* ✅ Feed 수정 모달 */}
+        {isEditModalOpen && (
+          <UpdateFeedModal
+            onClose={() => setIsEditModalOpen(false)}
+            mode="edit"
+            initialData={feedData}
+            onSuccess={() => {
+              onUpdateSuccess?.(); // ✅ FeedPage 갱신
+              onClose(); // 상세 모달 닫기
+            }}
+          />
+        )}
       </div>
     </div>
   );

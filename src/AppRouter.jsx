@@ -1,6 +1,6 @@
 "use client";
 
-import FeedPage from "@/features/feed";
+import { FeedPage } from "@/features/feed";
 import { LocalCompanionPage } from "@/features/local-companion";
 import { PlannedCompanionPage } from "@/features/planned-companion";
 import { ProfileManagementPage, ScheduleManagementPage } from "@/features/user";
@@ -16,6 +16,7 @@ const MainContent = ({
   onProfileUpdate,
   onLoginModalOpen,
 }) => {
+  console.log("[AppRouter] login : ", isLoggedIn);
   const renderPage = () => {
     switch (currentPage) {
       case "planned-companion":

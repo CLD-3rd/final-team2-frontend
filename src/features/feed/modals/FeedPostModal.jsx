@@ -1,24 +1,39 @@
-import { useState } from "react";
-import { PostForm } from "@/shared";
-import { useLockBodyScroll } from "@/shared";
-import { createFeed } from "@/features/feed";
+import { useState, useEffect } from "react";
+import { PostForm, useLockBodyScroll } from "@/shared";
+import { createFeed, updateFeed } from "@/features/feed";
 
-const FeedPostModal = ({ onClose, onRefresh }) => {
+const FeedPostModal = ({
+  onClose,
+  onSuccess, // ✅ 성공 시 콜백 추가
+  mode = "create",
+  initialData = null,
+}) => {
   const [formData, setFormData] = useState({
-    title: "",
-    content: "",
-    region: "",
+    title: initialData?.title || "",
+    content: initialData?.content || "",
+    region: initialData?.region || "",
     image: null,
-    badgeRequest: false,
+    badgeRequest: initialData?.badgeRequest || false,
   });
 
   useLockBodyScroll();
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        title: initialData.title || "",
+        content: initialData.content || "",
+        region: initialData.region || "",
+        image: null,
+        badgeRequest: initialData.badgeRequest || false,
+      });
+    }
+  }, [initialData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      // ✅ FormData 생성
       const formPayload = new FormData();
       formPayload.append("title", formData.title);
       formPayload.append("content", formData.content);
@@ -28,15 +43,22 @@ const FeedPostModal = ({ onClose, onRefresh }) => {
         formPayload.append("images", formData.image);
       }
 
-      // ✅ API 호출
-      const response = await createFeed(formPayload);
+      if (mode === "edit" && initialData?.id) {
+        await updateFeed(initialData.id, formPayload);
+      } else {
+        await createFeed(formPayload);
+      }
 
-      // ✅ 성공 → 모달 닫기 + 목록 새로고침
+      // ✅ 성공 시 콜백 실행 (FeedPage에서 reloadTrigger 증가)
+      onSuccess?.();
       onClose();
-      onRefresh?.();
     } catch (error) {
-      console.error("피드 작성 실패", error);
-      alert("피드 등록에 실패했습니다. 다시 시도해주세요.");
+      console.error(error);
+      alert(
+        mode === "edit"
+          ? "피드 수정에 실패했습니다."
+          : "피드 등록에 실패했습니다."
+      );
     }
   };
 
@@ -44,7 +66,7 @@ const FeedPostModal = ({ onClose, onRefresh }) => {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>새 피드 작성</h2>
+          <h2>{mode === "edit" ? "피드 수정" : "새 피드 작성"}</h2>
           <button className="modal-close" onClick={onClose}>
             ×
           </button>

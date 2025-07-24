@@ -121,11 +121,15 @@ export const getFeedDetail = async (feedId) => {
 // ✅ feed 등록
 export const createFeed = async (data) => {
   try {
-    const response = await axiosInstance.post("/api/feed", data);
+    const response = await axiosInstance.post("/api/feed", data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
 
     // ✅ 응답 검증
     if (response.status === 200 || response.status === 201) {
-      return res.data;
+      return response.data;
     } else {
       throw new Error(`피드 등록 실패: ${response.status}`);
     }
@@ -141,8 +145,25 @@ export const createFeed = async (data) => {
 
 // ✅ feed 수정
 export const updateFeed = async (feedId, data) => {
-  const response = await axiosInstance.patch(`/api/feed/${feedId}`, data);
-  return response.data;
+  try {
+    const response = await axiosInstance.patch(`/api/feed/${feedId}`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    if (response.status === 200 || response.status === 201) {
+      return response.data;
+    } else {
+      throw new Error(`피드 수정 실패: ${response.status}`);
+    }
+  } catch (error) {
+    console.error("피드 수정 실패", error);
+
+    throw new Error(
+      error.response?.data?.message || "피드 수정 중 오류가 발생했습니다."
+    );
+  }
 };
 
 // ✅ feed 삭제
