@@ -102,6 +102,7 @@ const FeedDetailModal = ({
       setIsMoreMenuOpen(false);
     }
   };
+
   const handleEditPost = () => {
     console.log("Edit post:", feedData.id);
     setIsMoreMenuOpen(false);
@@ -305,11 +306,11 @@ const FeedDetailModal = ({
         {/* 댓글 섹션 */}
         <div className="comments-section" onClick={handleModalClick}>
           <div className="comments-header">
-            <h3>댓글 {comments.length}개</h3>
+            <h3>댓글 {feedData.comments.length}개</h3>
           </div>
 
           <div className="comments-list">
-            {comments.map((comment) => (
+            {feedData.comments.map((comment) => (
               <div key={comment.id} className="comment-item">
                 <div className="comment-avatar">
                   <ProfileImage

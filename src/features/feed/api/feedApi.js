@@ -75,40 +75,54 @@ export const getFeedDetail = async (feedId) => {
 
     // ✅ 테스트용 Mock 데이터
     const testFeedDetail = {
-      feed_id: 1,
-      user_id: 45,
+      feedId: 1,
+      userId: 45,
       title: "부산 여행기",
       content: "부산의 아름다운 바다와 맛집을 소개합니다.",
-      image_url: [
+      imageUrls: [
         "https://cdn.example.com/feed/123/img1.jpg",
         "https://cdn.example.com/feed/123/img2.jpg",
       ],
       location: "BUSAN",
-      badge_request: "N",
       view_count: 254,
-      like_count: 88,
-      created_at: "2025-07-15",
-      modified_at: "2025-07-16",
+      created_at: "2025-07-24T12:30:00Z",
       author: {
         nickname: "여행러버",
-        profile_image: "https://cdn.example.com/users/45/profile.jpg",
+        profileImage: "https://cdn.example.com/users/45/profile.jpg",
       },
       comments: [
         {
-          comment_id: 1,
-          user_id: 201,
-          nickname: "댓글유저1",
-          content: "부산 진짜 최고죠!",
-          created_at: "2025-07-15T13:45:00",
-          modified_at: "2025-07-15T13:45:00",
+          commentId: 1,
+          author: {
+            id: 101,
+            nickname: "버",
+            profileImage: "/images/user-1.jpg",
+          },
+          content: "정말 멋진 이네요! 저도 가보고 싶어요.",
+          createdAt: "2025-07-23T12:30:00Z",
+          isMyComment: false,
         },
         {
-          comment_id: 2,
-          user_id: 202,
-          nickname: "댓글유저2",
-          content: "사진 너무 예뻐요!",
-          created_at: "2025-07-15T14:10:00",
-          modified_at: "",
+          commentId: 2,
+          author: {
+            id: 102,
+            nickname: "사작가",
+            profileImage: "/images/user-2.jpg",
+          },
+          content: "사진이 말 잘 나왔네요. 어떤 카메라로 찍으셨나요?",
+          createdAt: "2025-07-24T13:00:00Z",
+          isMyComment: false,
+        },
+        {
+          commentId: 3,
+          author: {
+            id: 103,
+            nickname: "용자님",
+            profileImage: "/images/user-profile.jpg",
+          },
+          content: "다음에 같가요!",
+          createdAt: "2025-07-24T13:30:00Z",
+          isMyComment: true,
         },
       ],
     };
