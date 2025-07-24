@@ -2,10 +2,12 @@
 import { axiosInstance } from "@/shared";
 import { parseFeedsResponse, parseFeedDetailResponse } from "@/features/feed";
 
+const BASE_URL = "/api/feed";
+
 // ✅ feed 전체 조회
 export const getFeeds = async (filters = ({}, (page = 1)), size = 10) => {
   try {
-    const { data } = await axiosInstance.get(`/api/feed`, {
+    const { data } = await axiosInstance.get(BASE_URL, {
       params: {
         page,
         size,
@@ -70,7 +72,7 @@ export const getFeeds = async (filters = ({}, (page = 1)), size = 10) => {
 // ✅ feed 상세 조회
 export const getFeedDetail = async (feedId) => {
   try {
-    const { data } = await axiosInstance.get(`/api/feed/${feedId}`);
+    const { data } = await axiosInstance.get(`${BASE_URL}/${feedId}`);
     return parseFeedDetailResponse(data);
   } catch (error) {
     const message =
@@ -141,7 +143,7 @@ export const getFeedDetail = async (feedId) => {
 // ✅ feed 등록
 export const createFeed = async (payload) => {
   try {
-    const { data } = await axiosInstance.post("/api/feed", payload, {
+    const { data } = await axiosInstance.post(BASE_URL, payload, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -158,11 +160,15 @@ export const createFeed = async (payload) => {
 // ✅ feed 수정
 export const updateFeed = async (feedId, payload) => {
   try {
-    const { data } = await axiosInstance.patch(`/api/feed/${feedId}`, payload, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    const { data } = await axiosInstance.patch(
+      `${BASE_URL}/${feedId}`,
+      payload,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
     return data;
   } catch (error) {
     const message =
@@ -175,7 +181,7 @@ export const updateFeed = async (feedId, payload) => {
 // ✅ feed 삭제
 export const deleteFeed = async (feedId) => {
   try {
-    const { data } = await axiosInstance.delete(`/api/feed/${feedId}`);
+    const { data } = await axiosInstance.delete(`${BASE_URL}/${feedId}`);
     return data;
   } catch (error) {
     const message =
@@ -189,7 +195,7 @@ export const deleteFeed = async (feedId) => {
 export const createComment = async (feedId, payload) => {
   try {
     const { data } = await axiosInstance.post(
-      `/api/feed/${feedId}/comments`,
+      `${BASE_URL}/${feedId}/comments`,
       payload
     );
     return data;
@@ -205,7 +211,7 @@ export const createComment = async (feedId, payload) => {
 export const updateComment = async (feedId, commentId, payload) => {
   try {
     const { data } = await axiosInstance.patch(
-      `/api/feed/${feedId}/comments/${commentId}`,
+      `${BASE_URL}/${feedId}/comments/${commentId}`,
       payload
     );
     return data;
@@ -221,7 +227,7 @@ export const updateComment = async (feedId, commentId, payload) => {
 export const deleteComment = async (feedId, commentId) => {
   try {
     const { data } = await axiosInstance.delete(
-      `/api/feed/${feedId}/comments/${commentId}`
+      `${BASE_URL}/${feedId}/comments/${commentId}`
     );
     return data;
   } catch (error) {

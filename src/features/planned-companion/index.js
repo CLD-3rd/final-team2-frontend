@@ -1,3 +1,5 @@
+export * from "./api/plannedApi";
+
 export { default as PlannedCompanionPage } from "/src/features/planned-companion/pages/PlannedCompanionPage";
 
 export { default as PlannedCompanionCard } from "/src/features/planned-companion/components/PlannedCompanionCard";
