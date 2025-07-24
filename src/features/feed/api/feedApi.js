@@ -135,34 +135,26 @@ export const getFeedDetail = async (feedId) => {
 };
 
 // ✅ feed 등록
-export const createFeed = async (data) => {
+export const createFeed = async (payload) => {
   try {
-    const response = await axiosInstance.post("/api/feed", data, {
+    const { data } = await axiosInstance.post("/api/feed", payload, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
     });
-
-    // ✅ 응답 검증
-    if (response.status === 200 || response.status === 201) {
-      return response.data;
-    } else {
-      throw new Error(`피드 등록 실패: ${response.status}`);
-    }
+    return data;
   } catch (error) {
-    console.error("피드 등록 실패:", error);
-
-    // ✅ 사용자에게 보여줄 메시지를 위해 에러 반환
-    throw new Error(
-      error.response?.data?.message || "피드 등록 중 오류가 발생했습니다."
-    );
+    const message =
+      error.response?.data?.message || "피드 등록 중 오류가 발생했습니다.";
+    console.error("피드 등록 실패:", message);
+    throw new Error(message);
   }
 };
 
 // ✅ feed 수정
-export const updateFeed = async (feedId, data) => {
+export const updateFeed = async (feedId, payload) => {
   try {
-    const { data } = await axiosInstance.patch(`/api/feed/${feedId}`, data, {
+    const { data } = await axiosInstance.patch(`/api/feed/${feedId}`, payload, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -190,27 +182,48 @@ export const deleteFeed = async (feedId) => {
 };
 
 // ✅ 댓글 등록
-export const createComment = async (feedId, data) => {
-  const response = await axiosInstance.post(
-    `/api/feed/${feedId}/comments`,
-    data
-  );
-  return response.data;
+export const createComment = async (feedId, payload) => {
+  try {
+    const { data } = await axiosInstance.post(
+      `/api/feed/${feedId}/comments`,
+      payload
+    );
+    return data;
+  } catch (error) {
+    const message =
+      error.response?.data?.message || "댓글 등록 중 오류가 발생했습니다.";
+    console.error("댓글 등록 실패:", message);
+    throw new Error(message);
+  }
 };
 
 // ✅ 댓글 수정
-export const updateComment = async (feedId, commentId, data) => {
-  const response = await axiosInstance.patch(
-    `/api/feed/${feedId}/comments/${commentId}`,
-    data
-  );
-  return response.data;
+export const updateComment = async (feedId, commentId, payload) => {
+  try {
+    const { data } = await axiosInstance.patch(
+      `/api/feed/${feedId}/comments/${commentId}`,
+      payload
+    );
+    return data;
+  } catch (error) {
+    const message =
+      error.response?.data?.message || "댓글 수정 중 오류가 발생했습니다.";
+    console.error("댓글 수정 실패:", message);
+    throw new Error(message);
+  }
 };
 
 // ✅ 댓글 삭제
 export const deleteComment = async (feedId, commentId) => {
-  const response = await axiosInstance.delete(
-    `/api/feed/${feedId}/comments/${commentId}`
-  );
-  return response.data;
+  try {
+    const { data } = await axiosInstance.delete(
+      `/api/feed/${feedId}/comments/${commentId}`
+    );
+    return data;
+  } catch (error) {
+    const message =
+      error.response?.data?.message || "댓글 삭제 중 오류가 발생했습니다.";
+    console.error("댓글 삭제 실패:", message);
+    throw new Error(message);
+  }
 };
