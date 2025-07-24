@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { DateRange } from "react-date-range";
-import { addDays, format } from "date-fns";
+import { format } from "date-fns";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 import { regionOptions } from "@/shared";
@@ -10,6 +10,8 @@ import { regionOptions } from "@/shared";
 const PostForm = ({
   formData,
   setFormData,
+  dateRange,
+  setDateRange,
   onSubmit,
   onClose,
   titleLabel,
@@ -19,15 +21,6 @@ const PostForm = ({
   includeContent,
   includeImage,
 }) => {
-  // ✅ 컴포넌트 내부로 이동
-  const [dateRange, setDateRange] = useState([
-    {
-      startDate: new Date(),
-      endDate: addDays(new Date(), 1),
-      key: "selection",
-    },
-  ]);
-
   useEffect(() => {
     if (includeDateRange) {
       const formatted = `${format(dateRange[0].startDate, "yy.MM.dd")}~${format(
@@ -37,6 +30,8 @@ const PostForm = ({
       setFormData((prev) => ({
         ...prev,
         dateRange: formatted,
+        startTime: dateRange[0].startDate.toISOString().split("T")[0],
+        endTime: dateRange[0].endDate.toISOString().split("T")[0],
       }));
     }
   }, [dateRange, includeDateRange, setFormData]);

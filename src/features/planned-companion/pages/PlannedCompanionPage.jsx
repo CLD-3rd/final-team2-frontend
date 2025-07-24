@@ -6,6 +6,7 @@ import {
   PlannedCompanionCard,
   CreatePlannedModal,
   getPlannedCompanions,
+  UpdatePlannedModal,
 } from "@/features/planned-companion";
 import toast from "react-hot-toast";
 
@@ -17,12 +18,26 @@ const PlannedCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
   });
   const [sort, setSort] = useState("recent"); // ✅ 정렬 상태
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
   const [posts, setPosts] = useState([]); // ✅ 서버 데이터 저장
   const [loading, setLoading] = useState(true);
 
   // ✅ 모달 열기/닫기
   const openCreateModal = () => setIsCreateModalOpen(true);
   const closeCreateModal = () => setIsCreateModalOpen(false);
+
+  const handleEditRequest = (postData) => {
+    setSelectedPost(postData);
+    console.log(postData);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditSuccess = () => {
+    fetchPosts();
+    setIsEditModalOpen(false);
+    setSelectedPost(null);
+  };
 
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
@@ -33,7 +48,7 @@ const PlannedCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
   };
 
   // ✅ API 호출 (조회)
-  const fetchPlannedCompanionPosts = async () => {
+  const fetchPosts = async () => {
     setLoading(true);
     try {
       const { posts } = await getPlannedCompanions(filters);
@@ -47,11 +62,11 @@ const PlannedCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
   };
 
   useEffect(() => {
-    fetchPlannedCompanionPosts();
+    fetchPosts();
   }, [filters, sort]);
 
   const handlePostCreate = async () => {
-    await fetchPlannedCompanionPosts(); // ✅ 새 글 등록 후 목록 갱신
+    await fetchPosts(); // ✅ 새 글 등록 후 목록 갱신
     closeCreateModal();
   };
 
@@ -73,9 +88,10 @@ const PlannedCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
           {posts.map((post) => (
             <PlannedCompanionCard
               key={post.id}
-              {...post}
+              postData={post}
               isLoggedIn={isLoggedIn}
               onLoginModalOpen={onLoginModalOpen}
+              onEdit={handleEditRequest}
             />
           ))}
         </div>
@@ -88,11 +104,20 @@ const PlannedCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
         </button>
       )}
 
-      {/* ✅ CreatePlannedModal */}
+      {/* ✅ Create Modal */}
       {isCreateModalOpen && (
         <CreatePlannedModal
           onClose={closeCreateModal}
           onPostCreate={handlePostCreate}
+        />
+      )}
+      {/* ✅ Update Modal */}
+      {isEditModalOpen && selectedPost && (
+        <UpdatePlannedModal
+          onClose={() => setIsEditModalOpen(false)}
+          initialData={selectedPost}
+          onSuccess={handleEditSuccess}
+          mode="edit"
         />
       )}
     </div>

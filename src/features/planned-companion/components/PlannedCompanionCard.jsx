@@ -1,17 +1,22 @@
 "use client";
+import { useState, useEffect } from "react";
+import {
+  useLockBodyScroll,
+  getRegionLabel,
+  FallbackImage,
+  ProfileImage,
+} from "@/shared";
 
 const PlannedCompanionCard = ({
-  title,
-  location,
-  dateRange,
-  description,
-  author,
-  participants,
-  maxParticipants,
-  image,
+  postData,
   isLoggedIn,
   onLoginModalOpen,
+  onEdit,
 }) => {
+  useLockBodyScroll();
+
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+
   const handleJoinClick = () => {
     if (!isLoggedIn) {
       onLoginModalOpen();
@@ -22,50 +27,90 @@ const PlannedCompanionCard = ({
     console.log("같이 갈래요 신청!");
   };
 
+  // 더 보기 메뉴 관련 핸들러 (+ 수정, 삭제)
+  const handleMoreMenuClick = (e) => {
+    e.stopPropagation();
+    setIsMoreMenuOpen(!isMoreMenuOpen);
+  };
+
+  const handleDeletePost = async () => {
+    if (window.confirm("이 피드를 삭제하시겠습니까?")) {
+      try {
+        await deleteFeed(postData.id);
+        toast.success("피드가 삭제되었습니다.");
+        setIsMoreMenuOpen(false);
+
+        onClose(); // 상세 모달 닫기
+        onUpdateSuccess?.(); // ✅ PlannedCompanionPage 새로고침 트리거
+      } catch (error) {
+        toast.error("피드 삭제에 실패했습니다. 다시 시도해주세요.");
+      }
+    }
+  };
+
   return (
     <div className="companion-card">
       <div className="card-header">
         <div className="author-info">
           <div className="author-avatar">
-            <img
-              src={image || "/images/default-user-profile.png"}
-              alt={author}
+            <ProfileImage
+              src={postData.image}
+              alt={postData.author}
               className="avatar-image"
-              onError={(e) => {
-                e.currentTarget.src = "/images/default-user-profile.png";
-              }}
             />
           </div>
           <div className="post-info">
-            <h3 className="post-title">{title}</h3>
-            <p className="post-location">{location}</p>
+            <h3 className="post-title">{postData.title}</h3>
+            <p className="post-location">{getRegionLabel(postData.location)}</p>
           </div>
         </div>
-        <button className="more-options">⋮</button>
+        {isLoggedIn && (
+          <div className="more-menu-container">
+            <button className="more-menu-button" onClick={handleMoreMenuClick}>
+              ⋮
+            </button>
+            {isMoreMenuOpen && (
+              <div className="more-menu-dropdown">
+                <button
+                  className="more-menu-item"
+                  onClick={() => onEdit(postData)} // ✅ postData 전달
+                >
+                  수정
+                </button>
+                <button
+                  className="more-menu-item delete"
+                  onClick={handleDeletePost}
+                >
+                  삭제
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+        {/* <button className="more-options">⋮</button> */}
       </div>
 
       <div className="card-image-container">
-        <img
-          src={image || "/images/image-not-found.png"}
-          alt={title}
+        <FallbackImage
+          src={postData.image}
+          alt={postData.title}
           className="companion-card-image"
-          onError={(e) => {
-            e.currentTarget.src = "/images/image-not-found.png";
-          }}
         />
       </div>
 
       <div className="card-content">
-        <div className="date-range">{dateRange}</div>
+        <div className="date-range">
+          {postData.startTime} ~ {postData.endTime}
+        </div>
         <div className="description">
-          {description.split("\n").map((line, index) => (
+          {postData.content.split("\n").map((line, index) => (
             <div key={index}>{line}</div>
           ))}
         </div>
 
         <div className="card-actions">
           <button className="participants-count-btn">
-            {participants}/{maxParticipants}
+            {postData.participants}/{postData.maxParticipants}
           </button>
           <button className="join-btn" onClick={handleJoinClick}>
             같이 갈래요
