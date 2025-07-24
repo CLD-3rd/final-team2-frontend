@@ -5,13 +5,13 @@ import { parseFeedsResponse, parseFeedDetailResponse } from "@/features/feed";
 // ✅ feed 전체 조회
 export const getFeeds = async (page = 1, size = 10) => {
   try {
-    const res = await axiosInstance.get(`/api/feed`, {
+    const response = await axiosInstance.get(`/api/feed`, {
       params: { page, size },
     });
-    if (res.status === 200 && res.data?.data) {
+    if (response.status === 200 && response.data?.data) {
       return {
-        feeds: parseFeedsResponse(res.data),
-        pageInfo: res.data?.data?.pageInfo,
+        feeds: parseFeedsResponse(response.data),
+        pageInfo: response.data?.data?.pageInfo,
       };
     }
     return null;
@@ -65,9 +65,9 @@ export const getFeeds = async (page = 1, size = 10) => {
 // ✅ feed 상세 조회
 export const getFeedDetail = async (feedId) => {
   try {
-    const res = await axiosInstance.get(`/api/feed/${feedId}`);
-    if (res.status === 200 && res.data?.data) {
-      return parseFeedDetailResponse(res.data.data);
+    const response = await axiosInstance.get(`/api/feed/${feedId}`);
+    if (response.status === 200 && response.data?.data) {
+      return parseFeedDetailResponse(response.data.data);
     }
     return null;
   } catch (error) {
@@ -120,8 +120,23 @@ export const getFeedDetail = async (feedId) => {
 
 // ✅ feed 등록
 export const createFeed = async (data) => {
-  const response = await axiosInstance.post("/api/feed", data);
-  return response.data;
+  try {
+    const response = await axiosInstance.post("/api/feed", data);
+
+    // ✅ 응답 검증
+    if (response.status === 200 || response.status === 201) {
+      return res.data;
+    } else {
+      throw new Error(`피드 등록 실패: ${response.status}`);
+    }
+  } catch (error) {
+    console.error("피드 등록 실패:", error);
+
+    // ✅ 사용자에게 보여줄 메시지를 위해 에러 반환
+    throw new Error(
+      error.response?.data?.message || "피드 등록 중 오류가 발생했습니다."
+    );
+  }
 };
 
 // ✅ feed 수정
