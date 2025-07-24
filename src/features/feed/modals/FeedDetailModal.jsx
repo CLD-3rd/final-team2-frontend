@@ -187,9 +187,20 @@ const FeedDetailModal = ({
     setEditingCommentText("");
   };
 
-  const handleDeleteComment = (commentId) => {
-    if (window.confirm("댓글을 삭제하시겠습니까?")) {
-      setComments(comments.filter((comment) => comment.id !== commentId));
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm("댓글을 삭제하시겠습니까?")) return;
+
+    try {
+      // ✅ API 호출
+      await deleteComment(feedId, commentId);
+
+      // ✅ UI 갱신
+      setComments((prev) =>
+        prev.filter((comment) => comment.commentId !== commentId)
+      );
+      alert("댓글이 삭제되었습니다.");
+    } catch (error) {
+      alert("댓글 삭제에 실패했습니다.");
     }
   };
 
