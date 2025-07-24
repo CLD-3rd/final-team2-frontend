@@ -6,7 +6,7 @@ const FilterBar = ({ filters, onFilterChange }) => {
   const [searchCriteria, setSearchCriteria] = useState("title");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-  const [activeSort, setActiveSort] = useState("recent");
+  const [activeSort, setActiveSort] = useState(filters.sort || "recent");
 
   const dropdownRef = useRef(null);
 
@@ -34,20 +34,32 @@ const FilterBar = ({ filters, onFilterChange }) => {
     setIsDropdownOpen(false);
   };
 
-  const handleSearch = () => {
-    console.log(`🔍 검색 실행: "${searchValue}" in ${searchCriteria}`);
-  };
-
-  const handleSortChange = (sortKey) => {
-    setActiveSort(sortKey);
-    if (onSortChange) onSortChange(sortKey);
-  };
-
   const getCurrentLabel = () => {
     const current = searchOptions.find(
       (option) => option.value === searchCriteria
     );
     return current ? current.label : "제목";
+  };
+
+  const handleSearch = () => {
+    console.log(`🔍 검색 실행: "${searchValue}" in ${searchCriteria}`);
+    // ✅ 검색 시 정렬을 최근 등록 순으로 강제 설정
+    const updatedFilters = {
+      ...filters,
+      [searchCriteria]: searchValue,
+      sort: "recent",
+    };
+    setActiveSort("recent");
+    onFilterChange(updatedFilters);
+  };
+
+  const handleSortChange = (sortKey) => {
+    setActiveSort(sortKey);
+    const updatedFilters = {
+      ...filters,
+      sort: sortKey,
+    };
+    onFilterChange(updatedFilters);
   };
 
   return (
@@ -56,6 +68,7 @@ const FilterBar = ({ filters, onFilterChange }) => {
 
       <div className="filter-right">
         <div className="search-container">
+          {/* 검색 기준 선택 */}
           <div className="search-criteria-dropdown" ref={dropdownRef}>
             <button
               type="button"
@@ -92,7 +105,7 @@ const FilterBar = ({ filters, onFilterChange }) => {
               </>
             )}
           </div>
-
+          {/* 검색어 입력 */}
           <input
             type="text"
             placeholder={`${getCurrentLabel()} 이름으로 검색하세요`}
@@ -100,16 +113,12 @@ const FilterBar = ({ filters, onFilterChange }) => {
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
           />
+          {/* 검색 버튼 */}
           <button className="search-button" onClick={handleSearch}>
             🔍
           </button>
         </div>
-
-        <div className="view-options">
-          <button className="view-button active">☰</button>
-          <button className="view-button">⊞</button>
-        </div>
-
+        {/* 정렬 버튼 */}
         <div className="sort-options">
           <button
             className={`sort-button ${activeSort === "recent" ? "active" : ""}`}

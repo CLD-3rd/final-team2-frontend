@@ -1,3 +1,5 @@
+import { formatTime } from "@/shared/utils/formatTime";
+
 // ✅ Feed 목록 조회 시
 export const parseFeedsResponse = (data) => {
   if (!data || !Array.isArray(data.feeds)) return [];
@@ -22,29 +24,23 @@ export const parseFeedDetailResponse = (data) => {
   if (!data) return null;
 
   return {
-    id: data.feed_id,
-    userId: data.user_id,
+    id: data.feedId,
     title: data.title,
     content: data.content,
-    images: data.image_url || [],
-    region: data.location,
-    badgeRequest: data.badge_request === "Y",
-    views: data.view_count,
-    likes: data.like_count,
-    createdAt: data.created_at,
-    updatedAt: data.modified_at,
+    region: data.location, // 서버는 location, UI는 region
+    images: data.imageUrls || [], // 기존 FeedDetailModal에서 images 사용
+    date: formatTime(data.created_at),
     author: {
-      nickname: data.author?.nickname || "익명",
-      profileImage:
-        data.author?.profile_image || "/images/default-user-profile.png",
+      nickname: data.author.nickname,
+      profileImage: data.author.profileImage,
     },
     comments: (data.comments || []).map((comment) => ({
-      id: comment.comment_id,
-      userId: comment.user_id,
-      nickname: comment.nickname,
+      id: comment.commentId,
+      author: comment.author.nickname,
+      profileImage: comment.author.profileImage,
       content: comment.content,
-      createdAt: comment.created_at,
-      updatedAt: comment.modified_at || null,
+      timestamp: formatTime(comment.createdAt), // "방금 전", "2시간 전" 같은 포맷 함수 필요
+      isMyComment: comment.isMyComment || false,
     })),
   };
 };

@@ -2,54 +2,42 @@
 
 import { useState, useEffect } from "react";
 import { useLockBodyScroll, FallbackImage, ProfileImage } from "@/shared";
-import { getFeedDetail } from "@/features/feed";
+import {
+  getFeedDetail,
+  deleteFeed,
+  createComment,
+  updateComment,
+  deleteComment,
+  UpdateFeedModal,
+} from "@/features/feed";
 
-const FeedDetailModal = ({ onClose, feedId, isLoggedIn, onFeedDelete }) => {
+const FeedDetailModal = ({
+  onClose,
+  feedId,
+  isLoggedIn,
+  onFeedDelete,
+  onUpdateSuccess, // ✅ FeedPage에서 갱신할 콜백 추가
+}) => {
   useLockBodyScroll();
+  console.log("[FeedDetail] login : ", isLoggedIn);
   const [feedData, setFeedData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingCommentText, setEditingCommentText] = useState("");
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
-  const [comments, setComments] = useState([
-    {
-      id: 1,
-      author: "여행러버",
-      content: "정말 멋진 곳이네요! 저도 가보고 싶어요.",
-      timestamp: "2시간 전",
-      likes: 3,
-      isLiked: false,
-      isMyComment: false,
-    },
-    {
-      id: 2,
-      author: "사진작가",
-      content: "사진이 정말 잘 나왔네요. 어떤 카메라로 찍으셨나요?",
-      timestamp: "1시간 전",
-      likes: 1,
-      isLiked: true,
-      isMyComment: false,
-    },
-    {
-      id: 3,
-      author: "사용자님",
-      content: "다음에 같이 가요!",
-      timestamp: "30분 전",
-      likes: 0,
-      isLiked: false,
-      isMyComment: true, // 내 댓글로 표시
-    },
-  ]);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchFeedDetail = async () => {
       try {
         const data = await getFeedDetail(feedId);
         setFeedData(data);
+        setComments(data.comments || []); // ✅ 댓글 상태에 세팅
       } catch (err) {
         console.error("피드 정보를 불러오지 못했습니다.", err);
         setError("피드 정보를 불러올 수 없습니다.");
@@ -82,77 +70,43 @@ const FeedDetailModal = ({ onClose, feedId, isLoggedIn, onFeedDelete }) => {
     );
   }
 
-  // // ✅ 댓글은 feedData에서 불러오기
-  // const [comments, setComments] = useState(feedData.comments || []);
+  // 더 보기 메뉴 관련 핸들러 (+ 수정, 삭제)
+  const handleMoreMenuClick = (e) => {
+    e.stopPropagation();
+    setIsMoreMenuOpen(!isMoreMenuOpen);
+  };
+
+  // 모달 외부 클릭 시 더보기 메뉴 닫기
+  const handleModalClick = () => {
+    if (isMoreMenuOpen) {
+      setIsMoreMenuOpen(false);
+    }
+  };
+
+  const handleEditPost = () => {
+    console.log("Edit post:", feedData.id);
+    setIsMoreMenuOpen(false);
+    setIsEditModalOpen(true); // FeedPostModal 열기
+  };
+
+  const handleDeletePost = async () => {
+    if (window.confirm("이 피드를 삭제하시겠습니까?")) {
+      try {
+        await deleteFeed(feedData.id);
+        alert("피드가 삭제되었습니다.");
+        setIsMoreMenuOpen(false);
+
+        onClose(); // 상세 모달 닫기
+        onUpdateSuccess?.(); // ✅ FeedPage 새로고침 트리거
+      } catch (error) {
+        alert("피드 삭제에 실패했습니다. 다시 시도해주세요.");
+      }
+    }
+  };
 
   const images = feedData.images || ["/images/feed-sample.jpg"];
   const hasMultipleImages = images.length > 1;
-
-  const handleCommentSubmit = (e) => {
-    e.preventDefault();
-    if (newComment.trim()) {
-      const comment = {
-        id: comments.length + 1,
-        author: "사용자님",
-        content: newComment,
-        timestamp: "방금 전",
-        likes: 0,
-        isLiked: false,
-        isMyComment: true,
-      };
-      setComments([...comments, comment]);
-      setNewComment("");
-    }
-  };
-
-  const handleCommentLike = (commentId) => {
-    setComments(
-      comments.map((comment) =>
-        comment.id === commentId
-          ? {
-              ...comment,
-              isLiked: !comment.isLiked,
-              likes: comment.isLiked ? comment.likes - 1 : comment.likes + 1,
-            }
-          : comment
-      )
-    );
-  };
-
-  const handleEditComment = (commentId, currentContent) => {
-    setEditingCommentId(commentId);
-    setEditingCommentText(currentContent);
-  };
-
-  const handleSaveEdit = (commentId) => {
-    if (editingCommentText.trim()) {
-      setComments(
-        comments.map((comment) =>
-          comment.id === commentId
-            ? {
-                ...comment,
-                content: editingCommentText,
-                timestamp: "방금 전 (수정됨)",
-              }
-            : comment
-        )
-      );
-    }
-    setEditingCommentId(null);
-    setEditingCommentText("");
-  };
-
-  const handleCancelEdit = () => {
-    setEditingCommentId(null);
-    setEditingCommentText("");
-  };
-
-  const handleDeleteComment = (commentId) => {
-    if (window.confirm("댓글을 삭제하시겠습니까?")) {
-      setComments(comments.filter((comment) => comment.id !== commentId));
-    }
-  };
-
+  // 여러 이미지 처리 핸들러
   const handlePrevImage = () => {
     setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
   };
@@ -175,33 +129,78 @@ const FeedDetailModal = ({ onClose, feedId, isLoggedIn, onFeedDelete }) => {
     }
   };
 
-  const handleMoreMenuClick = (e) => {
-    e.stopPropagation();
-    setIsMoreMenuOpen(!isMoreMenuOpen);
-  };
+  // 댓글 관련 핸들러
+  // 댓글 등록 시 UI 갱신
+  const handleCommentSubmit = async (e) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
 
-  const handleEditPost = () => {
-    console.log("Edit post:", feedData.id);
-    setIsMoreMenuOpen(false);
-    // 여기에 수정 로직 추가
-  };
-
-  const handleDeletePost = () => {
-    if (window.confirm("이 피드를 삭제하시겠습니까?")) {
-      console.log("Delete post:", feedData.id);
-      setIsMoreMenuOpen(false);
-      onClose();
-      // 실제 삭제 로직 추가
-      if (onFeedDelete) {
-        onFeedDelete(feedData.id);
-      }
+    try {
+      const newCommentData = await createComment(feedId, newComment);
+      setComments((prev) => [
+        ...prev,
+        {
+          commentId: newCommentData.id,
+          author: newCommentData.author,
+          content: newCommentData.content,
+          createdAt: newCommentData.createdAt,
+          isMyComment: true,
+        },
+      ]);
+      setNewComment("");
+    } catch (error) {
+      alert("댓글 등록에 실패했습니다.");
     }
   };
 
-  // 모달 외부 클릭 시 더보기 메뉴 닫기
-  const handleModalClick = () => {
-    if (isMoreMenuOpen) {
-      setIsMoreMenuOpen(false);
+  //댓글 수정
+  const handleEditComment = (commentId, currentContent) => {
+    setEditingCommentId(commentId);
+    setEditingCommentText(currentContent);
+  };
+
+  const handleSaveEdit = async (commentId) => {
+    if (!editingCommentText.trim()) return;
+
+    try {
+      // ✅ API 호출
+      await updateComment(feedId, commentId, editingCommentText);
+
+      // ✅ UI 갱신
+      setComments((prev) =>
+        prev.map((comment) =>
+          comment.commentId === commentId
+            ? { ...comment, content: editingCommentText }
+            : comment
+        )
+      );
+
+      setEditingCommentId(null);
+      setEditingCommentText("");
+    } catch (error) {
+      alert("댓글 수정에 실패했습니다.");
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCommentId(null);
+    setEditingCommentText("");
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm("댓글을 삭제하시겠습니까?")) return;
+
+    try {
+      // ✅ API 호출
+      await deleteComment(feedId, commentId);
+
+      // ✅ UI 갱신
+      setComments((prev) =>
+        prev.filter((comment) => comment.commentId !== commentId)
+      );
+      alert("댓글이 삭제되었습니다.");
+    } catch (error) {
+      alert("댓글 삭제에 실패했습니다.");
     }
   };
 
@@ -315,7 +314,7 @@ const FeedDetailModal = ({ onClose, feedId, isLoggedIn, onFeedDelete }) => {
               <div key={comment.id} className="comment-item">
                 <div className="comment-avatar">
                   <ProfileImage
-                    src="/images/user-profile.jpg"
+                    src={comment.profileImage}
                     alt={comment.author}
                   />
                 </div>
@@ -397,6 +396,18 @@ const FeedDetailModal = ({ onClose, feedId, isLoggedIn, onFeedDelete }) => {
             </div>
           </form>
         </div>
+        {/* ✅ Feed 수정 모달 */}
+        {isEditModalOpen && (
+          <UpdateFeedModal
+            onClose={() => setIsEditModalOpen(false)}
+            mode="edit"
+            initialData={feedData}
+            onSuccess={() => {
+              onUpdateSuccess?.(); // ✅ FeedPage 갱신
+              onClose(); // 상세 모달 닫기
+            }}
+          />
+        )}
       </div>
     </div>
   );

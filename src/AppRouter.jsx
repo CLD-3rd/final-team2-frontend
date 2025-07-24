@@ -1,6 +1,6 @@
 "use client";
 
-import FeedPage from "@/features/feed";
+import { FeedPage } from "@/features/feed";
 import { LocalCompanionPage } from "@/features/local-companion";
 import { PlannedCompanionPage } from "@/features/planned-companion";
 import { ProfileManagementPage, ScheduleManagementPage } from "@/features/user";
@@ -12,23 +12,27 @@ const MainContent = ({
   currentPage,
   onFeedCountChange,
   isLoggedIn,
-  feedData,
-  onFeedDelete,
   userProfile,
   onProfileUpdate,
   onLoginModalOpen,
 }) => {
+  console.log("[AppRouter] login : ", isLoggedIn);
   const renderPage = () => {
     switch (currentPage) {
-      case "photo":
+      case "planned-companion":
         return (
           <PlannedCompanionPage
             isLoggedIn={isLoggedIn}
             onLoginModalOpen={onLoginModalOpen}
           />
         );
-      case "friend":
-        return <LocalCompanionPage />;
+      case "local-companion":
+        return (
+          <LocalCompanionPage
+            isLoggedIn={isLoggedIn}
+            onLoginModalOpen={onLoginModalOpen}
+          />
+        );
       case "profile":
         return (
           <ProfileManagementPage
@@ -54,6 +58,7 @@ const MainContent = ({
       default:
         return (
           <FeedPage
+            onFeedCountChange={onFeedCountChange}
             isLoggedIn={isLoggedIn}
             onLoginModalOpen={onLoginModalOpen}
           />

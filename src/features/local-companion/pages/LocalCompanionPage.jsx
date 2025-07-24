@@ -2,16 +2,30 @@
 
 import { useState } from "react";
 import { Filterbar } from "@/shared";
+import {
+  LocalCompanionCard,
+  CreateLocalModal,
+} from "@/features/local-companion";
 
-const LocalCompanionPage = () => {
+const LocalCompanionPage = ({ isLoggedIn }) => {
   const [filters, setFilters] = useState({
     author: "",
     title: "",
     region: "",
   });
 
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
+  };
+
+  const openCreateModal = () => setIsCreateModalOpen(true);
+  const closeCreateModal = () => setIsCreateModalOpen(false);
+
+  const handlePostCreate = async () => {
+    // await fetchFeeds(); // ✅ 새 현지 동행 모집글 작성 후 다시 목록 불러오기
+    closeCreateModal();
   };
 
   // Sample data for local companion posts
@@ -58,46 +72,19 @@ const LocalCompanionPage = () => {
           <LocalCompanionCard key={post.id} {...post} />
         ))}
       </div>
-    </div>
-  );
-};
-
-const LocalCompanionCard = ({ title, rating, author, profileImage, tags }) => {
-  const renderStars = (rating) => {
-    return Array.from({ length: 5 }, (_, index) => (
-      <span key={index} className={`star ${index < rating ? "filled" : ""}`}>
-        ★
-      </span>
-    ));
-  };
-
-  return (
-    <div className="local-companion-card">
-      <div className="card-rating">{renderStars(rating)}</div>
-
-      <div className="card-main-content">
-        <h3 className="card-title">{title}</h3>
-
-        <div className="card-author-info">
-          <img
-            src={profileImage || "/images/default-user-profile.png"}
-            alt={author}
-            className="profile-image"
-            onError={(e) => {
-              e.currentTarget.src = "/images/default-user-profile.png";
-            }}
-          />
-          <span className="author-name">{author}</span>
-        </div>
-      </div>
-
-      <div className="card-tags">
-        {tags.map((tag, index) => (
-          <span key={index} className="tag">
-            {tag} ×
-          </span>
-        ))}
-      </div>
+      {/* ✅ + 버튼 */}
+      {isLoggedIn && (
+        <button className="fab" onClick={openCreateModal}>
+          +
+        </button>
+      )}
+      {/* ✅ CreateFeedModal (FeedPage에서 관리) */}
+      {isCreateModalOpen && (
+        <CreateLocalModal
+          onClose={closeCreateModal}
+          onPostCreate={handlePostCreate}
+        />
+      )}
     </div>
   );
 };
