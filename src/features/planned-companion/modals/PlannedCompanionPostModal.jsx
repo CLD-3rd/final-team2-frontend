@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { PostForm, useLockBodyScroll } from "@/shared";
+import { createPlannedCompanion } from "@/features/planned-companion";
+import toast from "react-hot-toast";
 
 const PlannedCompanionPostModal = ({ onClose, onPostCreate }) => {
   const [formData, setFormData] = useState({
@@ -10,26 +12,36 @@ const PlannedCompanionPostModal = ({ onClose, onPostCreate }) => {
     image: null,
   });
 
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
   useLockBodyScroll();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
-    const newPost = {
-      id: Date.now(),
-      title: formData.title,
-      region: formData.region,
-      author: "사용자님",
-      date: new Date().toISOString().split("T")[0],
-      dateRange: formData.dateRange,
-      images: formData.image
-        ? [URL.createObjectURL(formData.image)]
-        : ["/placeholder.svg?height=200&width=300&text=동행+모집"],
-      content: formData.content,
-    };
+    try {
+      const formPayload = new FormData();
+      formPayload.append("title", formData.title);
+      formPayload.append("content", formData.content);
+      formPayload.append("region", formData.region);
+      formPayload.append("date_range", formData.dateRange);
+      if (formData.image) {
+        formPayload.append("images", formData.image);
+      }
 
-    onPostCreate?.(newPost);
-    onClose();
+      const newPost = await createPlannedCompanion(formPayload);
+      toast.success("사전 동행 모집글이 등록되었습니다!");
+      onPostCreate?.(newPost); // ✅ 성공 시 목록 갱신
+      onClose();
+    } catch (error) {
+      toast.error("사전 동행 모집글 등록에 실패했습니다.");
+
+      // alert("사전 동행 모집글 등록에 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

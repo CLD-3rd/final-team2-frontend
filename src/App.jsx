@@ -6,6 +6,7 @@ import AppRouter from "@/AppRouter";
 import { CreateLocalModal } from "@/features/local-companion";
 import { LoginModal } from "@/features/user";
 import "@/App.css";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -69,6 +70,7 @@ function App() {
 
   return (
     <div className="app">
+      <Toaster position="top-right" reverseOrder={false} />
       <Header
         isLoggedIn={isLoggedIn}
         onLogin={openLoginModal}
