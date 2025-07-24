@@ -10,6 +10,7 @@ import {
   deleteComment,
   UpdateFeedModal,
 } from "@/features/feed";
+import toast from "react-hot-toast";
 
 const FeedDetailModal = ({
   onClose,
@@ -39,8 +40,7 @@ const FeedDetailModal = ({
         setFeedData(data);
         setComments(data.comments || []); // ✅ 댓글 상태에 세팅
       } catch (err) {
-        console.error("피드 정보를 불러오지 못했습니다.", err);
-        setError("피드 정보를 불러올 수 없습니다.");
+        toast.error("피드 정보를 불러오지 못했습니다.");
       } finally {
         setLoading(false);
       }
@@ -93,13 +93,13 @@ const FeedDetailModal = ({
     if (window.confirm("이 피드를 삭제하시겠습니까?")) {
       try {
         await deleteFeed(feedData.id);
-        alert("피드가 삭제되었습니다.");
+        toast.success("피드가 삭제되었습니다.");
         setIsMoreMenuOpen(false);
 
         onClose(); // 상세 모달 닫기
         onUpdateSuccess?.(); // ✅ FeedPage 새로고침 트리거
       } catch (error) {
-        alert("피드 삭제에 실패했습니다. 다시 시도해주세요.");
+        toast.error("피드 삭제에 실패했습니다. 다시 시도해주세요.");
       }
     }
   };
@@ -149,7 +149,7 @@ const FeedDetailModal = ({
       ]);
       setNewComment("");
     } catch (error) {
-      alert("댓글 등록에 실패했습니다.");
+      toast.error("댓글 등록에 실패했습니다.");
     }
   };
 
@@ -178,7 +178,7 @@ const FeedDetailModal = ({
       setEditingCommentId(null);
       setEditingCommentText("");
     } catch (error) {
-      alert("댓글 수정에 실패했습니다.");
+      toast.error("댓글 수정에 실패했습니다.");
     }
   };
 
@@ -198,9 +198,9 @@ const FeedDetailModal = ({
       setComments((prev) =>
         prev.filter((comment) => comment.commentId !== commentId)
       );
-      alert("댓글이 삭제되었습니다.");
+      toast.success("댓글이 삭제되었습니다.");
     } catch (error) {
-      alert("댓글 삭제에 실패했습니다.");
+      toast.error("댓글 삭제에 실패했습니다.");
     }
   };
 

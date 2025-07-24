@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { PostForm, useLockBodyScroll } from "@/shared";
 import { createFeed, updateFeed } from "@/features/feed";
+import toast from "react-hot-toast";
 
 const FeedPostModal = ({
   onClose,
@@ -50,11 +51,11 @@ const FeedPostModal = ({
       }
 
       // ✅ 성공 시 콜백 실행 (FeedPage에서 reloadTrigger 증가)
+      toast.success("피드가 등록되었습니다!");
       onSuccess?.();
       onClose();
     } catch (error) {
-      console.error(error);
-      alert(
+      toast.error(
         mode === "edit"
           ? "피드 수정에 실패했습니다."
           : "피드 등록에 실패했습니다."
