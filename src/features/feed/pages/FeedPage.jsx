@@ -11,11 +11,9 @@ import {
 
 const FeedPage = ({ onFeedCountChange, isLoggedIn }) => {
   const [filters, setFilters] = useState({
-    author: "",
-    title: "",
-    region: "",
+    sort: "recent",
   });
-  console.log("[FeedPage] login : ", isLoggedIn);
+  // console.log("[FeedPage] login : ", isLoggedIn);
 
   const [feedData, setFeedData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,13 +22,35 @@ const FeedPage = ({ onFeedCountChange, isLoggedIn }) => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedFeedId, setSelectedFeedId] = useState(null); // ✅ 상세 모달용 상태
 
+  const openCreateModal = () => setIsCreateModalOpen(true);
+  const closeCreateModal = () => setIsCreateModalOpen(false);
+
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
   };
 
+  // const filteredFeedData = feedData
+  //   .filter((feed) => {
+  //     if (filters.title && !feed.title.includes(filters.title)) return false;
+  //     if (filters.author && !feed.author.nickname.includes(filters.author))
+  //       return false;
+  //     if (filters.region && feed.region !== filters.region) return false;
+  //     return true;
+  //   })
+  //   .sort((a, b) => {
+  //     if (filters.sort === "recent") {
+  //       return new Date(b.createdAt) - new Date(a.createdAt);
+  //     } else if (filters.sort === "view") {
+  //       return b.views - a.views;
+  //     }
+  //     return 0;
+  //   });
+
   const fetchFeeds = async () => {
+    setLoading(true);
     try {
-      const { feeds } = await getFeeds();
+      console.log("[GetFeed] Sort : ", filters.sort);
+      const { feeds } = await getFeeds(filters);
       setFeedData(feeds);
       onFeedCountChange?.(feeds.length);
     } catch (error) {
@@ -42,7 +62,7 @@ const FeedPage = ({ onFeedCountChange, isLoggedIn }) => {
 
   useEffect(() => {
     fetchFeeds();
-  }, [reloadTrigger]);
+  }, [filters]);
 
   // ✅ 등록/수정 완료 시 새로고침
   const handleSuccess = () => {
@@ -50,9 +70,6 @@ const FeedPage = ({ onFeedCountChange, isLoggedIn }) => {
     setIsCreateModalOpen(false);
     setSelectedFeedId(null);
   };
-
-  const openCreateModal = () => setIsCreateModalOpen(true);
-  const closeCreateModal = () => setIsCreateModalOpen(false);
 
   const handleFeedClick = (feedId) => {
     setSelectedFeedId(feedId);

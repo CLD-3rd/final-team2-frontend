@@ -3,10 +3,14 @@ import { axiosInstance } from "@/shared";
 import { parseFeedsResponse, parseFeedDetailResponse } from "@/features/feed";
 
 // ✅ feed 전체 조회
-export const getFeeds = async (page = 1, size = 10) => {
+export const getFeeds = async (filters = ({}, (page = 1)), size = 10) => {
   try {
     const { data } = await axiosInstance.get(`/api/feed`, {
-      params: { page, size },
+      params: {
+        page,
+        size,
+        sort: filters.sort,
+      },
     });
     return {
       feeds: parseFeedsResponse(data),
