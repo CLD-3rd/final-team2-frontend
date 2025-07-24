@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Header, Sidebar } from "@/shared";
 import AppRouter from "@/AppRouter";
-import CreateFeedModal from "@/features/feed";
+import { CreateFeedModal } from "@/features/feed";
 import { CreateLocalModal } from "@/features/local-companion";
 import { CreatePlannedModal } from "@/features/planned-companion";
 import { LoginModal } from "@/features/user";
