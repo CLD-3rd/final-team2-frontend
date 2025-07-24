@@ -12,23 +12,26 @@ const MainContent = ({
   currentPage,
   onFeedCountChange,
   isLoggedIn,
-  feedData,
-  onFeedDelete,
   userProfile,
   onProfileUpdate,
   onLoginModalOpen,
 }) => {
   const renderPage = () => {
     switch (currentPage) {
-      case "photo":
+      case "planned-companion":
         return (
           <PlannedCompanionPage
             isLoggedIn={isLoggedIn}
             onLoginModalOpen={onLoginModalOpen}
           />
         );
-      case "friend":
-        return <LocalCompanionPage />;
+      case "local-companion":
+        return (
+          <LocalCompanionPage
+            isLoggedIn={isLoggedIn}
+            onLoginModalOpen={onLoginModalOpen}
+          />
+        );
       case "profile":
         return (
           <ProfileManagementPage
@@ -54,6 +57,7 @@ const MainContent = ({
       default:
         return (
           <FeedPage
+            onFeedCountChange={onFeedCountChange}
             isLoggedIn={isLoggedIn}
             onLoginModalOpen={onLoginModalOpen}
           />

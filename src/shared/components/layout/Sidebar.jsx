@@ -26,8 +26,16 @@ const Sidebar = ({
       count: feedCount,
       icon: <Newspaper size={20} />,
     },
-    { id: "photo", label: "사전 동행 모집", icon: <Megaphone size={20} /> },
-    { id: "friend", label: "현지 동행 모집", icon: <MapPin size={20} /> },
+    {
+      id: "planned-companion",
+      label: "사전 동행 모집",
+      icon: <Megaphone size={20} />,
+    },
+    {
+      id: "local-companion",
+      label: "현지 동행 모집",
+      icon: <MapPin size={20} />,
+    },
   ];
 
   // Menu sections for logged-in users
@@ -40,8 +48,16 @@ const Sidebar = ({
           count: feedCount,
           icon: <Newspaper size={20} />,
         },
-        { id: "photo", label: "사전 동행 모집", icon: <Megaphone size={20} /> },
-        { id: "friend", label: "현지 동행 모집", icon: <MapPin size={20} /> },
+        {
+          id: "planned-companion",
+          label: "사전 동행 모집",
+          icon: <Megaphone size={20} />,
+        },
+        {
+          id: "local-companion",
+          label: "현지 동행 모집",
+          icon: <MapPin size={20} />,
+        },
       ],
     },
     {

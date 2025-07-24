@@ -2,16 +2,27 @@
 
 import { useState } from "react";
 import { Filterbar } from "@/shared";
+import { CreateLocalModal } from "@/features/local-companion";
 
-const LocalCompanionPage = () => {
+const LocalCompanionPage = ({ isLoggedIn }) => {
   const [filters, setFilters] = useState({
     author: "",
     title: "",
     region: "",
   });
 
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
+  };
+
+  const openCreateModal = () => setIsCreateModalOpen(true);
+  const closeCreateModal = () => setIsCreateModalOpen(false);
+
+  const handlePostCreate = async () => {
+    // await fetchFeeds(); // ✅ 새 현지 동행 모집글 작성 후 다시 목록 불러오기
+    closeCreateModal();
   };
 
   // Sample data for local companion posts
@@ -58,6 +69,19 @@ const LocalCompanionPage = () => {
           <LocalCompanionCard key={post.id} {...post} />
         ))}
       </div>
+      {/* ✅ + 버튼 */}
+      {isLoggedIn && (
+        <button className="fab" onClick={openCreateModal}>
+          +
+        </button>
+      )}
+      {/* ✅ CreateFeedModal (FeedPage에서 관리) */}
+      {isCreateModalOpen && (
+        <CreateLocalModal
+          onClose={closeCreateModal}
+          onPostCreate={handlePostCreate}
+        />
+      )}
     </div>
   );
 };

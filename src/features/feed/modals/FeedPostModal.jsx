@@ -3,7 +3,7 @@ import { PostForm } from "@/shared";
 import { useLockBodyScroll } from "@/shared";
 import { createFeed } from "@/features/feed";
 
-const FeedPostModal = ({ onClose, onPostCreate }) => {
+const FeedPostModal = ({ onClose, onRefresh }) => {
   const [formData, setFormData] = useState({
     title: "",
     content: "",
@@ -31,18 +31,9 @@ const FeedPostModal = ({ onClose, onPostCreate }) => {
       // ✅ API 호출
       const response = await createFeed(formPayload);
 
-      // ✅ UI 반영
-      const newPost = {
-        id: response.data.feed_id,
-        title: response.data.title,
-        region: response.data.location,
-        author: response.data.author.nickname,
-        date: response.data.created_at,
-        images: response.data.image_url || [],
-      };
-
-      onPostCreate?.(newPost);
+      // ✅ 성공 → 모달 닫기 + 목록 새로고침
       onClose();
+      onRefresh?.();
     } catch (error) {
       console.error("피드 작성 실패", error);
       alert("피드 등록에 실패했습니다. 다시 시도해주세요.");
@@ -65,10 +56,10 @@ const FeedPostModal = ({ onClose, onPostCreate }) => {
           onClose={onClose}
           titleLabel="제목"
           contentLabel="내용"
-          includeBadge={true}
+          includeBadge
           includeDateRange={false}
-          includeContent={true}
-          includeImage={true}
+          includeContent
+          includeImage
         />
       </div>
     </div>

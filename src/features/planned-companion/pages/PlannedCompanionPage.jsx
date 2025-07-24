@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Filterbar } from "@/shared";
+import { CreatePlannedModal } from "@/features/planned-companion";
 
 const PhotoCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
   const [filters, setFilters] = useState({
@@ -9,9 +10,18 @@ const PhotoCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
     title: "",
     region: "",
   });
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  const openCreateModal = () => setIsCreateModalOpen(true);
+  const closeCreateModal = () => setIsCreateModalOpen(false);
 
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
+  };
+
+  const handlePostCreate = async () => {
+    // await fetch(); // ✅ 새 현지 동행 모집글 작성 후 다시 목록 불러오기
+    closeCreateModal();
   };
 
   // Sample data for 사전 동행 모집 posts
@@ -80,6 +90,19 @@ const PhotoCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
           />
         ))}
       </div>
+      {/* ✅ + 버튼 */}
+      {isLoggedIn && (
+        <button className="fab" onClick={openCreateModal}>
+          +
+        </button>
+      )}
+      {/* ✅ CreateFeedModal (PlannedCompanionPage에서 관리) */}
+      {isCreateModalOpen && (
+        <CreatePlannedModal
+          onClose={closeCreateModal}
+          onPostCreate={handlePostCreate}
+        />
+      )}
     </div>
   );
 };

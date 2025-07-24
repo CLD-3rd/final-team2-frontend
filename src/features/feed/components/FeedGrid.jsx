@@ -17,7 +17,7 @@ const FeedGrid = ({
 
   // Filter logic
   const filteredData = allFeedData.filter((item) => {
-    if (filters.location && item.location !== filters.location) return false;
+    if (filters.location && item.region !== filters.location) return false;
     if (filters.author && !item.author.includes(filters.author)) return false;
     return true;
   });
