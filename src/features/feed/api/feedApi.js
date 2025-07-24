@@ -168,8 +168,21 @@ export const updateFeed = async (feedId, data) => {
 
 // ✅ feed 삭제
 export const deleteFeed = async (feedId) => {
-  const response = await axiosInstance.delete(`/api/feed/${feedId}`);
-  return response.data;
+  try {
+    const response = await axiosInstance.delete(`/api/feed/${feedId}`);
+
+    if (response.status === 200 || response.status === 201) {
+      return response.data;
+    } else {
+      throw new Error(`피드 삭제 실패: ${response.status}`);
+    }
+  } catch (error) {
+    console.error("피드 삭제 실패", error);
+
+    throw new Error(
+      error.response?.data?.message || "피드 삭제 중 오류가 발생했습니다."
+    );
+  }
 };
 
 // ✅ 댓글 조회

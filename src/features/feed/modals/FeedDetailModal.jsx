@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useLockBodyScroll, FallbackImage, ProfileImage } from "@/shared";
-import { getFeedDetail, UpdateFeedModal } from "@/features/feed";
+import { getFeedDetail, deleteFeed, UpdateFeedModal } from "@/features/feed";
 
 const FeedDetailModal = ({
   onClose,
@@ -90,9 +90,68 @@ const FeedDetailModal = ({
     );
   }
 
+  // 더 보기 메뉴 관련 핸들러 (+ 수정, 삭제)
+  const handleMoreMenuClick = (e) => {
+    e.stopPropagation();
+    setIsMoreMenuOpen(!isMoreMenuOpen);
+  };
+
+  // 모달 외부 클릭 시 더보기 메뉴 닫기
+  const handleModalClick = () => {
+    if (isMoreMenuOpen) {
+      setIsMoreMenuOpen(false);
+    }
+  };
+  const handleEditPost = () => {
+    console.log("Edit post:", feedData.id);
+    setIsMoreMenuOpen(false);
+    setIsEditModalOpen(true); // FeedPostModal 열기
+  };
+
+  const handleDeletePost = async () => {
+    if (window.confirm("이 피드를 삭제하시겠습니까?")) {
+      try {
+        await deleteFeed(feedData.id);
+        alert("피드가 삭제되었습니다.");
+        setIsMoreMenuOpen(false);
+
+        onClose(); // 상세 모달 닫기
+        onUpdateSuccess?.(); // ✅ FeedPage 새로고침 트리거
+      } catch (error) {
+        alert("피드 삭제에 실패했습니다. 다시 시도해주세요.");
+      }
+    }
+  };
+
   // // ✅ 댓글은 feedData에서 불러오기
   // const [comments, setComments] = useState(feedData.comments || []);
 
+  const images = feedData.images || ["/images/feed-sample.jpg"];
+  const hasMultipleImages = images.length > 1;
+  // 여러 이미지 처리 핸들러
+  const handlePrevImage = () => {
+    setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+
+  const handleNextImage = () => {
+    setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
+
+  const handleImageClick = (e) => {
+    if (!hasMultipleImages) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const imageWidth = rect.width;
+
+    if (clickX < imageWidth / 2) {
+      handlePrevImage();
+    } else {
+      handleNextImage();
+    }
+  };
+
+  // 댓글 관련 핸들러
   const handleCommentSubmit = (e) => {
     e.preventDefault();
     if (newComment.trim()) {
@@ -108,20 +167,6 @@ const FeedDetailModal = ({
       setComments([...comments, comment]);
       setNewComment("");
     }
-  };
-
-  const handleCommentLike = (commentId) => {
-    setComments(
-      comments.map((comment) =>
-        comment.id === commentId
-          ? {
-              ...comment,
-              isLiked: !comment.isLiked,
-              likes: comment.isLiked ? comment.likes - 1 : comment.likes + 1,
-            }
-          : comment
-      )
-    );
   };
 
   const handleEditComment = (commentId, currentContent) => {
@@ -155,61 +200,6 @@ const FeedDetailModal = ({
   const handleDeleteComment = (commentId) => {
     if (window.confirm("댓글을 삭제하시겠습니까?")) {
       setComments(comments.filter((comment) => comment.id !== commentId));
-    }
-  };
-
-  const handlePrevImage = () => {
-    setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  };
-
-  const handleNextImage = () => {
-    setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  };
-
-  const handleImageClick = (e) => {
-    if (!hasMultipleImages) return;
-
-    const rect = e.currentTarget.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const imageWidth = rect.width;
-
-    if (clickX < imageWidth / 2) {
-      handlePrevImage();
-    } else {
-      handleNextImage();
-    }
-  };
-
-  const images = feedData.images || ["/images/feed-sample.jpg"];
-  const hasMultipleImages = images.length > 1;
-
-  const handleMoreMenuClick = (e) => {
-    e.stopPropagation();
-    setIsMoreMenuOpen(!isMoreMenuOpen);
-  };
-
-  const handleEditPost = () => {
-    console.log("Edit post:", feedData.id);
-    setIsMoreMenuOpen(false);
-    setIsEditModalOpen(true); // FeedPostModal 열기
-  };
-
-  const handleDeletePost = () => {
-    if (window.confirm("이 피드를 삭제하시겠습니까?")) {
-      console.log("Delete post:", feedData.id);
-      setIsMoreMenuOpen(false);
-      onClose();
-      // 실제 삭제 로직 추가
-      if (onFeedDelete) {
-        onFeedDelete(feedData.id);
-      }
-    }
-  };
-
-  // 모달 외부 클릭 시 더보기 메뉴 닫기
-  const handleModalClick = () => {
-    if (isMoreMenuOpen) {
-      setIsMoreMenuOpen(false);
     }
   };
 
