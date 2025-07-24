@@ -5,18 +5,17 @@ import { parseFeedsResponse, parseFeedDetailResponse } from "@/features/feed";
 // ✅ feed 전체 조회
 export const getFeeds = async (page = 1, size = 10) => {
   try {
-    const response = await axiosInstance.get(`/api/feed`, {
+    const { data } = await axiosInstance.get(`/api/feed`, {
       params: { page, size },
     });
-    if (response.status === 200 && response.data?.data) {
-      return {
-        feeds: parseFeedsResponse(response.data),
-        pageInfo: response.data?.data?.pageInfo,
-      };
-    }
-    return null;
+    return {
+      feeds: parseFeedsResponse(data),
+      pageInfo: data?.data?.pageInfo,
+    };
   } catch (error) {
-    console.error("피드 조회 실패", error);
+    const message =
+      error.response?.data?.message || "피드 조회 중 오류가 발생했습니다.";
+    console.error("피드 조회 실패:", message);
     // ✅ 테스트용 데이터
     const testFeeds = {
       feeds: [
@@ -59,19 +58,20 @@ export const getFeeds = async (page = 1, size = 10) => {
       feeds: parseFeedsResponse(testFeeds),
       pageInfo: testFeeds.pageInfo,
     };
+
+    throw new Error(message);
   }
 };
 
 // ✅ feed 상세 조회
 export const getFeedDetail = async (feedId) => {
   try {
-    const response = await axiosInstance.get(`/api/feed/${feedId}`);
-    if (response.status === 200 && response.data?.data) {
-      return parseFeedDetailResponse(response.data.data);
-    }
-    return null;
+    const { data } = await axiosInstance.get(`/api/feed/${feedId}`);
+    return parseFeedDetailResponse(data);
   } catch (error) {
-    console.error("피드 상세 조회 실패", error);
+    const message =
+      error.response?.data?.message || "피드 상세 조회 중 오류가 발생했습니다.";
+    console.error("피드 상세 조회 실패:", message);
 
     // ✅ 테스트용 Mock 데이터
     const testFeedDetail = {
@@ -129,6 +129,8 @@ export const getFeedDetail = async (feedId) => {
 
     // ✅ testFeedDetail의 data만 전달
     return parseFeedDetailResponse(testFeedDetail);
+
+    throw new Error(message);
   }
 };
 
@@ -160,49 +162,31 @@ export const createFeed = async (data) => {
 // ✅ feed 수정
 export const updateFeed = async (feedId, data) => {
   try {
-    const response = await axiosInstance.patch(`/api/feed/${feedId}`, data, {
+    const { data } = await axiosInstance.patch(`/api/feed/${feedId}`, data, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
     });
-
-    if (response.status === 200 || response.status === 201) {
-      return response.data;
-    } else {
-      throw new Error(`피드 수정 실패: ${response.status}`);
-    }
+    return data;
   } catch (error) {
-    console.error("피드 수정 실패", error);
-
-    throw new Error(
-      error.response?.data?.message || "피드 수정 중 오류가 발생했습니다."
-    );
+    const message =
+      error.response?.data?.message || "피드 수정 중 오류가 발생했습니다.";
+    console.error("피드 수정 실패:", message);
+    throw new Error(message);
   }
 };
 
 // ✅ feed 삭제
 export const deleteFeed = async (feedId) => {
   try {
-    const response = await axiosInstance.delete(`/api/feed/${feedId}`);
-
-    if (response.status === 200 || response.status === 201) {
-      return response.data;
-    } else {
-      throw new Error(`피드 삭제 실패: ${response.status}`);
-    }
+    const { data } = await axiosInstance.delete(`/api/feed/${feedId}`);
+    return data;
   } catch (error) {
-    console.error("피드 삭제 실패", error);
-
-    throw new Error(
-      error.response?.data?.message || "피드 삭제 중 오류가 발생했습니다."
-    );
+    const message =
+      error.response?.data?.message || "피드 삭제 중 오류가 발생했습니다.";
+    console.error("피드 삭제 실패:", message);
+    throw new Error(message);
   }
-};
-
-// ✅ 댓글 조회
-export const getComments = async (feedId) => {
-  const response = await axiosInstance.get(`/api/feed/${feedId}/comments`);
-  return response.data;
 };
 
 // ✅ 댓글 등록
