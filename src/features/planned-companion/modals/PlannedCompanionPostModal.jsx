@@ -37,8 +37,6 @@ const PlannedCompanionPostModal = ({ onClose, onPostCreate }) => {
       onClose();
     } catch (error) {
       toast.error("사전 동행 모집글 등록에 실패했습니다.");
-
-      // alert("사전 동행 모집글 등록에 실패했습니다.");
     } finally {
       setLoading(false);
     }

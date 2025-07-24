@@ -1,4 +1,5 @@
 import { axiosInstance } from "@/shared";
+import { parsePlannedCompanionListResponse } from "@/features/planned-companion";
 
 const BASE_URL = "/api/planned-companion";
 
@@ -26,6 +27,55 @@ export const getPlannedCompanions = async (
       error.response?.data?.message ||
       "사전 동행 모집글 조회 중 오류가 발생했습니다.";
     console.error("사전 동행 모집글 조회 실패:", message);
+    const testResponse = {
+      posts: [
+        {
+          id: 1,
+          title: "제주도 힐링 여행 동행 모집",
+          location: "제주도",
+          dateRange: "2025-08-10 ~ 2025-08-15",
+          description:
+            "함께 제주도를 여행할 동행을 찾습니다!\n맛집 탐방 필수 🍽",
+          author: "여행가123",
+          participants: 2,
+          maxParticipants: 4,
+          image: "https://cdn.example.com/images/jeju-trip.jpg",
+        },
+        {
+          id: 2,
+          title: "부산 해운대 여행 동행",
+          location: "부산",
+          dateRange: "2025-09-01 ~ 2025-09-05",
+          description: "바다 좋아하시는 분 환영합니다!\n사진 찍기 좋아요 📸",
+          author: "부산러버",
+          participants: 1,
+          maxParticipants: 3,
+          image: "https://cdn.example.com/images/busan-beach.jpg",
+        },
+        {
+          id: 3,
+          title: "강원도 캠핑 모임",
+          location: "강원도",
+          dateRange: "2025-08-20 ~ 2025-08-22",
+          description: "캠핑장비 있으신 분 대환영!\n밤하늘 별보러 가요 🌌",
+          author: "캠핑매니아",
+          participants: 3,
+          maxParticipants: 5,
+          image: "https://cdn.example.com/images/gangwon-camp.jpg",
+        },
+      ],
+      pageInfo: {
+        currentPage: 1,
+        pageSize: 10,
+        totalPages: 1,
+        totalElements: 3,
+      },
+    };
+
+    return {
+      posts: parsePlannedCompanionListResponse(testResponse),
+      pageInfo: testResponse.data?.pageInfo,
+    };
     throw new Error(message);
   }
 };

@@ -1,20 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Filterbar } from "@/shared";
 import {
   PlannedCompanionCard,
   CreatePlannedModal,
+  getPlannedCompanions,
 } from "@/features/planned-companion";
+import toast from "react-hot-toast";
 
-const PhotoCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
+const PlannedCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
   const [filters, setFilters] = useState({
     author: "",
     title: "",
     region: "",
   });
+  const [sort, setSort] = useState("recent"); // ✅ 정렬 상태
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [posts, setPosts] = useState([]); // ✅ 서버 데이터 저장
+  const [loading, setLoading] = useState(true);
 
+  // ✅ 모달 열기/닫기
   const openCreateModal = () => setIsCreateModalOpen(true);
   const closeCreateModal = () => setIsCreateModalOpen(false);
 
@@ -22,84 +28,67 @@ const PhotoCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
     setFilters(newFilters);
   };
 
+  const handleSortChange = (newSort) => {
+    setSort(newSort);
+  };
+
+  // ✅ API 호출 (조회)
+  const fetchPlannedCompanionPosts = async () => {
+    setLoading(true);
+    try {
+      const { posts } = await getPlannedCompanions(filters);
+      console.log(posts);
+      setPosts(posts);
+    } catch (error) {
+      toast.error("사전 동행 모집글 조회 실패");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPlannedCompanionPosts();
+  }, [filters, sort]);
+
   const handlePostCreate = async () => {
-    // await fetch(); // ✅ 새 현지 동행 모집글 작성 후 다시 목록 불러오기
+    await fetchPlannedCompanionPosts(); // ✅ 새 글 등록 후 목록 갱신
     closeCreateModal();
   };
 
-  // Sample data for 사전 동행 모집 posts
-  const companionPosts = [
-    {
-      id: 1,
-      title: "프랑스 1박2일 가성비",
-      location: "김해시",
-      dateRange: "25.7.18~25.7.19",
-      description:
-        "프랑스 당일치기 여행갑니다\n일정 : 인천공항 >> 프랑스 공항 >> 인천공항",
-      author: "A",
-      authorImage: "/images/user-a.png", // 이미지 없을 경우 undefined
-      participants: 2,
-      maxParticipants: 4,
-      image: "/placeholder.svg?height=200&width=300&text=여행+이미지",
-    },
-    {
-      id: 2,
-      title: "프랑스 1박2일 가성비",
-      location: "김해시",
-      dateRange: "25.7.18~25.7.19",
-      description:
-        "프랑스 당일치기 여행갑니다\n일정 : 인천공항 >> 프랑스 공항 >> 인천공항",
-      author: "A",
-      participants: 1,
-      maxParticipants: 3,
-      image: "/placeholder.svg?height=200&width=300&text=여행+이미지",
-    },
-    {
-      id: 3,
-      title: "프랑스 1박2일 가성비",
-      location: "김해시",
-      dateRange: "25.7.18~25.7.19",
-      description:
-        "프랑스 당일치기 여행갑니다\n일정 : 인천공항 >> 프랑스 공항 >> 인천공항",
-      author: "A",
-      participants: 3,
-      maxParticipants: 5,
-      image: "/placeholder.svg?height=200&width=300&text=여행+이미지",
-    },
-    {
-      id: 4,
-      title: "프랑스 1박2일 가성비",
-      location: "김해시",
-      dateRange: "25.7.18~25.7.19",
-      description:
-        "프랑스 당일치기 여행갑니다\n일정 : 인천공항 >> 프랑스 공항 >> 인천공항",
-      author: "A",
-      participants: 0,
-      maxParticipants: 2,
-      image: "/placeholder.svg?height=200&width=300&text=여행+이미지",
-    },
-  ];
-
   return (
-    <div className="photo-companion-page">
-      <Filterbar filters={filters} onFilterChange={handleFilterChange} />
-      <div className="companion-grid">
-        {companionPosts.map((post) => (
-          <PlannedCompanionCard
-            key={post.id}
-            {...post}
-            isLoggedIn={isLoggedIn}
-            onLoginModalOpen={onLoginModalOpen}
-          />
-        ))}
-      </div>
+    <div className="planned-companion-page">
+      <Filterbar
+        filters={filters}
+        onFilterChange={handleFilterChange}
+        onSortChange={handleSortChange} // ✅ 정렬 변경 핸들러 전달
+      />
+
+      {/* ✅ 로딩 상태 처리 */}
+      {loading ? (
+        <p className="loading-text">로딩 중...</p>
+      ) : posts.length === 0 ? (
+        <p className="empty-text">사전 동행 모집글이 없습니다.</p>
+      ) : (
+        <div className="companion-grid">
+          {posts.map((post) => (
+            <PlannedCompanionCard
+              key={post.id}
+              {...post}
+              isLoggedIn={isLoggedIn}
+              onLoginModalOpen={onLoginModalOpen}
+            />
+          ))}
+        </div>
+      )}
+
       {/* ✅ + 버튼 */}
       {isLoggedIn && (
         <button className="fab" onClick={openCreateModal}>
           +
         </button>
       )}
-      {/* ✅ CreateFeedModal (PlannedCompanionPage에서 관리) */}
+
+      {/* ✅ CreatePlannedModal */}
       {isCreateModalOpen && (
         <CreatePlannedModal
           onClose={closeCreateModal}
@@ -110,4 +99,4 @@ const PhotoCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
   );
 };
 
-export default PhotoCompanionPage;
+export default PlannedCompanionPage;

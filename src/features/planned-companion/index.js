@@ -1,4 +1,5 @@
 export * from "./api/plannedApi";
+export * from "./dto/plannedCompanionDto";
 
 export { default as PlannedCompanionPage } from "/src/features/planned-companion/pages/PlannedCompanionPage";
 

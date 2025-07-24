@@ -8,6 +8,7 @@ import {
   CreateFeedModal,
   FeedDetailModal,
 } from "@/features/feed";
+import toast from "react-hot-toast";
 
 const FeedPage = ({ onFeedCountChange, isLoggedIn }) => {
   const [filters, setFilters] = useState({
@@ -51,10 +52,11 @@ const FeedPage = ({ onFeedCountChange, isLoggedIn }) => {
     try {
       console.log("[GetFeed] Sort : ", filters.sort);
       const { feeds } = await getFeeds(filters);
+      console.log(feeds);
       setFeedData(feeds);
       onFeedCountChange?.(feeds.length);
     } catch (error) {
-      console.error("피드 데이터를 불러오는 데 실패했습니다.", error);
+      toast.error("피드 데이터를 불러오는 데 실패했습니다.");
     } finally {
       setLoading(false);
     }
