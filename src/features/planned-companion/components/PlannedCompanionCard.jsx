@@ -62,7 +62,12 @@ const PlannedCompanionCard = ({
           </div>
           <div className="post-info">
             <h3 className="post-title">{postData.title}</h3>
-            <p className="post-location">{getRegionLabel(postData.location)}</p>
+            <div className="post-row">
+              <p className="post-location">
+                {getRegionLabel(postData.location)}
+              </p>
+              <p className="post-date">{postData.createdAt}</p>
+            </div>
           </div>
         </div>
         {isLoggedIn && (
