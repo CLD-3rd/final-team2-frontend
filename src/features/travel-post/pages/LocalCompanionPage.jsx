@@ -2,10 +2,7 @@
 
 import { useState } from "react";
 import { Filterbar } from "@/shared";
-import {
-  LocalCompanionCard,
-  CreateLocalModal,
-} from "@/features/local-companion";
+import { LocalCompanionCard, CreateLocalModal } from "@/features/travel-post";
 
 const LocalCompanionPage = ({ isLoggedIn }) => {
   const [filters, setFilters] = useState({

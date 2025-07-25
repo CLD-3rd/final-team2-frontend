@@ -2,7 +2,7 @@ import { axiosInstance } from "@/shared";
 import {
   parsePlannedCompanionsResponse,
   parseLocalCompanionsResponse,
-} from "@/features/planned-companion";
+} from "@/features/travel-post";
 
 const BASE_URL = "/api/travel-posts";
 /**

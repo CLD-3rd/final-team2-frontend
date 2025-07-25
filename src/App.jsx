@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Header, Sidebar } from "@/shared";
 import AppRouter from "@/AppRouter";
-import { CreateLocalModal } from "@/features/local-companion";
+import { CreateLocalModal } from "@/features/travel-post";
 import { LoginModal } from "@/features/user";
 import "@/App.css";
 import { Toaster } from "react-hot-toast";

@@ -1,8 +1,10 @@
 "use client";
 
 import { FeedPage } from "@/features/feed";
-import { LocalCompanionPage } from "@/features/local-companion";
-import { PlannedCompanionPage } from "@/features/planned-companion";
+import {
+  PlannedCompanionPage,
+  LocalCompanionPage,
+} from "@/features/travel-post";
 import { ProfileManagementPage, ScheduleManagementPage } from "@/features/user";
 import { ChatPage } from "@/features/chat";
 import { ErrorPage } from "@/shared";

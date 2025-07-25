@@ -7,7 +7,7 @@ import {
   CreatePlannedModal,
   getTravelPosts,
   UpdatePlannedModal,
-} from "@/features/planned-companion";
+} from "@/features/travel-post";
 import toast from "react-hot-toast";
 
 const PlannedCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {

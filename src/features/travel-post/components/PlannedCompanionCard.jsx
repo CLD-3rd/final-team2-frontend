@@ -1,12 +1,12 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   useLockBodyScroll,
   getRegionLabel,
   FallbackImage,
   ProfileImage,
 } from "@/shared";
-import { deleteTravelPost } from "@/features/planned-companion";
+import { deleteTravelPost } from "@/features/travel-post";
 import toast from "react-hot-toast";
 
 const PlannedCompanionCard = ({

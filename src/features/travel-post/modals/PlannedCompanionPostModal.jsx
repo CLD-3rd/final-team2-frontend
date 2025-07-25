@@ -1,9 +1,6 @@
 import { useState, useEffect } from "react";
 import { PostForm, useLockBodyScroll } from "@/shared";
-import {
-  createTravelPost,
-  updateTravelPost,
-} from "@/features/planned-companion";
+import { createTravelPost, updateTravelPost } from "@/features/travel-post";
 import toast from "react-hot-toast";
 
 const PlannedCompanionPostModal = ({
