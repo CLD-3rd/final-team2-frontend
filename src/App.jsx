@@ -98,17 +98,6 @@ function App() {
         />
       </div>
 
-      {isCreateModalOpen && (
-        <>
-          {currentPage === "local-companion" && (
-            <CreateLocalModal
-              onClose={closeCreateModal}
-              onPostCreate={handlePostCreate}
-            />
-          )}
-        </>
-      )}
-
       {isLoginModalOpen && (
         <LoginModal onClose={closeLoginModal} onLogin={handleLogin} />
       )}

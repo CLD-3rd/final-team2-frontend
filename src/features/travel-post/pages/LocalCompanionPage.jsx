@@ -1,8 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Filterbar } from "@/shared";
-import { LocalCompanionCard, CreateLocalModal } from "@/features/travel-post";
+import {
+  LocalCompanionCard,
+  CreateLocalModal,
+  getTravelPosts,
+} from "@/features/travel-post";
+import toast from "react-hot-toast";
 
 const LocalCompanionPage = ({ isLoggedIn }) => {
   const [filters, setFilters] = useState({
@@ -10,65 +15,79 @@ const LocalCompanionPage = ({ isLoggedIn }) => {
     title: "",
     region: "",
   });
-
+  const [sort, setSort] = useState("recent"); // ✅ 정렬 상태
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
+  const [posts, setPosts] = useState([]); // ✅ 서버 데이터 저장
+  const [loading, setLoading] = useState(true);
+
+  const openCreateModal = () => setIsCreateModalOpen(true);
+  const closeCreateModal = () => setIsCreateModalOpen(false);
+
+  const handleEditRequest = (postData) => {
+    setSelectedPost(postData);
+    console.log(postData);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditSuccess = () => {
+    fetchPosts();
+    setIsEditModalOpen(false);
+    setSelectedPost(null);
+  };
 
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
   };
 
-  const openCreateModal = () => setIsCreateModalOpen(true);
-  const closeCreateModal = () => setIsCreateModalOpen(false);
+  const handleSortChange = (newSort) => {
+    setSort(newSort);
+  };
+
+  // ✅ API 호출 (조회)
+  const fetchPosts = async () => {
+    setLoading(true);
+    try {
+      const { posts } = await getTravelPosts("NOW", filters);
+      setPosts(posts);
+    } catch (error) {
+      toast.error("현지 동행 모집글 조회 실패");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, [filters, sort]);
 
   const handlePostCreate = async () => {
     // await fetchFeeds(); // ✅ 새 현지 동행 모집글 작성 후 다시 목록 불러오기
     closeCreateModal();
   };
 
-  // Sample data for local companion posts
-  const localCompanionPosts = [
-    {
-      id: 1,
-      title: "25년 제주 여행 가실 분 여자분들",
-      rating: 4,
-      author: "사용자A",
-      profileImage: "/placeholder.svg?height=40&width=40",
-      tags: ["느긋해요", "술 좋아해요", "의상차이에요"],
-    },
-    {
-      id: 2,
-      title: "25년 제주 여행 가실 분 여자분들",
-      rating: 5,
-      author: "사용자B",
-      profileImage: "/placeholder.svg?height=40&width=40",
-      tags: ["느긋해요", "술 좋아해요", "의상차이에요"],
-    },
-    {
-      id: 3,
-      title: "25년 제주 여행 가실 분 여자분들",
-      rating: 5,
-      author: "사용자C",
-      profileImage: "/placeholder.svg?height=40&width=40",
-      tags: ["느긋해요", "술 좋아해요", "의상차이에요"],
-    },
-    {
-      id: 4,
-      title: "25년 제주 여행 가실 분 여자분들",
-      rating: 5,
-      author: "사용자D",
-      profileImage: "/placeholder.svg?height=40&width=40",
-      tags: ["느긋해요", "술 좋아해요", "의상차이에요"],
-    },
-  ];
-
   return (
     <div className="local-companion-page">
-      <Filterbar filters={filters} onFilterChange={handleFilterChange} />
-      <div className="local-companion-grid">
-        {localCompanionPosts.map((post) => (
-          <LocalCompanionCard key={post.id} {...post} />
-        ))}
-      </div>
+      <Filterbar
+        filters={filters}
+        onFilterChange={handleFilterChange}
+        onSortChange={handleSortChange}
+      />
+
+      {/* ✅ 로딩 상태 처리 */}
+      {loading ? (
+        <p className="loading-text">로딩 중...</p>
+      ) : posts.length === 0 ? (
+        <p className="empty-text">현지 동행 모집글이 없습니다.</p>
+      ) : (
+        <div className="local-companion-grid">
+          {posts.map((post) => (
+            <LocalCompanionCard key={post.id} postData={post} />
+          ))}
+        </div>
+      )}
+
       {/* ✅ + 버튼 */}
       {isLoggedIn && (
         <button className="fab" onClick={openCreateModal}>

@@ -48,7 +48,7 @@ export const getTravelPosts = async (
       error.response?.data?.message ||
       `[${type}] 모집글 조회 중 오류가 발생했습니다.`;
     console.error(`[${type}] 모집글 조회 실패`, message);
-    const testResponse = {
+    const testPlannedResponse = {
       posts: [
         {
           travelPostId: 1,
@@ -110,12 +110,70 @@ export const getTravelPosts = async (
         totalElements: 3,
       },
     };
+    const testLocalResponse = {
+      posts: [
+        {
+          travelPostId: 101,
+          title: "제주 카페 투어 동행 구해요 ☕",
+          location: "JEJU",
+          author: {
+            userId: 11,
+            nickname: "카페러버",
+            profileImgUrl: "https://cdn.example.com/users/11/profile.jpg",
+            rating: 3.5,
+            tags: ["커피", "사진", "맛집"],
+          },
+          createdAt: "2025-08-03",
+        },
+        {
+          travelPostId: 102,
+          title: "부산 해운대에서 맥주 한잔 하실 분 🍺",
+          location: "BUSAN",
+          author: {
+            userId: 12,
+            nickname: "부산사나이",
+            profileImgUrl: "https://cdn.example.com/users/12/profile.jpg",
+            rating: 4.2,
+            tags: ["바다", "야경", "맥주"],
+          },
+          createdAt: "2025-08-02",
+        },
+        {
+          travelPostId: 103,
+          title: "서울 홍대 근처 맛집 탐방 🙌",
+          location: "SEOUL",
+          author: {
+            userId: 13,
+            nickname: "맛집헌터",
+            profileImgUrl: "https://cdn.example.com/users/13/profile.jpg",
+            rating: 4.9,
+            tags: ["맛집", "트렌디", "SNS"],
+          },
+          createdAt: "2025-08-01",
+        },
+      ],
+      pageInfo: {
+        currentPage: 1,
+        pageSize: 10,
+        totalPages: 1,
+        totalElements: 3,
+      },
+    };
+
+    let parsedPosts;
+    if (type === "BEFORE") {
+      parsedPosts = parsePlannedCompanionsResponse(testPlannedResponse);
+    } else if (type === "NOW") {
+      parsedPosts = parseLocalCompanionsResponse(testLocalResponse);
+    } else {
+      throw new Error(`[모집글 조회]지원하지 않는 postType: ${type}`);
+    }
 
     return {
-      posts: parsePlannedCompanionsResponse(testResponse),
-      pageInfo: testResponse.data?.pageInfo,
+      posts: parsedPosts,
+      pageInfo: parsedPosts.pageInfo,
     };
-    throw new Error(message);
+    // throw new Error(message);
   }
 };
 

@@ -23,7 +23,6 @@ export const parseLocalCompanionsResponse = (data) => {
   return data.posts.map((post) => ({
     id: post.travelPostId,
     title: post.title,
-    content: post.content,
     location: post.location,
     startTime: post.startTime,
     endTime: post.endTime,

@@ -52,7 +52,6 @@ const PlannedCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
     setLoading(true);
     try {
       const { posts } = await getTravelPosts("BEFORE", filters);
-      console.log(posts);
       setPosts(posts);
     } catch (error) {
       toast.error("사전 동행 모집글 조회 실패");
