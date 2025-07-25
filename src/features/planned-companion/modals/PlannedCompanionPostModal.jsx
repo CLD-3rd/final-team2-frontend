@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { PostForm, useLockBodyScroll } from "@/shared";
 import {
-  createPlannedCompanion,
-  updatePlannedCompanion,
+  createTravelPost,
+  updateTravelPost,
 } from "@/features/planned-companion";
 import toast from "react-hot-toast";
 
@@ -69,11 +69,11 @@ const PlannedCompanionPostModal = ({
       }
 
       if (mode === "create") {
-        await createPlannedCompanion(formPayload);
+        await createTravelPost("BEFORE", formPayload);
         toast.success("사전 동행 모집글이 등록되었습니다!");
         onPostCreate?.();
       } else if (mode === "edit" && initialData?.id) {
-        await updatePlannedCompanion(initialData.id, formPayload);
+        await updateTravelPost("BEFORE", initialData.id, formPayload);
         toast.success("사전 동행 모집글이 수정되었습니다!");
         onSuccess?.();
       }

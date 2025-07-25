@@ -5,7 +5,7 @@ import { Filterbar } from "@/shared";
 import {
   PlannedCompanionCard,
   CreatePlannedModal,
-  getPlannedCompanions,
+  getTravelPosts,
   UpdatePlannedModal,
 } from "@/features/planned-companion";
 import toast from "react-hot-toast";
@@ -51,7 +51,7 @@ const PlannedCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
   const fetchPosts = async () => {
     setLoading(true);
     try {
-      const { posts } = await getPlannedCompanions(filters);
+      const { posts } = await getTravelPosts("BEFORE", filters);
       console.log(posts);
       setPosts(posts);
     } catch (error) {

@@ -6,7 +6,7 @@ import {
   FallbackImage,
   ProfileImage,
 } from "@/shared";
-import { deletePlannedCompanion } from "@/features/planned-companion";
+import { deleteTravelPost } from "@/features/planned-companion";
 import toast from "react-hot-toast";
 
 const PlannedCompanionCard = ({
@@ -38,7 +38,7 @@ const PlannedCompanionCard = ({
   const handleDeletePost = async () => {
     if (window.confirm("이 모집글을 삭제하시겠습니까?")) {
       try {
-        await deletePlannedCompanion(postData.id);
+        await deleteTravelPost("BEFORE", postData.id);
         toast.success("모집글이 삭제되었습니다.");
         setIsMoreMenuOpen(false);
 

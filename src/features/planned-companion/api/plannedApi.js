@@ -1,10 +1,19 @@
 import { axiosInstance } from "@/shared";
-import { parsePlannedCompanionListResponse } from "@/features/planned-companion";
+import {
+  parsePlannedCompanionsResponse,
+  parseLocalCompanionsResponse,
+} from "@/features/planned-companion";
 
-const BASE_URL = "/api/planned-companion";
-
-// ✅ 사전 동행 모집글 조회
-export const getPlannedCompanions = async (
+const BASE_URL = "/api/travel-posts";
+/**
+ * ✅ 공통 CRUD API
+ * @param {string} type - "BEFORE" | "NOW"
+ * @param {object} params - query params
+ * @param {object} payload - body data (POST/PATCH)
+ */
+// ✅ 모집글 조회
+export const getTravelPosts = async (
+  type,
   filters = {},
   page = 1,
   size = 10
@@ -12,21 +21,33 @@ export const getPlannedCompanions = async (
   try {
     const { data } = await axiosInstance.get(BASE_URL, {
       params: {
+        postType: type,
         page,
         size,
         sort: filters.sort || "recent", // ✅ 정렬 기본값
         ...filters,
       },
     });
+
+    // ✅ 파서 자동 적용
+    let parsedPosts;
+    if (type === "BEFORE") {
+      parsedPosts = parsePlannedCompanionsResponse(data);
+    } else if (type === "NOW") {
+      parsedPosts = parseLocalCompanionsResponse(data);
+    } else {
+      throw new Error(`[모집글 조회]지원하지 않는 postType: ${type}`);
+    }
+
     return {
-      posts: parsePlannedCompanionsResponse(data),
+      posts: parsedPosts,
       pageInfo: data?.data?.pageInfo,
     };
   } catch (error) {
     const message =
       error.response?.data?.message ||
-      "사전 동행 모집글 조회 중 오류가 발생했습니다.";
-    console.error("사전 동행 모집글 조회 실패:", message);
+      `[${type}] 모집글 조회 중 오류가 발생했습니다.`;
+    console.error(`[${type}] 모집글 조회 실패`, message);
     const testResponse = {
       posts: [
         {
@@ -91,17 +112,49 @@ export const getPlannedCompanions = async (
     };
 
     return {
-      posts: parsePlannedCompanionListResponse(testResponse),
+      posts: parsePlannedCompanionsResponse(testResponse),
       pageInfo: testResponse.data?.pageInfo,
     };
     throw new Error(message);
   }
 };
 
-// ✅ 사전 동행 모집글 생성
-export const createPlannedCompanion = async (payload) => {
+// // ✅ 모집글 조회
+// export const getTravelPosts = async (
+//   type,
+//   filters = {},
+//   page = 1,
+//   size = 10
+// ) => {
+//   try {
+//     const { data } = await axiosInstance.get(BASE_URL, {
+//       params: {
+//         postType: type,
+//         page,
+//         size,
+//         sort: filters.sort || "recent", // ✅ 정렬 기본값
+//         ...filters,
+//       },
+//     });
+
+//     return {
+//       posts: parsePlannedCompanionsResponse(data),
+//       pageInfo: data?.data?.pageInfo,
+//     };
+//   } catch (error) {
+//     const message =
+//       error.response?.data?.message ||
+//       `[${type}] 모집글 조회 중 오류가 발생했습니다.`;
+//     console.error(`[${type}] 모집글 조회 실패`, message);
+//     throw new Error(message);
+//   }
+// };
+
+// ✅ 모집글 생성
+export const createTravelPost = async (type, payload) => {
   try {
     const { data } = await axiosInstance.post(BASE_URL, payload, {
+      params: { postType: type },
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -110,19 +163,20 @@ export const createPlannedCompanion = async (payload) => {
   } catch (error) {
     const message =
       error.response?.data?.message ||
-      "사전 동행 모집글 등록 중 오류가 발생했습니다.";
-    console.error("사전 동행 모집글 등록 실패:", message);
+      `[${type}] 모집글 등록 중 오류가 발생했습니다.`;
+    console.error(`[${type}] 모집글 등록 실패`, message);
     throw new Error(message);
   }
 };
 
-// ✅ 사전 동행 모집글 수정
-export const updatePlannedCompanion = async (postId, payload) => {
+// ✅ 모집글 수정
+export const updateTravelPost = async (type, postId, payload) => {
   try {
     const { data } = await axiosInstance.patch(
       `${BASE_URL}/${postId}`,
       payload,
       {
+        params: { postType: type },
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -132,22 +186,24 @@ export const updatePlannedCompanion = async (postId, payload) => {
   } catch (error) {
     const message =
       error.response?.data?.message ||
-      "사전 동행 모집글 수정 중 오류가 발생했습니다.";
-    console.error("사전 동행 모집글 수정 실패:", message);
+      `[${type}] 모집글 수정 중 오류가 발생했습니다.`;
+    console.error(`[${type}] 모집글 수정 실패`, message);
     throw new Error(message);
   }
 };
 
-// ✅ 사전 동행 모집글 삭제
-export const deletePlannedCompanion = async (postId) => {
+// ✅ 모집글 삭제
+export const deleteTravelPost = async (type, postId) => {
   try {
-    const { data } = await axiosInstance.delete(`${BASE_URL}/${postId}`);
+    const { data } = await axiosInstance.delete(`${BASE_URL}/${postId}`, {
+      params: { postType: type },
+    });
     return data;
   } catch (error) {
     const message =
       error.response?.data?.message ||
-      "사전 동행 모집글 삭제 중 오류가 발생했습니다.";
-    console.error("사전 동행 모집글 삭제 실패:", message);
+      `[${type}] 모집글 삭제 중 오류가 발생했습니다.`;
+    console.error(`[${type}] 모집글 삭제 실패`, message);
     throw new Error(message);
   }
 };
