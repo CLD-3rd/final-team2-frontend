@@ -15,9 +15,8 @@ const PlannedCompanionCard = ({
   onLoginModalOpen,
   onEdit,
 }) => {
-  useLockBodyScroll();
-
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  useLockBodyScroll();
 
   const handleJoinClick = () => {
     if (!isLoggedIn) {

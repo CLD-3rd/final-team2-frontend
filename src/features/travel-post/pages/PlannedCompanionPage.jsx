@@ -29,7 +29,6 @@ const PlannedCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
 
   const handleEditRequest = (postData) => {
     setSelectedPost(postData);
-    console.log(postData);
     setIsEditModalOpen(true);
   };
 

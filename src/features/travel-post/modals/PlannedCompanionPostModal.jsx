@@ -25,8 +25,8 @@ const PlannedCompanionPostModal = ({
       key: "selection",
     },
   ]);
-
   const [loading, setLoading] = useState(false);
+
   useLockBodyScroll();
 
   // ✅ initialData 있을 때 formData 세팅
@@ -109,9 +109,9 @@ const PlannedCompanionPostModal = ({
           onClose={onClose}
           titleLabel="여행 제목"
           contentLabel="여행 계획"
-          includeBadge={false}
           includeDateRange={true}
           includeContent={true}
+          includeMaxParticipants={true}
           includeImage={true}
         />
       </div>

@@ -5,11 +5,12 @@ import { Filterbar } from "@/shared";
 import {
   LocalCompanionCard,
   CreateLocalModal,
+  UpdateLocalModal,
   getTravelPosts,
 } from "@/features/travel-post";
 import toast from "react-hot-toast";
 
-const LocalCompanionPage = ({ isLoggedIn }) => {
+const LocalCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
   const [filters, setFilters] = useState({
     author: "",
     title: "",
@@ -27,7 +28,6 @@ const LocalCompanionPage = ({ isLoggedIn }) => {
 
   const handleEditRequest = (postData) => {
     setSelectedPost(postData);
-    console.log(postData);
     setIsEditModalOpen(true);
   };
 
@@ -63,7 +63,7 @@ const LocalCompanionPage = ({ isLoggedIn }) => {
   }, [filters, sort]);
 
   const handlePostCreate = async () => {
-    // await fetchFeeds(); // ✅ 새 현지 동행 모집글 작성 후 다시 목록 불러오기
+    await fetchPosts();
     closeCreateModal();
   };
 
@@ -83,7 +83,13 @@ const LocalCompanionPage = ({ isLoggedIn }) => {
       ) : (
         <div className="local-companion-grid">
           {posts.map((post) => (
-            <LocalCompanionCard key={post.id} postData={post} />
+            <LocalCompanionCard
+              key={post.id}
+              postData={post}
+              isLoggedIn={isLoggedIn}
+              onLoginModalOpen={onLoginModalOpen}
+              onEdit={handleEditRequest}
+            />
           ))}
         </div>
       )}
@@ -99,6 +105,15 @@ const LocalCompanionPage = ({ isLoggedIn }) => {
         <CreateLocalModal
           onClose={closeCreateModal}
           onPostCreate={handlePostCreate}
+        />
+      )}
+      {/* ✅ Update Modal */}
+      {isEditModalOpen && selectedPost && (
+        <UpdateLocalModal
+          onClose={() => setIsEditModalOpen(false)}
+          initialData={selectedPost}
+          onSuccess={handleEditSuccess}
+          mode="edit"
         />
       )}
     </div>
