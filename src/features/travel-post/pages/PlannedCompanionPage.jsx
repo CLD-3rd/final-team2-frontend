@@ -90,6 +90,7 @@ const PlannedCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
               isLoggedIn={isLoggedIn}
               onLoginModalOpen={onLoginModalOpen}
               onEdit={handleEditRequest}
+              onUpdateSuccess={fetchPosts}
             />
           ))}
         </div>

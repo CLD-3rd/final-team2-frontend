@@ -6,7 +6,10 @@ import {
   FallbackImage,
   ProfileImage,
 } from "@/shared";
-import { deleteTravelPost } from "@/features/travel-post";
+import {
+  deleteTravelPost,
+  requestTravelPostJoin,
+} from "@/features/travel-post";
 import toast from "react-hot-toast";
 
 const PlannedCompanionCard = ({
@@ -14,18 +17,28 @@ const PlannedCompanionCard = ({
   isLoggedIn,
   onLoginModalOpen,
   onEdit,
+  onUpdateSuccess,
 }) => {
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   useLockBodyScroll();
 
-  const handleJoinClick = () => {
+  const handleJoinClick = async () => {
     if (!isLoggedIn) {
       onLoginModalOpen();
       return;
     }
-
-    // 로그인된 유저의 경우 - 실제 신청 로직은 나중에 구현
-    console.log("같이 갈래요 신청!");
+    if (window.confirm("이 모집글에 참여 신청하시겠습니까?")) {
+      try {
+        await requestTravelPostJoin("BEFORE", postData.id);
+        toast.success("참여 신청이 완료되었습니다!");
+      } catch (error) {
+        toast.error(
+          "사전 동행 모집 참여 신청에 실패했습니다.\n다시 시도해주세요."
+        );
+      } finally {
+        onUpdateSuccess?.();
+      }
+    }
   };
 
   // 더 보기 메뉴 관련 핸들러 (+ 수정, 삭제)
@@ -40,10 +53,10 @@ const PlannedCompanionCard = ({
         await deleteTravelPost("BEFORE", postData.id);
         toast.success("모집글이 삭제되었습니다.");
         setIsMoreMenuOpen(false);
-
-        onUpdateSuccess?.(); // ✅ PlannedCompanionPage 새로고침 트리거
       } catch (error) {
-        toast.error("모집글 삭제에 실패했습니다. 다시 시도해주세요.");
+        toast.error("모집글 삭제에 실패했습니다.\n다시 시도해주세요.");
+      } finally {
+        onUpdateSuccess?.();
       }
     }
   };

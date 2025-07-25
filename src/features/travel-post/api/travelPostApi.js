@@ -197,10 +197,10 @@ export const createTravelPost = async (type, payload) => {
 };
 
 // ✅ 모집글 수정
-export const updateTravelPost = async (type, postId, payload) => {
+export const updateTravelPost = async (type, travelPostId, payload) => {
   try {
     const { data } = await axiosInstance.patch(
-      `${BASE_URL}/${postId}`,
+      `${BASE_URL}/${travelPostId}`,
       payload,
       {
         params: { postType: type },
@@ -220,9 +220,9 @@ export const updateTravelPost = async (type, postId, payload) => {
 };
 
 // ✅ 모집글 삭제
-export const deleteTravelPost = async (type, postId) => {
+export const deleteTravelPost = async (type, travelPostId) => {
   try {
-    const { data } = await axiosInstance.delete(`${BASE_URL}/${postId}`, {
+    const { data } = await axiosInstance.delete(`${BASE_URL}/${travelPostId}`, {
       params: { postType: type },
     });
     return data;
@@ -231,6 +231,26 @@ export const deleteTravelPost = async (type, postId) => {
       error.response?.data?.message ||
       `[${type}] 모집글 삭제 중 오류가 발생했습니다.`;
     console.error(`[${type}] 모집글 삭제 실패`, message);
+    throw new Error(message);
+  }
+};
+
+// ✅ 참여 신청
+export const requestTravelPostJoin = async (type, travelPostId) => {
+  try {
+    const { data } = await axiosInstance.post(
+      `${BASE_URL}/requests/${travelPostId}`,
+      {},
+      {
+        params: { postType: type },
+      }
+    );
+    return data;
+  } catch (error) {
+    const message =
+      error.response?.data?.message ||
+      `[${type}] 모집글 참여 신청 중 오류가 발생했습니다.`;
+    console.error("참여 신청 실패:", message);
     throw new Error(message);
   }
 };
