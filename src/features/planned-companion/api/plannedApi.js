@@ -30,41 +30,56 @@ export const getPlannedCompanions = async (
     const testResponse = {
       posts: [
         {
-          id: 1,
+          travelPostId: 1,
           title: "제주도 힐링 여행 동행 모집",
+          content: "함께 제주도를 여행할 동행을 찾습니다!\n맛집 탐방 필수 🍽",
           location: "JEJU",
           startTime: "2025-08-10",
           endTime: "2025-08-15",
-          description:
-            "함께 제주도를 여행할 동행을 찾습니다!\n맛집 탐방 필수 🍽",
-          author: "여행가123",
-          participants: 2,
+          author: {
+            userId: 1,
+            nickname: "여행가123",
+            profileImgUrl: "https://userProfileImage1.jpg",
+          },
+          participants: 2, // (+ 현재까지 신청받은 인원 수)
           maxParticipants: 4,
-          image: "https://cdn.example.com/images/jeju-trip.jpg",
+          imageUrl: "https://cdn.example.com/images/jeju-trip.jpg",
+          createdAt: "2025-08-03",
         },
         {
-          id: 2,
+          travelPostId: 2,
           title: "부산 해운대 여행 동행",
+          content: "바다 좋아하시는 분 환영합니다!\n사진 찍기 좋아요 📸",
           location: "BUSAN",
           startTime: "2025-09-01",
           endTime: "2025-09-05",
-          description: "바다 좋아하시는 분 환영합니다!\n사진 찍기 좋아요 📸",
-          author: "부산러버",
-          participants: 1,
+          author: {
+            userId: 2,
+            nickname: "부산러버",
+            profileImgUrl: "https://userProfileImage2.jpg",
+          },
+          participants: 1, // (+ 현재까지 신청받은 인원 수)
           maxParticipants: 3,
-          image: "https://cdn.example.com/images/busan-beach.jpg",
+          imageUrl: "https://cdn.example.com/images/busan-beach.jpg",
+          createdAt: "2025-08-03",
         },
         {
-          id: 3,
+          travelPostId: 3,
           title: "강원도 캠핑 모임",
+          content:
+            "바다 좋아하시는 분 환영합니다!\n사진 찍기 좋아요 📸\na\na\na",
           location: "SOKCHO",
           startTime: "2025-08-20",
           endTime: "2025-08-22",
-          description: "캠핑장비 있으신 분 대환영!\n밤하늘 별보러 가요 🌌",
-          author: "캠핑매니아",
-          participants: 3,
+          author: {
+            userId: 3,
+            nickname: "캠핑매니아",
+            profileImgUrl: "https://userProfileImage3.jpg",
+          },
+          participants: 3, // (+ 현재까지 신청받은 인원 수)
           maxParticipants: 5,
-          image: "https://cdn.example.com/images/gangwon-camp.jpg",
+          imageUrl: "https://cdn.example.com/images/gangwon-camp.jpg",
+          createdAt: "2025-08-01",
         },
       ],
       pageInfo: {

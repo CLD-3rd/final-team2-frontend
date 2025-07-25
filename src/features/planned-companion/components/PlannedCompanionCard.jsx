@@ -55,8 +55,8 @@ const PlannedCompanionCard = ({
         <div className="author-info">
           <div className="author-avatar">
             <ProfileImage
-              src={postData.image}
-              alt={postData.author}
+              src={postData.author.profileImgUrl}
+              alt={postData.author.nickname}
               className="avatar-image"
             />
           </div>
@@ -93,7 +93,7 @@ const PlannedCompanionCard = ({
 
       <div className="card-image-container">
         <FallbackImage
-          src={postData.image}
+          src={postData.imageUrl}
           alt={postData.title}
           className="companion-card-image"
         />
