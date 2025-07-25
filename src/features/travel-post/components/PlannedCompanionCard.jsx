@@ -18,6 +18,7 @@ const PlannedCompanionCard = ({
   onLoginModalOpen,
   onEdit,
   onUpdateSuccess,
+  onClick,
 }) => {
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   useLockBodyScroll();
@@ -62,7 +63,7 @@ const PlannedCompanionCard = ({
   };
 
   return (
-    <div className="companion-card">
+    <div className="companion-card" onClick={onClick}>
       <div className="card-header">
         <div className="author-info">
           <div className="author-avatar">
@@ -116,8 +117,6 @@ const PlannedCompanionCard = ({
             </div>
           </div>
         </div>
-
-        {/* <button className="more-options">⋮</button> */}
       </div>
 
       <div className="card-image-container">
@@ -132,12 +131,7 @@ const PlannedCompanionCard = ({
         <div className="date-range">
           {postData.startTime} ~ {postData.endTime}
         </div>
-        <div className="description">
-          {postData.content.split("\n").map((line, index) => (
-            <div key={index}>{line}</div>
-          ))}
-        </div>
-
+        <div className="description">{postData.content}</div>
         <div className="card-actions">
           <button className="participants-count-btn">
             {postData.participants}/{postData.maxParticipants}

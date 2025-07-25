@@ -1615,10 +1615,28 @@ body {
 }
 
 .description {
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* 최대 3줄 */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  line-clamp: 2;
+  box-orient: vertical;
+
+  text-overflow: ellipsis;
   font-size: 14px;
   color: #666;
   line-height: 1.4;
   margin-bottom: 16px;
+}
+
+.toggle-btn {
+  color: var(--color-primary);
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
 }
 
 /* FAB */
