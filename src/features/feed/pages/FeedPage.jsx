@@ -16,7 +16,7 @@ const FeedPage = ({ onFeedCountChange, isLoggedIn }) => {
   });
   // console.log("[FeedPage] login : ", isLoggedIn);
 
-  const [feedData, setFeedData] = useState([]);
+  const [feeds, setFeeds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [reloadTrigger, setReloadTrigger] = useState(0);
 
@@ -34,7 +34,8 @@ const FeedPage = ({ onFeedCountChange, isLoggedIn }) => {
     setLoading(true);
     try {
       const { feeds } = await getFeeds(filters);
-      setFeedData(feeds);
+      console.log(feeds);
+      setFeeds(feeds);
       onFeedCountChange?.(feeds.length);
     } catch (error) {
       toast.error("피드 데이터를 불러오는 데 실패했습니다.");
@@ -66,14 +67,14 @@ const FeedPage = ({ onFeedCountChange, isLoggedIn }) => {
     <>
       <Filterbar filters={filters} onFilterChange={handleFilterChange} />
 
-      {!loading && feedData.length === 0 ? (
+      {!loading && feeds.length === 0 ? (
         <div className="empty-feed-message">
           아직 작성된 피드가 없습니다. 🥲
         </div>
       ) : (
         <FeedGrid
           filters={filters}
-          feedData={feedData}
+          feeds={feeds}
           loading={loading}
           onFeedClick={handleFeedClick}
         />

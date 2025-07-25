@@ -16,15 +16,11 @@ const FeedDetailModal = ({
   onClose,
   feedId,
   isLoggedIn,
-  onFeedDelete,
   onUpdateSuccess, // ✅ FeedPage에서 갱신할 콜백 추가
 }) => {
-  useLockBodyScroll();
-  console.log("[FeedDetail] login : ", isLoggedIn);
   const [feedData, setFeedData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -32,19 +28,25 @@ const FeedDetailModal = ({
   const [editingCommentText, setEditingCommentText] = useState("");
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [hasMultipleImages, setHasMultipleImages] = useState(false);
+
+  useLockBodyScroll();
+
+  const fetchFeedDetail = async () => {
+    try {
+      const data = await getFeedDetail(feedId);
+      setHasMultipleImages(data.imageUrls.length > 1);
+      setFeedData(data);
+      console.log(data);
+      setComments(data.comments || []); // ✅ 댓글 상태에 세팅
+    } catch (err) {
+      toast.error("피드 정보를 불러오지 못했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchFeedDetail = async () => {
-      try {
-        const data = await getFeedDetail(feedId);
-        setFeedData(data);
-        setComments(data.comments || []); // ✅ 댓글 상태에 세팅
-      } catch (err) {
-        toast.error("피드 정보를 불러오지 못했습니다.");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchFeedDetail();
   }, [feedId]);
 
@@ -104,15 +106,17 @@ const FeedDetailModal = ({
     }
   };
 
-  const images = feedData.images || ["/images/feed-sample.jpg"];
-  const hasMultipleImages = images.length > 1;
   // 여러 이미지 처리 핸들러
   const handlePrevImage = () => {
-    setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? feedData.imageUrls.length - 1 : prev - 1
+    );
   };
 
   const handleNextImage = () => {
-    setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+    setCurrentImageIndex((prev) =>
+      prev === feedData.imageUrls.length - 1 ? 0 : prev + 1
+    );
   };
 
   const handleImageClick = (e) => {
@@ -246,7 +250,7 @@ const FeedDetailModal = ({
         <div className="feed-modal-image-section">
           <div className="image-container">
             <FallbackImage
-              src={images[currentImageIndex] || "/placeholder.svg"}
+              src={feedData.imageUrls[currentImageIndex]}
               alt={feedData.title}
               className="feed-modal-image"
               onClick={handleImageClick}
@@ -269,10 +273,10 @@ const FeedDetailModal = ({
                   ›
                 </button>
                 <div className="image-pagination">
-                  {currentImageIndex + 1}/{images.length}
+                  {currentImageIndex + 1}/{feedData.imageUrls.length}
                 </div>
                 <div className="image-dots">
-                  {images.map((_, index) => (
+                  {feedData.imageUrls.map((_, index) => (
                     <button
                       key={index}
                       className={`image-dot ${

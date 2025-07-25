@@ -2,29 +2,14 @@
 
 import { FeedCard } from "@/features/feed";
 
-const FeedGrid = ({ filters, feedData, onFeedClick }) => {
-  const allFeedData = Array.isArray(feedData) ? feedData : [];
-
-  // Filter logic
-  const filteredData = allFeedData.filter((item) => {
-    if (filters.location && item.location !== filters.location) return false;
-    if (filters.author && !item.author.includes(filters.author)) return false;
-    return true;
-  });
-
+const FeedGrid = ({ feeds, onFeedClick }) => {
   return (
     <div className="feed-grid">
-      {filteredData.map((item) => (
+      {feeds.map((feedData) => (
         <FeedCard
-          key={item.id}
-          title={item.title}
-          location={item.location}
-          author={`유저 ${item.userId}`}
-          date={item.createdAt}
-          images={[item.image]}
-          views={item.views}
-          likes={item.likes}
-          onClick={() => onFeedClick(item.id)}
+          key={feedData.id}
+          feedData={feedData}
+          onClick={() => onFeedClick(feedData.id)}
         />
       ))}
     </div>

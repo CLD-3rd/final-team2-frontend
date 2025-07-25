@@ -5,17 +5,19 @@ export const parseFeedsResponse = (data) => {
   if (!data || !Array.isArray(data.feeds)) return [];
 
   return data.feeds.map((feed) => ({
-    id: feed.feed_id,
-    userId: feed.user_id,
+    id: feed.feedId,
+    author: {
+      userId: feed.author.userId,
+      nickname: feed.author.nickname,
+      profileImgUrl: feed.author.profileImgUrl,
+    },
     title: feed.title,
     content: feed.content,
-    image: feed.image_url,
+    imageUrls: feed.imageUrls,
     location: feed.location,
-    badgeRequest: feed.badge_request === "Y",
-    views: feed.view_count,
-    likes: feed.like_count,
-    createdAt: feed.created_at,
-    updatedAt: feed.modified_at,
+    badgeRequest: feed.badgeRequest,
+    viewCount: feed.viewCount,
+    createdAt: feed.createdAt,
   }));
 };
 
@@ -25,21 +27,22 @@ export const parseFeedDetailResponse = (data) => {
 
   return {
     id: data.feedId,
+    author: {
+      userId: data.author.userId,
+      nickname: data.author.nickname,
+      profileImgUrl: data.author.profileImgUrl,
+    },
     title: data.title,
     content: data.content,
     location: data.location,
-    images: data.imageUrls || [], // 기존 FeedDetailModal에서 images 사용
-    date: formatTime(data.created_at),
-    author: {
-      nickname: data.author.nickname,
-      profileImage: data.author.profileImage,
-    },
+    imageUrls: data.imageUrls,
+    createdAt: formatTime(data.created_at),
     comments: (data.comments || []).map((comment) => ({
       id: comment.commentId,
       author: comment.author.nickname,
-      profileImage: comment.author.profileImage,
+      profileImgUrl: comment.author.profileImgUrl,
       content: comment.content,
-      timestamp: formatTime(comment.createdAt), // "방금 전", "2시간 전" 같은 포맷 함수 필요
+      timestamp: formatTime(comment.createdAt), // "방금 전", "2시간 전" 같은 포맷 함수 사용
       isMyComment: comment.isMyComment || false,
     })),
   };
