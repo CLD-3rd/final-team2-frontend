@@ -6,6 +6,8 @@ import {
   FallbackImage,
   ProfileImage,
 } from "@/shared";
+import { deletePlannedCompanion } from "@/features/planned-companion";
+import toast from "react-hot-toast";
 
 const PlannedCompanionCard = ({
   postData,
@@ -34,16 +36,15 @@ const PlannedCompanionCard = ({
   };
 
   const handleDeletePost = async () => {
-    if (window.confirm("이 피드를 삭제하시겠습니까?")) {
+    if (window.confirm("이 모집글을 삭제하시겠습니까?")) {
       try {
-        await deleteFeed(postData.id);
-        toast.success("피드가 삭제되었습니다.");
+        await deletePlannedCompanion(postData.id);
+        toast.success("모집글이 삭제되었습니다.");
         setIsMoreMenuOpen(false);
 
-        onClose(); // 상세 모달 닫기
         onUpdateSuccess?.(); // ✅ PlannedCompanionPage 새로고침 트리거
       } catch (error) {
-        toast.error("피드 삭제에 실패했습니다. 다시 시도해주세요.");
+        toast.error("모집글 삭제에 실패했습니다. 다시 시도해주세요.");
       }
     }
   };
