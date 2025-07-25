@@ -73,7 +73,41 @@ const PlannedCompanionCard = ({
             />
           </div>
           <div className="post-info">
-            <h3 className="post-title">{postData.title}</h3>
+            <div className="post-row">
+              <h3 className="post-title">{postData.title}</h3>
+              {isLoggedIn && (
+                <div className="more-menu-container">
+                  <button
+                    className="more-menu-button"
+                    onClick={handleMoreMenuClick}
+                  >
+                    ⋮
+                  </button>
+                  {isMoreMenuOpen && (
+                    <div className="more-menu-dropdown">
+                      <button
+                        className="more-menu-item"
+                        onClick={() => {
+                          setIsMoreMenuOpen(false);
+                          onEdit(postData);
+                        }}
+                      >
+                        수정
+                      </button>
+                      <button
+                        className="more-menu-item delete"
+                        onClick={async () => {
+                          setIsMoreMenuOpen(false);
+                          await handleDeletePost();
+                        }}
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
             <div className="post-row">
               <p className="post-location">
                 {getLocationLabel(postData.location)}
@@ -82,35 +116,7 @@ const PlannedCompanionCard = ({
             </div>
           </div>
         </div>
-        {isLoggedIn && (
-          <div className="more-menu-container">
-            <button className="more-menu-button" onClick={handleMoreMenuClick}>
-              ⋮
-            </button>
-            {isMoreMenuOpen && (
-              <div className="more-menu-dropdown">
-                <button
-                  className="more-menu-item"
-                  onClick={() => {
-                    setIsMoreMenuOpen(false);
-                    onEdit(postData);
-                  }}
-                >
-                  수정
-                </button>
-                <button
-                  className="more-menu-item delete"
-                  onClick={async () => {
-                    setIsMoreMenuOpen(false);
-                    await handleDeletePost();
-                  }}
-                >
-                  삭제
-                </button>
-              </div>
-            )}
-          </div>
-        )}
+
         {/* <button className="more-options">⋮</button> */}
       </div>
 
