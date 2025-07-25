@@ -5,7 +5,7 @@ import { DateRange } from "react-date-range";
 import { format } from "date-fns";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
-import { regionOptions } from "@/shared";
+import { locationOptions } from "@/shared";
 
 const PostForm = ({
   formData,
@@ -63,17 +63,17 @@ const PostForm = ({
 
       {/* 지역 + 뱃지 */}
       <div className="form-row">
-        <div className="form-group region-group">
-          <label htmlFor="region">지역</label>
+        <div className="form-group location-group">
+          <label htmlFor="location">지역</label>
           <select
-            id="region"
-            name="region"
-            value={formData.region}
+            id="location"
+            name="location"
+            value={formData.location}
             onChange={handleChange}
             required
           >
             <option value="">지역을 선택하세요</option>
-            {regionOptions.map(({ value, label }) => (
+            {locationOptions.map(({ value, label }) => (
               <option key={value} value={value}>
                 {label}
               </option>

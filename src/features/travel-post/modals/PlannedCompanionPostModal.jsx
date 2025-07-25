@@ -13,7 +13,7 @@ const PlannedCompanionPostModal = ({
   const [formData, setFormData] = useState({
     title: "",
     content: "",
-    region: "",
+    location: "",
     dateRange: "",
     maxParticipants: "",
     image: null,
@@ -46,7 +46,7 @@ const PlannedCompanionPostModal = ({
       ]);
     }
   }, [initialData]);
-
+  console.log(formData);
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -55,7 +55,7 @@ const PlannedCompanionPostModal = ({
       const formPayload = new FormData();
       formPayload.append("title", formData.title);
       formPayload.append("content", formData.content);
-      formPayload.append("location", formData.region);
+      formPayload.append("location", formData.location);
       // ✅ DateRange 값 변환
       const startDate = dateRange[0].startDate.toISOString().split("T")[0];
       const endDate = dateRange[0].endDate.toISOString().split("T")[0];

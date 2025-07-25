@@ -2,7 +2,7 @@
 import { useState } from "react";
 import {
   useLockBodyScroll,
-  getRegionLabel,
+  getLocationLabel,
   FallbackImage,
   ProfileImage,
 } from "@/shared";
@@ -63,7 +63,7 @@ const PlannedCompanionCard = ({
             <h3 className="post-title">{postData.title}</h3>
             <div className="post-row">
               <p className="post-location">
-                {getRegionLabel(postData.location)}
+                {getLocationLabel(postData.location)}
               </p>
               <p className="post-date">{postData.createdAt}</p>
             </div>

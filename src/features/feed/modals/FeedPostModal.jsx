@@ -10,11 +10,11 @@ const FeedPostModal = ({
   initialData = null,
 }) => {
   const [formData, setFormData] = useState({
-    title: initialData?.title || "",
-    content: initialData?.content || "",
-    region: initialData?.region || "",
+    title: "",
+    content: "",
+    location: "",
     image: null,
-    badgeRequest: initialData?.badgeRequest || false,
+    badgeRequest: false,
   });
 
   useLockBodyScroll();
@@ -22,11 +22,7 @@ const FeedPostModal = ({
   useEffect(() => {
     if (initialData) {
       setFormData({
-        title: initialData.title || "",
-        content: initialData.content || "",
-        region: initialData.region || "",
-        image: null,
-        badgeRequest: initialData.badgeRequest || false,
+        ...initialData,
       });
     }
   }, [initialData]);
@@ -38,7 +34,7 @@ const FeedPostModal = ({
       const formPayload = new FormData();
       formPayload.append("title", formData.title);
       formPayload.append("content", formData.content);
-      formPayload.append("location", formData.region);
+      formPayload.append("location", formData.location);
       formPayload.append("badge_request", formData.badgeRequest);
       if (formData.image) {
         formPayload.append("images", formData.image);

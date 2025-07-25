@@ -34,7 +34,7 @@ const LocalCompanionPostModal = ({
     try {
       const formPayload = new FormData();
       formPayload.append("title", formData.title);
-      formPayload.append("location", formData.region);
+      formPayload.append("location", formData.location);
 
       if (mode === "create") {
         await createTravelPost("NOW", formPayload);

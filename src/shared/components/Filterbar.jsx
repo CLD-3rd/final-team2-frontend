@@ -26,7 +26,7 @@ const FilterBar = ({ filters, onFilterChange }) => {
   const searchOptions = [
     { value: "title", label: "제목" },
     { value: "author", label: "글쓴이" },
-    { value: "region", label: "지역" },
+    { value: "location", label: "지역" },
   ];
 
   const handleSearchCriteriaChange = (criteria) => {

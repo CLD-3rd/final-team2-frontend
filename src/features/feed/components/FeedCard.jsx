@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { FallbackImage, getRegionLabel } from "@/shared";
+import { FallbackImage, getLocationLabel } from "@/shared";
 
 const FeedCard = ({
   title,
-  region,
+  location,
   author,
   date,
   images,
@@ -53,7 +53,7 @@ const FeedCard = ({
 
       <div className="card-content">
         <h3 className="card-title">{title}</h3>
-        <p className="card-region">{getRegionLabel(region)}</p>
+        <p className="card-location">{getLocationLabel(location)}</p>
         <div className="card-meta">
           <span className="card-author">{author}</span>
           <span className="card-date">{date}</span>

@@ -14,7 +14,7 @@ const LocalCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
   const [filters, setFilters] = useState({
     author: "",
     title: "",
-    region: "",
+    location: "",
   });
   const [sort, setSort] = useState("recent"); // ✅ 정렬 상태
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);

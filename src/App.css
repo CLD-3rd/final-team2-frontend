@@ -955,7 +955,7 @@ body {
   color: #333;
 }
 
-.card-region {
+.card-location {
   font-size: 18px;
   font-weight: 500;
   color: #666;
@@ -1735,7 +1735,7 @@ body {
   margin-bottom: 20px;
 }
 
-.region-group {
+.location-group {
   flex: 1;
 }
 

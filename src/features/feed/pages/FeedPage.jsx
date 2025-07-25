@@ -30,23 +30,6 @@ const FeedPage = ({ onFeedCountChange, isLoggedIn }) => {
     setFilters(newFilters);
   };
 
-  // const filteredFeedData = feedData
-  //   .filter((feed) => {
-  //     if (filters.title && !feed.title.includes(filters.title)) return false;
-  //     if (filters.author && !feed.author.nickname.includes(filters.author))
-  //       return false;
-  //     if (filters.region && feed.region !== filters.region) return false;
-  //     return true;
-  //   })
-  //   .sort((a, b) => {
-  //     if (filters.sort === "recent") {
-  //       return new Date(b.createdAt) - new Date(a.createdAt);
-  //     } else if (filters.sort === "view") {
-  //       return b.views - a.views;
-  //     }
-  //     return 0;
-  //   });
-
   const fetchFeeds = async () => {
     setLoading(true);
     try {

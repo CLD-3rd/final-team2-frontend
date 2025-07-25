@@ -13,11 +13,11 @@ export { default as PostForm } from "./components/forms/PostForm";
 export { default as useLockBodyScroll } from "./hooks/useLockBodyScroll";
 
 // ✅ Utils
-export * from "./utils/regionMapper";
+export * from "./utils/locationMapper";
 export * from "./utils/formatTime";
 
 // ✅ Constants
-export { default as regionOptions } from "./constants/regionOptions";
+export { default as locationOptions } from "./constants/locationOptions";
 
 // ✅ Pages
 export { default as ErrorPage } from "./pages/ErrorPage";

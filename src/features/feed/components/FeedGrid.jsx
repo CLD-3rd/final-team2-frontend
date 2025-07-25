@@ -7,7 +7,7 @@ const FeedGrid = ({ filters, feedData, onFeedClick }) => {
 
   // Filter logic
   const filteredData = allFeedData.filter((item) => {
-    if (filters.location && item.region !== filters.location) return false;
+    if (filters.location && item.location !== filters.location) return false;
     if (filters.author && !item.author.includes(filters.author)) return false;
     return true;
   });
@@ -18,7 +18,7 @@ const FeedGrid = ({ filters, feedData, onFeedClick }) => {
         <FeedCard
           key={item.id}
           title={item.title}
-          region={item.region}
+          location={item.location}
           author={`유저 ${item.userId}`}
           date={item.createdAt}
           images={[item.image]}

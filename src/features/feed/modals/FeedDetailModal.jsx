@@ -215,7 +215,7 @@ const FeedDetailModal = ({
           <div className="header-spacer"></div>
           <div className="location-info">
             <span className="location-pin">📍</span>
-            <span className="location-name">{feedData.region}</span>
+            <span className="location-name">{feedData.location}</span>
             {isLoggedIn && (
               <div className="more-menu-container">
                 <button

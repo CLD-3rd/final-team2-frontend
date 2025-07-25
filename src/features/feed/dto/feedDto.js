@@ -10,7 +10,7 @@ export const parseFeedsResponse = (data) => {
     title: feed.title,
     content: feed.content,
     image: feed.image_url,
-    region: feed.location,
+    location: feed.location,
     badgeRequest: feed.badge_request === "Y",
     views: feed.view_count,
     likes: feed.like_count,
@@ -27,7 +27,7 @@ export const parseFeedDetailResponse = (data) => {
     id: data.feedId,
     title: data.title,
     content: data.content,
-    region: data.location, // 서버는 location, UI는 region
+    location: data.location,
     images: data.imageUrls || [], // 기존 FeedDetailModal에서 images 사용
     date: formatTime(data.created_at),
     author: {
