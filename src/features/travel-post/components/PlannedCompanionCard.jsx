@@ -78,13 +78,19 @@ const PlannedCompanionCard = ({
               <div className="more-menu-dropdown">
                 <button
                   className="more-menu-item"
-                  onClick={() => onEdit(postData)} // ✅ postData 전달
+                  onClick={() => {
+                    setIsMoreMenuOpen(false);
+                    onEdit(postData);
+                  }}
                 >
                   수정
                 </button>
                 <button
                   className="more-menu-item delete"
-                  onClick={handleDeletePost}
+                  onClick={async () => {
+                    setIsMoreMenuOpen(false);
+                    await handleDeletePost();
+                  }}
                 >
                   삭제
                 </button>
