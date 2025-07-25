@@ -15,6 +15,7 @@ const PlannedCompanionPostModal = ({
     content: "",
     region: "",
     dateRange: "",
+    maxParticipants: "",
     image: null,
   });
   const [dateRange, setDateRange] = useState([
@@ -61,6 +62,10 @@ const PlannedCompanionPostModal = ({
 
       formPayload.append("startTime", startDate); // 2025-08-10
       formPayload.append("endTime", endDate); // 2025-08-15
+
+      // ✅ 최대 인원 추가
+      formPayload.append("maxParticipants", Number(formData.maxParticipants)); // 숫자 값
+
       if (formData.image) {
         formPayload.append("images", formData.image);
       }

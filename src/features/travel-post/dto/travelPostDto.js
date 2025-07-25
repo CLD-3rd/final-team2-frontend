@@ -24,11 +24,7 @@ export const parseLocalCompanionsResponse = (data) => {
     id: post.travelPostId,
     title: post.title,
     location: post.location,
-    startTime: post.startTime,
-    endTime: post.endTime,
     author: post.author,
-    participants: post.participants,
-    maxParticipants: post.maxParticipants,
     image: post.image,
     createdAt: post.createdAt,
   }));

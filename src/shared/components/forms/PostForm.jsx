@@ -129,6 +129,22 @@ const PostForm = ({
         </div>
       )}
 
+      {/* 최대 인원 입력 */}
+      <div className="form-group">
+        <label htmlFor="maxParticipants">최대 인원</label>
+        <input
+          type="number"
+          id="maxParticipants"
+          name="maxParticipants"
+          value={formData.maxParticipants}
+          onChange={handleChange}
+          placeholder="최대 인원을 입력하세요"
+          min={2}
+          max={10}
+          required
+        />
+      </div>
+
       {/* 이미지 */}
       {includeImage && (
         <div className="form-group">

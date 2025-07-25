@@ -173,40 +173,9 @@ export const getTravelPosts = async (
       posts: parsedPosts,
       pageInfo: parsedPosts.pageInfo,
     };
-    // throw new Error(message);
+    throw new Error(message);
   }
 };
-
-// // ✅ 모집글 조회
-// export const getTravelPosts = async (
-//   type,
-//   filters = {},
-//   page = 1,
-//   size = 10
-// ) => {
-//   try {
-//     const { data } = await axiosInstance.get(BASE_URL, {
-//       params: {
-//         postType: type,
-//         page,
-//         size,
-//         sort: filters.sort || "recent", // ✅ 정렬 기본값
-//         ...filters,
-//       },
-//     });
-
-//     return {
-//       posts: parsePlannedCompanionsResponse(data),
-//       pageInfo: data?.data?.pageInfo,
-//     };
-//   } catch (error) {
-//     const message =
-//       error.response?.data?.message ||
-//       `[${type}] 모집글 조회 중 오류가 발생했습니다.`;
-//     console.error(`[${type}] 모집글 조회 실패`, message);
-//     throw new Error(message);
-//   }
-// };
 
 // ✅ 모집글 생성
 export const createTravelPost = async (type, payload) => {
