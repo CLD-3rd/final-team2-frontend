@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useLockBodyScroll, ProfileImage } from "@/shared";
+import { useLockBodyScroll, getRegionLabel, ProfileImage } from "@/shared";
 import { deleteTravelPost } from "@/features/travel-post";
 import ReactStars from "react-rating-stars-component";
 import toast from "react-hot-toast";
@@ -85,7 +85,12 @@ const LocalCompanionCard = ({
             alt={postData.author.nickname}
             className="profile-image"
           />
-          <span className="author-name">{postData.author.nickname}</span>
+          <div className="author-details">
+            <span className="author-name">{postData.author.nickname}</span>
+            <p className="author-location">
+              {getRegionLabel(postData.location)}
+            </p>
+          </div>
         </div>
       </div>
 

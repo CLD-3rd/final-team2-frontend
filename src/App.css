@@ -1258,6 +1258,11 @@ body {
   color: #666;
   font-size: 14px;
 }
+.card-author-info {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* 이미지와 텍스트 사이 간격 */
+}
 
 .author-name {
   font-weight: 500;
@@ -1909,16 +1914,19 @@ body {
   margin-bottom: 15px;
   color: white;
 }
-
-.card-author-info {
+.author-details {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .author-name {
   font-size: 14px;
   font-weight: 500;
+}
+.author-location {
+  font-size: 16px;
+  color: #ddd;
 }
 
 .card-tags {

@@ -18,7 +18,6 @@ const MainContent = ({
   onProfileUpdate,
   onLoginModalOpen,
 }) => {
-  console.log("[AppRouter] login : ", isLoggedIn);
   const renderPage = () => {
     switch (currentPage) {
       case "planned-companion":

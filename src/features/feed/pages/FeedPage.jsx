@@ -50,9 +50,7 @@ const FeedPage = ({ onFeedCountChange, isLoggedIn }) => {
   const fetchFeeds = async () => {
     setLoading(true);
     try {
-      console.log("[GetFeed] Sort : ", filters.sort);
       const { feeds } = await getFeeds(filters);
-      console.log(feeds);
       setFeedData(feeds);
       onFeedCountChange?.(feeds.length);
     } catch (error) {

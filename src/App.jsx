@@ -66,7 +66,6 @@ function App() {
   // + 버튼을 보여줄 페이지들 정의
   const showFabPages = ["feed", "planned-companion", "local-companion"];
   const shouldShowFab = isLoggedIn && showFabPages.includes(currentPage);
-  console.log("[App] login : ", isLoggedIn);
 
   return (
     <div className="app">
