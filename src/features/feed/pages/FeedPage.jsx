@@ -46,7 +46,7 @@ const FeedPage = ({ onFeedCountChange, isLoggedIn }) => {
 
   useEffect(() => {
     fetchFeeds();
-  }, [filters]);
+  }, [filters, reloadTrigger]);
 
   // ✅ 등록/수정 완료 시 새로고침
   const handleSuccess = () => {

@@ -11,20 +11,34 @@ import {
 import toast from "react-hot-toast";
 
 const LocalCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
+  const [posts, setPosts] = useState([]); // ✅ 서버 데이터 저장
+  const [selectedPost, setSelectedPost] = useState(null);
   const [filters, setFilters] = useState({
-    author: "",
-    title: "",
-    location: "",
+    sort: "recent",
   });
-  const [sort, setSort] = useState("recent"); // ✅ 정렬 상태
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedPost, setSelectedPost] = useState(null);
-  const [posts, setPosts] = useState([]); // ✅ 서버 데이터 저장
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchPosts();
+  }, [filters]);
 
   const openCreateModal = () => setIsCreateModalOpen(true);
   const closeCreateModal = () => setIsCreateModalOpen(false);
+
+  // ✅ API 호출 (조회)
+  const fetchPosts = async () => {
+    setLoading(true);
+    try {
+      const { posts } = await getTravelPosts("NOW", filters);
+      setPosts(posts);
+    } catch (error) {
+      toast.error("현지 동행 모집글 조회 실패");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleEditRequest = (postData) => {
     setSelectedPost(postData);
@@ -44,23 +58,6 @@ const LocalCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
   const handleSortChange = (newSort) => {
     setSort(newSort);
   };
-
-  // ✅ API 호출 (조회)
-  const fetchPosts = async () => {
-    setLoading(true);
-    try {
-      const { posts } = await getTravelPosts("NOW", filters);
-      setPosts(posts);
-    } catch (error) {
-      toast.error("현지 동행 모집글 조회 실패");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchPosts();
-  }, [filters, sort]);
 
   const handlePostCreate = async () => {
     await fetchPosts();

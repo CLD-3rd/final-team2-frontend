@@ -12,23 +12,19 @@ import {
 import toast from "react-hot-toast";
 
 const PlannedCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
+  const [posts, setPosts] = useState([]); // ✅ 서버 데이터 저장
+  const [selectedPost, setSelectedPost] = useState(null);
+  const [selectedPostId, setSelectedPostId] = useState(null); // ✅ 상세 모달용 상태
   const [filters, setFilters] = useState({
-    author: "",
-    title: "",
-    location: "",
+    sort: "recent",
   });
-  const [sort, setSort] = useState("recent"); // ✅ 정렬 상태
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedPost, setSelectedPost] = useState(null);
-  const [posts, setPosts] = useState([]); // ✅ 서버 데이터 저장
-  const [selectedPostId, setSelectedPostId] = useState(null); // ✅ 상세 모달용 상태
-
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchPosts();
-  }, [filters, sort]);
+  }, [filters]);
 
   // ✅ 모달 열기/닫기
   const openCreateModal = () => setIsCreateModalOpen(true);

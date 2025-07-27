@@ -5,15 +5,19 @@ import { parseFeedsResponse, parseFeedDetailResponse } from "@/features/feed";
 const BASE_URL = "/api/feed";
 
 // ✅ feed 전체 조회
-export const getFeeds = async (filters = ({}, (page = 1)), size = 10) => {
+export const getFeeds = async (filters = {}, page = 1, size = 12) => {
   try {
     const { data } = await axiosInstance.get(BASE_URL, {
       params: {
         page,
         size,
-        sort: filters.sort,
+        sort: filters.sort || "recent", // ✅ 기본값
+        title: filters.title || "", // ✅ 제목 검색
+        author: filters.author || "", // ✅ 글쓴이 검색
+        location: filters.location || "", // ✅ 지역 검색
       },
     });
+    console.log();
     return {
       feeds: parseFeedsResponse(data),
       pageInfo: data?.data?.pageInfo,

@@ -17,7 +17,7 @@ export const getTravelPosts = async (
   type,
   filters = {},
   page = 1,
-  size = 10
+  size = 12
 ) => {
   try {
     const { data } = await axiosInstance.get(BASE_URL, {
@@ -25,8 +25,10 @@ export const getTravelPosts = async (
         postType: type,
         page,
         size,
-        sort: filters.sort || "recent", // ✅ 정렬 기본값
-        ...filters,
+        sort: filters.sort || "recent", // ✅ 기본값
+        title: filters.title || "", // ✅ 제목 검색
+        author: filters.author || "", // ✅ 글쓴이 검색
+        location: filters.location || "", // ✅ 지역 검색
       },
     });
 
