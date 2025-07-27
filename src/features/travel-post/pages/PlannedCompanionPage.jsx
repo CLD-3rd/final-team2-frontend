@@ -7,6 +7,7 @@ import {
   CreatePlannedModal,
   getTravelPosts,
   UpdatePlannedModal,
+  PostDetailModal,
 } from "@/features/travel-post";
 import toast from "react-hot-toast";
 
@@ -21,11 +22,29 @@ const PlannedCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
   const [posts, setPosts] = useState([]); // ✅ 서버 데이터 저장
+  const [selectedPostId, setSelectedPostId] = useState(null); // ✅ 상세 모달용 상태
+
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchPosts();
+  }, [filters, sort]);
 
   // ✅ 모달 열기/닫기
   const openCreateModal = () => setIsCreateModalOpen(true);
   const closeCreateModal = () => setIsCreateModalOpen(false);
+
+  const fetchPosts = async () => {
+    setLoading(true);
+    try {
+      const { posts } = await getTravelPosts("BEFORE", filters);
+      setPosts(posts);
+    } catch (error) {
+      toast.error("사전 동행 모집글 조회 실패");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleEditRequest = (postData) => {
     setSelectedPost(postData);
@@ -46,26 +65,24 @@ const PlannedCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
     setSort(newSort);
   };
 
-  // ✅ API 호출 (조회)
-  const fetchPosts = async () => {
-    setLoading(true);
-    try {
-      const { posts } = await getTravelPosts("BEFORE", filters);
-      setPosts(posts);
-    } catch (error) {
-      toast.error("사전 동행 모집글 조회 실패");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchPosts();
-  }, [filters, sort]);
-
   const handlePostCreate = async () => {
     await fetchPosts(); // ✅ 새 글 등록 후 목록 갱신
     closeCreateModal();
+  };
+
+  // ✅ 등록/수정 완료 시 새로고침
+  const handleSuccess = () => {
+    setReloadTrigger((prev) => prev + 1);
+    setIsCreateModalOpen(false);
+    setSelectedFeedId(null);
+  };
+  // 모집글 상세 관련 핸들러
+  const handlePostClick = (postId) => {
+    setSelectedPostId(postId);
+  };
+
+  const closeDetailModal = () => {
+    setSelectedPostId(null);
   };
 
   return (
@@ -91,6 +108,7 @@ const PlannedCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
               onLoginModalOpen={onLoginModalOpen}
               onEdit={handleEditRequest}
               onUpdateSuccess={fetchPosts}
+              onPostClick={handlePostClick}
             />
           ))}
         </div>
@@ -108,6 +126,15 @@ const PlannedCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
         <CreatePlannedModal
           onClose={closeCreateModal}
           onPostCreate={handlePostCreate}
+        />
+      )}
+      {/* ✅ 피드 상세 모달 */}
+      {selectedPostId && (
+        <PostDetailModal
+          postId={selectedPostId}
+          onClose={closeDetailModal}
+          isLoggedIn={isLoggedIn}
+          onUpdateSuccess={handleSuccess} // ✅ 수정 시 새로고침
         />
       )}
       {/* ✅ Update Modal */}

@@ -1,3 +1,5 @@
+import { formatTime } from "@/shared/utils/formatTime";
+
 // ✅ 리스트 응답 변환
 export const parsePlannedCompanionsResponse = (data) => {
   if (!data?.posts) return [];
@@ -13,7 +15,7 @@ export const parsePlannedCompanionsResponse = (data) => {
     participants: post.participants,
     maxParticipants: post.maxParticipants,
     image: post.image,
-    createdAt: post.createdAt,
+    createdAt: formatTime(post.createdAt),
   }));
 };
 
@@ -26,6 +28,28 @@ export const parseLocalCompanionsResponse = (data) => {
     location: post.location,
     author: post.author,
     image: post.image,
-    createdAt: post.createdAt,
+    createdAt: formatTime(post.createdAt),
   }));
+};
+
+// ✅ 상세 모집글 응답 파싱
+export const parsePostDetailResponse = (data) => {
+  if (!data) return null;
+
+  return {
+    id: data.travelPostId,
+    title: data.title,
+    content: data.content,
+    location: data.location,
+    startTime: data.startTime,
+    endTime: data.endTime,
+    author: {
+      userId: data.author.userId,
+      nickname: data.author.nickname,
+      profileImgUrl: data.author.profileImgUrl,
+    },
+    maxParticipants: data.maxParticipants,
+    imageUrl: data.imageUrl,
+    createdAt: formatTime(data.createdAt),
+  };
 };

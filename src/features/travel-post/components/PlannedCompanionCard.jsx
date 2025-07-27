@@ -18,12 +18,10 @@ const PlannedCompanionCard = ({
   onLoginModalOpen,
   onEdit,
   onUpdateSuccess,
-  onClick,
+  onPostClick,
 }) => {
-  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
-  useLockBodyScroll();
-
-  const handleJoinClick = async () => {
+  const handleJoinClick = async (e) => {
+    e.stopPropagation();
     if (!isLoggedIn) {
       onLoginModalOpen();
       return;
@@ -42,28 +40,8 @@ const PlannedCompanionCard = ({
     }
   };
 
-  // 더 보기 메뉴 관련 핸들러 (+ 수정, 삭제)
-  const handleMoreMenuClick = (e) => {
-    e.stopPropagation();
-    setIsMoreMenuOpen(!isMoreMenuOpen);
-  };
-
-  const handleDeletePost = async () => {
-    if (window.confirm("이 모집글을 삭제하시겠습니까?")) {
-      try {
-        await deleteTravelPost("BEFORE", postData.id);
-        toast.success("모집글이 삭제되었습니다.");
-        setIsMoreMenuOpen(false);
-      } catch (error) {
-        toast.error("모집글 삭제에 실패했습니다.\n다시 시도해주세요.");
-      } finally {
-        onUpdateSuccess?.();
-      }
-    }
-  };
-
   return (
-    <div className="companion-card" onClick={onClick}>
+    <div className="companion-card" onClick={onPostClick}>
       <div className="card-header">
         <div className="author-info">
           <div className="author-avatar">
@@ -76,38 +54,6 @@ const PlannedCompanionCard = ({
           <div className="post-info">
             <div className="post-row">
               <h3 className="post-title">{postData.title}</h3>
-              {isLoggedIn && (
-                <div className="more-menu-container">
-                  <button
-                    className="more-menu-button"
-                    onClick={handleMoreMenuClick}
-                  >
-                    ⋮
-                  </button>
-                  {isMoreMenuOpen && (
-                    <div className="more-menu-dropdown">
-                      <button
-                        className="more-menu-item"
-                        onClick={() => {
-                          setIsMoreMenuOpen(false);
-                          onEdit(postData);
-                        }}
-                      >
-                        수정
-                      </button>
-                      <button
-                        className="more-menu-item delete"
-                        onClick={async () => {
-                          setIsMoreMenuOpen(false);
-                          await handleDeletePost();
-                        }}
-                      >
-                        삭제
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
             <div className="post-row">
               <p className="post-location">
@@ -136,7 +82,7 @@ const PlannedCompanionCard = ({
           <button className="participants-count-btn">
             {postData.participants}/{postData.maxParticipants}
           </button>
-          <button className="join-btn" onClick={handleJoinClick}>
+          <button className="join-btn" onClick={(e) => handleJoinClick(e)}>
             같이 갈래요
           </button>
         </div>

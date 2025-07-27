@@ -11,6 +11,7 @@ export { default as CreatePlannedModal } from "@/features/travel-post/modals/Pla
 export { default as UpdatePlannedModal } from "@/features/travel-post/modals/PlannedCompanionPostModal";
 export { default as CreateLocalModal } from "@/features/travel-post/modals/LocalCompanionPostModal";
 export { default as UpdateLocalModal } from "@/features/travel-post/modals/LocalCompanionPostModal";
+export { default as PostDetailModal } from "@/features/travel-post/modals/PostDetailModal";
 
 // ✅ Pages
 export { default as PlannedCompanionPage } from "@/features/travel-post/pages/PlannedCompanionPage";
