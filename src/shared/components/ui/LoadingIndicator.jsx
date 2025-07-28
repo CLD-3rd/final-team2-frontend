@@ -15,7 +15,7 @@ const LoadingIndicator = ({ text = "로딩 중..." }) => {
     >
       <div className="spinner" />
       <span>{text}</span>
-      <style jsx>{`
+      <style>{`
         .spinner {
           width: 16px;
           height: 16px;
