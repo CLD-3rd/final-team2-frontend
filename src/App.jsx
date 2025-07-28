@@ -16,13 +16,10 @@ function App() {
   const [feedCount, setFeedCount] = useState(0);
 
   const [userProfile, setUserProfile] = useState({
-    username: "사용자님",
-    profileImage: "/images/user-profile.jpg",
-    badges: ["브론즈 뱃지", "랜드마크 뱃지"],
-    rating: 4,
-    reviewCount: 20,
+    id : 12,
+    badges: [],    
     travelTags: [],
-    ownedBadges: ["브론즈 뱃지", "랜드마크 뱃지", "여행 마니아", "사진 전문가"],
+    ownedBadges: [],
   });
 
   const handleLogin = () => {

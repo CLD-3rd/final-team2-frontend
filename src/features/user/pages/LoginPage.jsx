@@ -1,5 +1,7 @@
 "use client";
 
+import {FallbackImage} from "@/shared";
+
 const LoginPage = ({ onLogin }) => {
   const handleGoogleLogin = () => {
     // Handle Google login logic here
@@ -13,9 +15,8 @@ const LoginPage = ({ onLogin }) => {
       <div className="login-container">
         <div className="login-logo-section">
           <div className="login-logo">
-            <img
+            <FallbackImage
               src="/placeholder.svg?height=120&width=120"
-              alt="GotEEgo Character"
               className="logo-character"
             />
           </div>

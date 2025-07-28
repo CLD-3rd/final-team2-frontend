@@ -1,62 +1,48 @@
 "use client"
 
-import { useState } from "react"
+import {ProfileImage} from "@/shared";
+import { useEffect, useState } from "react";
+import { getSchedules, updateParticipantStatus  } from "@/features/user/api/scheduleApi";
+import { parseScheduleResponse} from "@/features/user/dto/scheduleDto";
+import EvaluationModal from "@/features/user/modals/EvaluationModal";
 
-const ScheduleManagementPage = () => {
+
+const ScheduleManagementPage = ({userProfile}) => {
   // 오늘 날짜 0시 기준
+  const currentUserId = userProfile.id;
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
   const [currentYear, setCurrentYear] = useState(today.getFullYear())
   const [currentMonth, setCurrentMonth] = useState(today.getMonth())
   const [selectedDay, setSelectedDay] = useState(today.getDate())
+
+  function formatDate(month, day, year) {
+    return `${String(month + 1).padStart(2, "0")}/${String(day).padStart(2, "0")}/${year}`
+  }
+
   const [selectedDate, setSelectedDate] = useState(formatDate(today.getMonth(), today.getDate(), today.getFullYear()))
-  const [isDateFocused, setIsDateFocused] = useState(false)
   const [activeFilter, setActiveFilter] = useState("date")
   const [closedRecruitIds, setClosedRecruitIds] = useState([])
+  const [schedules, setSchedules] = useState([]);
+  const [selectedParticipant, setSelectedParticipant] = useState(null);
 
-  // 샘플 일정 데이터 (startDate/endDate 추가)
-  const schedules = [
-    {
-      id: 1,
-      title: "JS님의일정 과 프랑스 4박5일 일정",
-      location: "파리",
-      startDate: "2025-07-21",
-      endDate: "2025-07-25",
-      isReviewed: false,  // 평가 완료 여부
-    },
-    {
-      id: 2,
-      title: "JS님의일정 과 미들라이 2박3일 일정",
-      location: "전북",
-      startDate: "2025-08-10",
-      endDate: "2025-08-12",
-      isReviewed: false,  // 평가 완료 여부
-      participants: [
-        { name: "홍길동", status: "드래곤", approved: true, image: "/images/hong.png" },
-        { name: "김철수", status: "의상차이에요", tag: "크리에", approved: true, image: "/images/hong.png" },
-        { name: "이영희", status: "", approved: true, image: "/images/hong.png" },
-      ],
-      progress: "4 / 5",
-    },
-    {
-      id: 3,
-      title: "JS님의일정 과 북한한 2박3일 일정",
-      location: "전북",
-      startDate: "2025-07-10",
-      endDate: "2025-07-12",
-      showRegisterButton: true,
-      isReviewed: false,  // 평가 완료 여부
-    },
-    {
-      id: 4,
-      title: "JS님의일정 과 이탈리아아 2박3일 일정",
-      location: "전북",
-      startDate: "2025-06-01",
-      endDate: "2025-06-03",
-      isReviewed: true,  // 평가 완료 여부
-    },
-  ]
+  useEffect(() => {
+    (async () => {
+      const data = await getSchedules();
+      console.log(parseScheduleResponse(data, currentUserId))
+      setSchedules(parseScheduleResponse(data, currentUserId));
+    })();
+  }, []);
+
+
+  const getScheduleStatus = (schedule) => {
+    if (schedule.progressStatus === "UPCOMING") return "예정";
+    if (schedule.progressStatus === "ONGOING") return "진행중";
+    return "완료";
+  };
+
+  
 
   // 필터 버튼
   const filterButtons = [
@@ -74,17 +60,6 @@ const ScheduleManagementPage = () => {
     return d
   }
 
-  // 상태 자동 계산
-  const getScheduleStatus = (schedule) => {
-    if (!schedule.startDate || !schedule.endDate) return "예정"
-    const now = today
-    const start = toDateOnly(schedule.startDate)
-    const end = toDateOnly(schedule.endDate)
-    if (now < start) return "예정"
-    if (now >= start && now <= end) return "진행중"
-    return "완료"
-  }
-
   // 날짜 필터
   const selectedFullDate = new Date(currentYear, currentMonth, selectedDay)
   selectedFullDate.setHours(0, 0, 0, 0)
@@ -95,16 +70,27 @@ const ScheduleManagementPage = () => {
     return selectedFullDate >= start && selectedFullDate <= end
   }
 
-  // 일정 필터링
-  const filteredSchedules = schedules.filter((schedule) => {
-    const status = getScheduleStatus(schedule)
-    if (activeFilter === "all") return true
-    if (activeFilter === "date") return isDateInSchedule(schedule)
-    if (activeFilter === "scheduled") return status === "예정"
-    if (activeFilter === "progress") return status === "진행중"
-    if (activeFilter === "completed") return status === "완료"
-    return true
+  const filteredSchedules = schedules
+  .filter((schedule) => {
+    const status = getScheduleStatus(schedule);
+    if (activeFilter === "all") return true;
+    if (activeFilter === "date") return isDateInSchedule(schedule);
+    if (activeFilter === "scheduled") return status === "예정";
+    if (activeFilter === "progress") return status === "진행중";
+    if (activeFilter === "completed") return status === "완료";
+    return true;
   })
+  .sort((a, b) => {
+    const statusA = getScheduleStatus(a);
+    const statusB = getScheduleStatus(b);
+
+    // 완료인 애들은 뒤로 보냄
+    if (statusA === "완료" && statusB !== "완료") return 1;
+    if (statusA !== "완료" && statusB === "완료") return -1;
+
+    // 나머지는 시작일 빠른 순
+    return new Date(a.startDate) - new Date(b.startDate);
+  });
 
   // 캘린더
   const getDaysInMonth = (month, year) => new Date(year, month + 1, 0).getDate()
@@ -121,9 +107,7 @@ const ScheduleManagementPage = () => {
     return null
   }
 
-  function formatDate(month, day, year) {
-    return `${String(month + 1).padStart(2, "0")}/${String(day).padStart(2, "0")}/${year}`
-  }
+  
 
   const handleDateChange = (e) => {
     const value = e.target.value
@@ -231,67 +215,133 @@ const ScheduleManagementPage = () => {
               <ScheduleCard
                 key={schedule.id}
                 schedule={schedule}
+                currentUserId={currentUserId}
                 status={getScheduleStatus(schedule)}
                 isRecruitClosed={closedRecruitIds.includes(schedule.id)}
                 onRecruitClose={() => setClosedRecruitIds((prev) => [...prev, schedule.id])}
+                setSelectedParticipant={setSelectedParticipant}
               />
             ))
           )}
         </div>
       </div>
-    </div>
-  )
+    {/* 모달은 ScheduleManagementPage의 return 끝부분에 둔다 */}
+    {selectedParticipant && (
+      <EvaluationModal
+        participant={selectedParticipant}
+        currentUserId={currentUserId}
+        onClose={() => setSelectedParticipant(null)}
+        onSubmit={(data) => {
+          console.log("평가 제출:", data);
+          setSelectedParticipant(null);
+        }}
+        onReport={(p) => alert(`${p.name} 신고하기!`)}
+      />
+    )}
+  </div>
+)
 }
 
-const ScheduleCard = ({ schedule, status, isRecruitClosed, onRecruitClose }) => {
-  const [open, setOpen] = useState(false)
-  const [participants, setParticipants] = useState(schedule.participants || [])
+const ScheduleCard = ({ schedule, status, currentUserId, isRecruitClosed, onRecruitClose, setSelectedParticipant}) => {
+  const [open, setOpen] = useState(false);
+  const [participants, setParticipants] = useState(
+  (schedule.participants || []).filter((p) => p.id !== currentUserId)
+  );
   const [approvedCount, setApprovedCount] = useState(
-    (schedule.participants && schedule.participants.filter((p) => p.approved).length) || 0
-  )
-  const [errorMsg, setErrorMsg] = useState("")
-  const maxRecruit = schedule.progress ? Number(schedule.progress.split("/")[1].trim()) : null
-  const participantCount = participants.length
+    (schedule.participants || []).filter((p) => p.approved).length
+  );
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const handleRecruitClose = () => {
-    if (onRecruitClose) onRecruitClose()
-    setParticipants([]) // 모집 마감 시 참여자 목록 비움
-  }
+  const participantCount = participants.length;
+  const isOwner = schedule.owner?.id === currentUserId; // role 대신 판별
+  const isParticipant = (schedule.participants || []).some(p => p.id === currentUserId);
+  const isRejected = schedule.myJoinStatus === "REJECTED";
 
-  const handleApprove = (index) => {
-    if (maxRecruit && approvedCount >= maxRecruit) {
-      setErrorMsg("더이상 모집할 수 없음")
-      setTimeout(() => setErrorMsg(""), 2000)
-      return
-    }
-    setApprovedCount((prev) => prev + 1)
-    setParticipants((prev) => prev.filter((_, i) => i !== index))
-  }
+  // 거절된 일정인 경우 open 상태를 강제로 false로 설정
+  const effectiveOpen = isRejected ? false : open;
 
-  const handleReject = (index) => {
-    setParticipants((prev) => prev.filter((_, i) => i !== index))
+  const handleRecruitClose = () => onRecruitClose && onRecruitClose();
+
+  const handleApprove = async (index, participant) => {
+  try {
+    await updateParticipantStatus(schedule.id, participant.id, "APPROVED");
+    setParticipants((prev) =>
+      prev.map((p, i) => (i === index ? { ...p, status: "APPROVED", approved: true } : p))
+    );
+    setApprovedCount((prev) => prev + 1);
+  } catch (error) {
+    alert("참여자 승인 실패");
   }
+};
+
+
+const handleReject = async (index, participant) => {
+  try {
+    await updateParticipantStatus(schedule.id, participant.id, "REJECTED");
+    setParticipants((prev) =>
+      prev.map((p, i) => (i === index ? { ...p, status: "REJECTED", approved: false } : p))
+    );
+  } catch (error) {
+    alert("참여자 거절 실패");
+  }
+};
+
+
+  // 모집 마감된 경우 승인된 참가자만 표시
+  const visibleParticipants = [
+    ...(schedule.owner && schedule.owner.id !== currentUserId ? [schedule.owner] : []),
+    ...(isRecruitClosed 
+      ? participants.filter(p => p.status === "APPROVED") 
+      : participants
+    ),
+  ];
+
+  const isFull = schedule.recruitLimit > 0 && approvedCount >= schedule.recruitLimit;
+
+
 
   return (
-    <div className="schedule-card" style={{ marginBottom: 10 }}>
+    <div
+      className="schedule-card"
+      style={{
+        marginBottom: 10,
+        backgroundColor: isRejected ? "#eee" : "#fff",
+      }}
+    >
       <div
         className="schedule-card-header"
-        style={{ cursor: participantCount > 0 ? 'pointer' : 'default' }}
-        onClick={() => participantCount > 0 && setOpen((prev) => !prev)}
+        style={{ cursor: !isRejected && participantCount > 0 ? "pointer" : "default" }}
+        onClick={() => {
+          if (!isRejected && participantCount > 0) setOpen((prev) => !prev);
+        }}
       >
-        <div className="schedule-avatar">A</div>
         <div className="schedule-info">
-          <h3>{schedule.title}</h3>
-          <p>{schedule.location}</p>
-          <p style={{ color: status === "진행중" ? "green" : status === "예정" ? "blue" : "gray" }}>{status}</p>
+          {/* 기본 표시: 지역 | 기간 | 내 일정/참여 일정 | 진행 상태 */}
+          <h3>
+            {schedule.title} ({schedule.location})
+          </h3>
+          <p>
+            {`${new Date(schedule.startDate).toLocaleDateString()} ~ ${new Date(
+              schedule.endDate
+            ).toLocaleDateString()}`}
+          </p>
+          <p>{isOwner ? "내 일정" : "참여 일정"}</p>
+          <p style={{ color: status === "진행중" ? "green" : status === "예정" ? "blue" : "gray" }}>
+            {status}
+          </p>
+
+          <p>{approvedCount+1} / {schedule.recruitLimit+1}</p>
+
         </div>
-  
-        {status === "예정" && schedule.progress && (
-          <div className="schedule-progress" style={{ position: 'relative' }}>
-            <span>{approvedCount} / {maxRecruit}</span>
-            {!isRecruitClosed ? (
-              <div style={{ position: "relative" }}>
-                <button className="recruit-btn" onClick={handleRecruitClose}>모집 마감하기</button>
+
+        {/* 예정 일정: OWNER만 모집 마감 버튼 */}
+        {status === "예정" && isOwner && schedule.recruitLimit > 0 && (
+  <div className="schedule-progress" style={{ position: "relative" }}>
+    {(!isRecruitClosed && !isFull) ? (
+      <div style={{ position: "relative" }}>
+        <button className="recruit-btn" onClick={handleRecruitClose}>
+          모집 마감하기
+        </button>
                 {participantCount > 0 && (
                   <span
                     className="schedule-badge"
@@ -303,65 +353,129 @@ const ScheduleCard = ({ schedule, status, isRecruitClosed, onRecruitClose }) => 
                     }}
                   >
                     {participantCount}
-                  </span>
-                )}
-              </div>
-            ) : (
-              <button 
-                className="recruit-btn closed" 
-                disabled
-                style={{
-                  backgroundColor: "#ccc", 
-                  color: "#666", 
-                  cursor: "not-allowed"
-                }}
-              >
-                모집 마감
-              </button>
+          </span>
+        )}
+      </div>
+    ) : (
+      <button 
+        className="recruit-btn closed" 
+        disabled
+        style={{ backgroundColor: "#ccc", color: "#666" }}
+      >
+        모집 마감
+      </button>
             )}
           </div>
         )}
+
+        {/* 예정 일정: PARTICIPANT 승인 상태 */}
+        {status === "예정" && isParticipant && (
+          <div className="approval-status">
+            <span>
+              {schedule.myJoinStatus === "APPROVED"
+                ? "승인됨"
+                : schedule.myJoinStatus === "REJECTED"
+                ? "거절됨"
+                : "승인 대기중"}
+            </span>
+          </div>
+        )}
       </div>
-  
+
       {errorMsg && <div style={{ color: "red", textAlign: "center" }}>{errorMsg}</div>}
-  
-      {open && status === "예정" && participants.length > 0 && (
+
+      {/* 진행중 / 예정: 참여자 목록 */}
+      {effectiveOpen && (status === "진행중" || status === "예정") && !isRejected && visibleParticipants.length > 0 && (
         <div className="participants-section">
-          {participants.map((participant, index) => (
+          {visibleParticipants.map((participant, index) => (
             <div key={index} className="participant-row">
               <div className="participant-info">
-                <img 
-                  src={participant.image} 
-                  alt={participant.name} 
-                  className="participant-avatar" 
-                />
-                <span>{participant.name}</span>
+                <ProfileImage src={participant.image} className="participant-avatar" />
+                <span>
+                  {participant.name}
+                  {participant.id === schedule.owner?.id ? " (여행 리더)" : ""}
+                </span>
               </div>
-              <div>
-                <button className="action-btn approve" onClick={() => handleApprove(index)}>✓</button>
-                <button className="action-btn reject" onClick={() => handleReject(index)}>✕</button>
-              </div>
+              {status === "예정" && isOwner && participant.status === "PENDING" && (
+                <div>
+                  <button className="action-btn approve" onClick={() => handleApprove(index)}>
+                    ✓
+                  </button>
+                  <button className="action-btn reject" onClick={() => handleReject(index)}>
+                    ✕
+                  </button>
+                </div>
+              )}
             </div>
           ))}
+        </div>
+      )}
 
+
+      {/* 완료 일정 평가 로직 */}
+{status === "완료" && (
+  <>
+    {/* 목록 닫힘 상태 */}
+{!effectiveOpen && (
+  <div className="schedule-actions">
+    <button
+      className="completed-btn"
+      style={{
+        backgroundColor: schedule.isReviewed ? "#28a745" : "#ff7f50",
+        color: "#fff",
+      }}
+      onClick={() => setOpen(true)} // 클릭 시 목록 열기
+    >
+      {schedule.isReviewed ? "평가 완료" : "평가하기"}
+    </button>
+  </div>
+)}
+
+
+
+
+    {effectiveOpen && (
+  <div className="participants-section">
+    {visibleParticipants.map((participant, index) => (
+      <div key={index} className="participant-row">
+        <div className="participant-info">
+          <ProfileImage src={participant.image} className="participant-avatar" />
+          <span>
+            {participant.name}
+            {participant.id === schedule.owner?.id ? " (여행 리더)" : ""}
+          </span>
         </div>
-      )}
-  
-      {/* 여기 아래에 추가 */}
-      {status === "완료" && !schedule.isReviewed && (
-        <div className="schedule-actions">
-          <button className="register-btn">동행자 여행 평가</button>
-        </div>
-      )}
-  
-      {status === "완료" && schedule.isReviewed && (
-        <div className="schedule-actions">
-          <span className="completed-btn">평가 완료</span>
-        </div>
-      )}
-    </div>
-  )
-}
+        <button
+          className="evaluation-btn"
+          onClick={() => {
+            if (!participant.isReviewed) {
+              setSelectedParticipant(participant); // 평가 안 했으면 모달 열기
+            }
+          }}
+          disabled={participant.isReviewed} // 평가완료면 비활성화
+          style={{
+            backgroundColor: participant.isReviewed ? "#28a745" : "#ff7f50",
+            color: "#fff",
+            padding: "6px 12px",
+            borderRadius: "20px",
+            marginLeft: "8px",
+            border: "none",
+            cursor: participant.isReviewed ? "default" : "pointer",
+            opacity: participant.isReviewed ? 0.7 : 1,
+          }}
+        >
+          {participant.isReviewed ? "평가 완료" : "평가하기"}
+        </button>
+      </div>
+    ))}
+  </div>
+)}
+  </>
+)}
+
+
+
+</div> )}
 
 
 export default ScheduleManagementPage

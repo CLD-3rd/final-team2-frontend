@@ -1,6 +1,35 @@
 "use client";
 
-const Header = ({ isLoggedIn, onLogin, onLogout, userProfile }) => {
+import { useLockBodyScroll, ProfileImage } from "@/shared";
+import { useEffect, useState } from "react";
+import { getUserInfo } from "@/features/user/api/userApi";
+import { parseUserInfoResponse } from "@/features/user/dto/userDto";
+
+
+
+const Header = ({ isLoggedIn, onLogin, onLogout }) => {
+  const [userProfile, setUserProfile] = useState({
+    username: "로딩중...",
+    profileImage: "/images/default-user-profile.png",
+  });
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        // 임시로 userId = 12 (로그인 상태라면 토큰이나 session에서 가져오는 것이 일반적)
+        const rawData = await getUserInfo(12);
+        const parsedData = parseUserInfoResponse(rawData);
+        setUserProfile(parsedData);
+      } catch (error) {
+        console.error("유저 정보 불러오기 실패:", error);
+      }
+    };
+
+    if (isLoggedIn) {
+      fetchUserInfo();
+    }
+  }, [isLoggedIn]);
+
   return (
     <header className="header bg-white">
       <div className="header-left">
@@ -17,17 +46,15 @@ const Header = ({ isLoggedIn, onLogin, onLogout, userProfile }) => {
       <div className="header-right">
         {isLoggedIn ? (
           <div className="user-menu">
-            <img
-              src={
-                userProfile?.profileImage || "/images/default-user-profile.png"
-              }
+            <ProfileImage
+              src={userProfile.profileImage}
               alt="프로필"
               className="profile-image"
               onError={(e) => {
                 e.currentTarget.src = "/images/default-user-profile.png";
               }}
             />
-            <span>{userProfile?.username || "사용자님"}</span>
+            <span>{userProfile.username}</span>
             <button onClick={onLogout} className="auth-button font-medium">
               로그아웃
             </button>
