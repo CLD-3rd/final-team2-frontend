@@ -1,4 +1,4 @@
-const regionOptions = [
+const locationOptions = [
   { value: "JEJU", label: "제주" },
   { value: "SEOUL", label: "서울" },
   { value: "BUSAN", label: "부산" },
@@ -10,4 +10,4 @@ const regionOptions = [
   { value: "GANGNEUNG", label: "강릉" },
   { value: "SOKCHO", label: "속초" },
 ];
-export default regionOptions;
+export default locationOptions;

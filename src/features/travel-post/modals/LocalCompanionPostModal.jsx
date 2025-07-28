@@ -1,24 +1,24 @@
 import { useState, useEffect } from "react";
 import { PostForm, useLockBodyScroll } from "@/shared";
-import { createFeed, updateFeed } from "@/features/feed";
+import { createTravelPost, updateTravelPost } from "@/features/travel-post";
 import toast from "react-hot-toast";
 
-const FeedPostModal = ({
+const LocalCompanionPostModal = ({
   onClose,
-  onSuccess, // ✅ 성공 시 콜백 추가
-  mode = "create",
+  onPostCreate,
+  onSuccess, // ✅ 수정 후 성공 콜백
   initialData = null,
+  mode = "create", // ✅ "create" | "edit"
 }) => {
   const [formData, setFormData] = useState({
     title: "",
-    content: "",
     location: "",
-    image: null,
-    badgeRequest: false,
   });
+  const [loading, setLoading] = useState(false);
 
   useLockBodyScroll();
 
+  // ✅ initialData 있을 때 formData 세팅
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -29,33 +29,32 @@ const FeedPostModal = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
       const formPayload = new FormData();
       formPayload.append("title", formData.title);
-      formPayload.append("content", formData.content);
       formPayload.append("location", formData.location);
-      formPayload.append("badge_request", formData.badgeRequest);
-      if (formData.image) {
-        formPayload.append("images", formData.image);
+
+      if (mode === "create") {
+        await createTravelPost("NOW", formPayload);
+        toast.success("현지 동행 모집글이 등록되었습니다!");
+        onPostCreate?.();
+      } else if (mode === "edit" && initialData?.id) {
+        await updateTravelPost("NOW", initialData.id, formPayload);
+        toast.success("현지 동행 모집글이 수정되었습니다!");
+        onSuccess?.();
       }
 
-      if (mode === "edit" && initialData?.id) {
-        await updateFeed(initialData.id, formPayload);
-      } else {
-        await createFeed(formPayload);
-      }
-
-      // ✅ 성공 시 콜백 실행 (FeedPage에서 reloadTrigger 증가)
-      toast.success("피드가 등록되었습니다!");
-      onSuccess?.();
       onClose();
     } catch (error) {
       toast.error(
-        mode === "edit"
-          ? "피드 수정에 실패했습니다."
-          : "피드 등록에 실패했습니다."
+        mode === "create"
+          ? "현지 동행 모집글 등록에 실패했습니다."
+          : "현지 동행 모집글 수정에 실패했습니다."
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -63,7 +62,7 @@ const FeedPostModal = ({
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>{mode === "edit" ? "피드 수정" : "새 피드 작성"}</h2>
+          <h2>{mode === "create" ? "현지 동행 모집" : "모집글 수정"}</h2>
           <button className="modal-close" onClick={onClose}>
             ×
           </button>
@@ -73,16 +72,12 @@ const FeedPostModal = ({
           setFormData={setFormData}
           onSubmit={handleSubmit}
           onClose={onClose}
-          titleLabel="제목"
-          contentLabel="내용"
-          includeBadge
-          includeDateRange={false}
-          includeContent
-          includeImage
+          titleLabel="모집 제목"
+          contentLabel="여행 계획"
         />
       </div>
     </div>
   );
 };
 
-export default FeedPostModal;
+export default LocalCompanionPostModal;
