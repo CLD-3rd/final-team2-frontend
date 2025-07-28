@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Header, Sidebar } from "@/shared";
 import AppRouter from "@/AppRouter";
-import { LoginModal } from "@/features/user";
+import { LoginModal, getCurrentUser, logoutUser } from "@/features/user";
 import "@/App.css";
 import { Toaster } from "react-hot-toast";
 import { axiosInstance } from "@/shared"; // ✅ withCredentials: true 포함된 axios
@@ -12,26 +12,24 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState("feed");
+  const [currentPage, setCurrentPage] = useState("planned-companion");
   const [feedCount, setFeedCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const [userProfile, setUserProfile] = useState(null);
 
-  // const [userProfile, setUserProfile] = useState({
-  //   id: 12,
-  //   badges: [],
-  //   travelTags: [],
-  //   ownedBadges: [],
-  // });
-
   // ✅ 로그인 상태 유지 (서버에 요청)
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
-        const response = await axiosInstance.get("/api/users/me");
-        setUserProfile(response.data);
-        setIsLoggedIn(true);
+        const user = await getCurrentUser();
+        if (user) {
+          setUserProfile(user);
+          setIsLoggedIn(true);
+        } else {
+          setIsLoggedIn(false);
+          setUserProfile(null);
+        }
       } catch (error) {
         console.warn("로그인 상태 확인 실패:", error);
         setIsLoggedIn(false);
@@ -44,11 +42,12 @@ function App() {
     fetchCurrentUser();
   }, []);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setIsLoggedIn(true);
     setIsLoginModalOpen(false);
     // ✅ 로그인 직후 유저 정보 다시 가져오기
-    axios.get("/api/users/me").then((res) => setUserProfile(res.data));
+    const user = await getCurrentUser();
+    if (user) setUserProfile(user);
   };
 
   const handleProfileUpdate = (updatedProfile) => {
@@ -57,9 +56,11 @@ function App() {
 
   const handleLogout = async () => {
     try {
-      await axiosInstance.post("/api/logout"); // ✅ 로그아웃 API 필요
-      setIsLoggedIn(false);
-      setUserProfile(null);
+      const success = await logoutUser();
+      if (success) {
+        setIsLoggedIn(false);
+        setUserProfile(null);
+      }
     } catch (err) {
       console.error("로그아웃 실패:", err);
     }

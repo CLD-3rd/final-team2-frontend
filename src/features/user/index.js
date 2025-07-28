@@ -5,7 +5,7 @@ export { default as TravelTagEditModal } from "./modals/TravelTagEditModal";
 export { default as LoginPage } from "./pages/LoginPage";
 export { default as ProfileManagementPage } from "./pages/ProfileManagementPage";
 export { default as ScheduleManagementPage } from "./pages/ScheduleManagementPage";
-export { default as EvaluationModal} from "./modals/EvaluationModal";
+export { default as EvaluationModal } from "./modals/EvaluationModal";
 export * from "./api/userApi";
 export * from "./dto/userDto";
 export * from "./api/scheduleApi";
