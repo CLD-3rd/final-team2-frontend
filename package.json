@@ -17,6 +17,7 @@
     "react-date-range": "^2.0.1",
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.5.2",
+    "react-infinite-scroll-component": "^6.1.0",
     "react-rating-stars-component": "^2.2.0"
   },
   "devDependencies": {

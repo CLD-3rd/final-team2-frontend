@@ -66,7 +66,7 @@ export const getFeeds = async (filters = {}, page = 1, size = 12) => {
       ],
       pageInfo: {
         currentPage: 1,
-        pageSize: 10,
+        pageSize: 12,
         totalPages: 1,
         totalElements: 2,
       },

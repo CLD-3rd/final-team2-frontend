@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Filterbar } from "@/shared";
+import {
+  Filterbar,
+  InfiniteScrollWrapper,
+  LoadingIndicator,
+  EndMessage,
+} from "@/shared";
 import {
   LocalCompanionCard,
   CreateLocalModal,
@@ -11,33 +16,51 @@ import {
 import toast from "react-hot-toast";
 
 const LocalCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
-  const [posts, setPosts] = useState([]); // ✅ 서버 데이터 저장
-  const [selectedPost, setSelectedPost] = useState(null);
-  const [filters, setFilters] = useState({
-    sort: "recent",
-  });
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [posts, setPosts] = useState([]);
+  const [filters, setFilters] = useState({ sort: "recent" });
+
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(true);
 
+  const [selectedPost, setSelectedPost] = useState(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // ✅ 필터 변경 시 초기화
   useEffect(() => {
-    fetchPosts();
+    setPage(1);
+    setPosts([]);
+    fetchPosts(1, false);
   }, [filters]);
 
-  const openCreateModal = () => setIsCreateModalOpen(true);
-  const closeCreateModal = () => setIsCreateModalOpen(false);
-
-  // ✅ API 호출 (조회)
-  const fetchPosts = async () => {
+  const fetchPosts = async (pageNum = 1, append = false) => {
     setLoading(true);
     try {
-      const { posts } = await getTravelPosts("NOW", filters);
-      setPosts(posts);
+      const { posts: newPosts, pageInfo } = await getTravelPosts(
+        "NOW",
+        filters,
+        pageNum,
+        12
+      );
+      setPosts((prev) => (append ? [...prev, ...newPosts] : newPosts));
+      setHasMore(pageNum < pageInfo.totalPages);
     } catch (error) {
       toast.error("현지 동행 모집글 조회 실패");
+      setHasMore(false);
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadMorePosts = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchPosts(nextPage, true);
+  };
+
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
   };
 
   const handleEditRequest = (postData) => {
@@ -46,64 +69,59 @@ const LocalCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
   };
 
   const handleEditSuccess = () => {
-    fetchPosts();
+    fetchPosts(1, false);
     setIsEditModalOpen(false);
     setSelectedPost(null);
   };
 
-  const handleFilterChange = (newFilters) => {
-    setFilters(newFilters);
-  };
-
-  const handleSortChange = (newSort) => {
-    setSort(newSort);
-  };
-
   const handlePostCreate = async () => {
-    await fetchPosts();
-    closeCreateModal();
+    await fetchPosts(1, false);
+    setIsCreateModalOpen(false);
   };
 
   return (
     <div className="local-companion-page">
-      <Filterbar
-        filters={filters}
-        onFilterChange={handleFilterChange}
-        onSortChange={handleSortChange}
-      />
+      <Filterbar filters={filters} onFilterChange={handleFilterChange} />
 
-      {/* ✅ 로딩 상태 처리 */}
-      {loading ? (
-        <p className="loading-text">로딩 중...</p>
-      ) : posts.length === 0 ? (
-        <p className="empty-text">현지 동행 모집글이 없습니다.</p>
+      {loading && posts.length === 0 ? (
+        <LoadingIndicator text="모집글을 불러오는 중..." />
       ) : (
-        <div className="local-companion-grid">
-          {posts.map((post) => (
-            <LocalCompanionCard
-              key={post.id}
-              postData={post}
-              isLoggedIn={isLoggedIn}
-              onLoginModalOpen={onLoginModalOpen}
-              onEdit={handleEditRequest}
-            />
-          ))}
-        </div>
+        <InfiniteScrollWrapper
+          dataLength={posts.length}
+          next={loadMorePosts}
+          hasMore={hasMore}
+          loaderText={<LoadingIndicator text="모집글을 불러오는 중..." />}
+          endText={<EndMessage text="모든 모집글을 확인했어요!" />}
+        >
+          <div className="local-companion-grid">
+            {posts.map((post) => (
+              <LocalCompanionCard
+                key={post.id}
+                postData={post}
+                isLoggedIn={isLoggedIn}
+                onLoginModalOpen={onLoginModalOpen}
+                onEdit={handleEditRequest}
+              />
+            ))}
+          </div>
+        </InfiniteScrollWrapper>
       )}
 
       {/* ✅ + 버튼 */}
       {isLoggedIn && (
-        <button className="fab" onClick={openCreateModal}>
+        <button className="fab" onClick={() => setIsCreateModalOpen(true)}>
           +
         </button>
       )}
-      {/* ✅ CreateFeedModal (FeedPage에서 관리) */}
+
+      {/* ✅ Create Modal */}
       {isCreateModalOpen && (
         <CreateLocalModal
-          onClose={closeCreateModal}
+          onClose={() => setIsCreateModalOpen(false)}
           onPostCreate={handlePostCreate}
         />
       )}
+
       {/* ✅ Update Modal */}
       {isEditModalOpen && selectedPost && (
         <UpdateLocalModal
