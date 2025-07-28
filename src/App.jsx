@@ -24,11 +24,12 @@ function App() {
       try {
         const user = await getCurrentUser();
         if (user) {
-          setUserProfile(user);
+          setUserProfile({
+            nickname: user.nickname || user.email.split("@")[0],
+            profileImage:
+              user.profileImageUrl || "/images/default-user-profile.png",
+          });
           setIsLoggedIn(true);
-        } else {
-          setIsLoggedIn(false);
-          setUserProfile(null);
         }
       } catch (error) {
         console.warn("로그인 상태 확인 실패:", error);
