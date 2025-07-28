@@ -42,7 +42,8 @@ const MainContent = ({
           />
         );
       case "schedule":
-        return <ScheduleManagementPage />;
+        return <ScheduleManagementPage
+        userProfile={userProfile}/>;
       case "chat":
         return <ChatPage />;
       case "support":

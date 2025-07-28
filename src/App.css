@@ -523,7 +523,13 @@ body {
   background: #f8f4ff;
   border-radius: 12px;
   padding: 20px;
-  border: 1px solid #e8e3ff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.schedule-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .schedule-card-header {
@@ -3537,4 +3543,12 @@ body {
     max-width: 280px;
     justify-content: center;
   }
+}
+
+.profile-star.half {
+  background: linear-gradient(90deg, gold 50%, #ccc 50%);
+  background-clip: text;             /* 표준 속성 */
+  -webkit-background-clip: text;     /* 크롬, 사파리 */
+  color: transparent;
+  -webkit-text-fill-color: transparent;
 }

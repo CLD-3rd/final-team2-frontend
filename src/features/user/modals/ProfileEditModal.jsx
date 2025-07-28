@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useLockBodyScroll } from "@/shared";
+import { useLockBodyScroll, ProfileImage } from "@/shared";
 
 const ProfileEditModal = ({ onClose, userProfile, onSave }) => {
   useLockBodyScroll();
@@ -73,7 +73,7 @@ const ProfileEditModal = ({ onClose, userProfile, onSave }) => {
               <h3 className="section-title">프로필 사진</h3>
               <div className="profile-image-edit-container">
                 <div className="profile-image-preview">
-                  <img
+                  <ProfileImage
                     src={imagePreview || "/placeholder.svg"}
                     alt="프로필 미리보기"
                     className="preview-image"
