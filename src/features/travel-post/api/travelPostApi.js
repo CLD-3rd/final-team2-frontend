@@ -54,7 +54,7 @@ export const getTravelPostDetail = async (type, travelPostId) => {
     const { data } = await axiosInstance.get(`${BASE_URL}/${travelPostId}`, {
       params: { postType: type },
     });
-    return parseFeedDetailResponse(data);
+    return parsePostDetailResponse(data);
   } catch (error) {
     const message =
       error.response?.data?.message ||
@@ -90,7 +90,7 @@ export const getTravelPostDetail = async (type, travelPostId) => {
 // ✅ 모집글 생성
 export const createTravelPost = async (type, payload) => {
   try {
-    const { data } = await axiosInstance.post(BASE_URL, payload, {
+    const { data } = await axiosInstance.post(`${BASE_URL}/requests`, payload, {
       params: { postType: type },
       headers: {
         "Content-Type": "multipart/form-data",
