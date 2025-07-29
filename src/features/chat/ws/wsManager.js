@@ -10,7 +10,7 @@ class WSManager {
 
   connect = () => {
     return new Promise((resolve, reject) => {
-      const socket = new SockJS("/ws-stomp"); // 서버 엔드포인트
+      const socket = new SockJS("/ws"); // 서버 엔드포인트
       this.stompClient = Stomp.over(socket);
       this.stompClient.connect({}, () => resolve(), (error) => reject(error));
     });
@@ -21,14 +21,28 @@ class WSManager {
     this.subscriptions = [];
   };
 
-  subscribeChat = (roomId, isGroup, callback) => {
-    const destination = isGroup
-      ? `/sub/chat/group/${roomId}`
-      : `/sub/chat/direct/${roomId}`;
+  // src/features/chat/ws/wsManager.js
+subscribeChat = (roomId, isGroup, callback) => {
+  this.cleanupChatSubscriptions(); // 기존 구독 해제
 
-    const sub = this.stompClient.subscribe(destination, callback);
-    this.subscriptions.push(sub);
-  };
+  let sub;
+  if (isGroup) {
+    // 그룹 채팅방 구독
+    sub = this.stompClient.subscribe(
+      `/sub/chat/room/${roomId}`,
+      (message) => callback(JSON.parse(message.body))
+    );
+  } else {
+    // 1:1 채팅 메시지 구독 (개인 큐)
+    sub = this.stompClient.subscribe(
+      `/user/queue/messages`,
+      (message) => callback(JSON.parse(message.body))
+    );
+  }
+
+  this.subscriptions.push(sub);
+};
+
 
   sendMessage = (roomId, message, isGroup = false, recipientId = null) => {
     const destination = isGroup
@@ -38,6 +52,14 @@ class WSManager {
 
     this.stompClient.send(destination, {}, JSON.stringify(message));
   };
+
+  subscribeNotifications = (callback) => {
+  const sub = this.stompClient.subscribe(
+    "/user/queue/notifications",
+    (message) => callback(JSON.parse(message.body))
+  );
+  this.subscriptions.push(sub);
+};
 
   disconnect = () => {
     if (this.stompClient) this.stompClient.disconnect();

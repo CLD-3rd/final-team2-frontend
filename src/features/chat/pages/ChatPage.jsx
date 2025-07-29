@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react"
 import ProfileImage from "../../../shared/components/ProfileImage";
 import { getDirectChatRooms, getGroupChatRooms, getChatMessages, getCurrentUser, getUsers } from "../api/chatApi";
 import { parseDirectChatRoomResponse, parseGroupChatRoomResponse, parseChatMessageResponse, parseUsersResponse, parseCurrentUserResponse } from "../dto/chatDto";
+import { wsManager } from "../ws/wsManager";
 
 const ChatPage = () => {
   // 상태 관리
@@ -27,6 +28,56 @@ const ChatPage = () => {
     "👍", "👎", "👏", "🙌", "👋", "✌️", "🤝", "💪", "🙏", "👌",
     "❤️", "💕", "💖", "💯", "🔥", "⭐", "🎉", "🎊", "🌟", "✨",
   ]
+
+  // 최초 1회 연결 + 알림 구독
+useEffect(() => {
+  wsManager.connect()
+    .then(() => {
+      console.log("WebSocket Connected");
+
+      wsManager.subscribeNotifications((notification) => {
+        console.log("새 알림:", notification);
+        if (notification.roomId) {
+          // DM & Group 모두 처리
+          setDirectRooms(prev =>
+            prev.map(room => room.roomId === notification.roomId
+              ? { ...room, unreadCount: (room.unreadCount || 0) + 1 }
+              : room
+            )
+          );
+          setGroupRooms(prev =>
+            prev.map(room => room.roomId === notification.roomId
+              ? { ...room, unreadCount: (room.unreadCount || 0) + 1 }
+              : room
+            )
+          );
+        }
+      });
+    })
+    .catch((err) => console.error("WebSocket Connect Failed:", err));
+
+  return () => wsManager.disconnect();
+}, []);
+
+  // 채팅방 구독만 관리
+useEffect(() => {
+  if (!selectedChat) return;
+
+  wsManager.cleanupChatSubscriptions();
+
+  if (chatType === "direct") {
+    wsManager.subscribeChat(null, false, (msg) => {
+      setChatMessages(prev => [...prev, msg]);
+    });
+  } else if (chatType === "group") {
+    wsManager.subscribeChat(selectedChat.roomId, true, (msg) => {
+      setChatMessages(prev => [...prev, msg]);
+    });
+  }
+}, [selectedChat, chatType]);
+
+
+
 
   // [GET /api/users/me] 현재 사용자 정보 가져오기
   useEffect(() => {
@@ -137,30 +188,29 @@ const ChatPage = () => {
   // [SEND /pub/chat.direct.send/{currentRoomId}] DM 메시지 전송 (WebSocket)
   // [SEND /pub/chat.group.send/{currentRoomId}] 그룹 메시지 전송 (WebSocket)
   const sendMessage = async (message) => {
-    if (!currentRoomId || !message.trim()) return
+  if (!currentRoomId || !message.trim()) return;
 
-    try {
-      if (chatType === "direct") {
-        // TODO: chatApi.sendDirectMessage(currentRoomId, message) 호출
-        console.log(`SEND /pub/chat.direct.send/${currentRoomId} - DM 메시지 전송`)
-      } else {
-        // TODO: chatApi.sendGroupMessage(currentRoomId, message) 호출
-        console.log(`SEND /pub/chat.group.send/${currentRoomId} - 그룹 메시지 전송`)
-      }
-      
-      // 로컬 상태 업데이트
-      const newMessage = {
-        id: Date.now(),
-        sender: "me",
-        type: "text",
-        content: message,
-        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      }
-      setChatMessages(prev => [...prev, newMessage])
-    } catch (error) {
-      console.error("Failed to send message:", error)
+  const msgPayload = {
+    roomId: currentRoomId,
+    content: message,
+    type: "TALK",
+    recipientId: chatType === "direct" ? selectedChat?.recipientId : null,
+  };
+
+  wsManager.sendMessage(currentRoomId, msgPayload, chatType === "group", selectedChat?.recipientId);
+
+  setChatMessages(prev => [
+    ...prev,
+    {
+      id: Date.now(),
+      sender: currentUser?.name || "me",
+      type: "text",
+      content: message,
+      timestamp: new Date().toISOString(),
     }
-  }
+  ]);
+};
+
 
   // 채팅 타입 변경 (DM/Group)
   const handleChatTypeChange = (type) => {

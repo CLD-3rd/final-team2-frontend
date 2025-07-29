@@ -5,6 +5,8 @@ import { useLockBodyScroll, getLocationLabel, ProfileImage } from "@/shared";
 import { deleteTravelPost } from "@/features/travel-post";
 import ReactStars from "react-rating-stars-component";
 import toast from "react-hot-toast";
+import { createDirectChatRoom } from '@/features/chat/api/chatApi';
+
 
 const LocalCompanionCard = ({
   postData,
@@ -32,6 +34,19 @@ const LocalCompanionCard = ({
         onUpdateSuccess?.(); // ✅ PlannedCompanionPage 새로고침 트리거
       } catch (error) {
         toast.error("모집글 삭제에 실패했습니다. 다시 시도해주세요.");
+      }
+    }
+  };
+
+    const handleCardClick = async () => {
+    const result = window.confirm("DM하시겠습니까?");
+    if (result) {
+      try {
+        await createDirectChatRoom(postData.author.id);
+        alert("DM 채팅방이 생성되었습니다!");
+        // 필요하다면 채팅방으로 이동 등 추가 동작
+      } catch (e) {
+        alert("채팅방 생성에 실패했습니다.");
       }
     }
   };
@@ -85,7 +100,7 @@ const LocalCompanionCard = ({
       <div className="card-main-content">
         <h3 className="card-title">{postData.title}</h3>
 
-        <div className="card-author-info">
+        <div className="card-author-info" onClick={handleCardClick} style={{ cursor: 'pointer' }}>
           <ProfileImage
             src={postData.author.profileImgUrl}
             alt={postData.author.nickname}
