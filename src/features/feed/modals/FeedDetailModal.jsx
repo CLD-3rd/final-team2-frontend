@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLockBodyScroll, FallbackImage, ProfileImage } from "@/shared";
 import {
   getFeedDetail,
@@ -28,8 +28,10 @@ const FeedDetailModal = ({
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [hasMultipleImages, setHasMultipleImages] = useState(false);
-  const [isOwner, setIsOwner] = useState(false);
   const isLoggedIn = !!currentUser;
+  const isOwner = useMemo(() => {
+    return isLoggedIn && postData?.author.userId === currentUser?.userId;
+  }, [isLoggedIn, postData, currentUser]);
 
   useLockBodyScroll();
 
@@ -38,7 +40,6 @@ const FeedDetailModal = ({
       const data = await getFeedDetail(feedId);
       setHasMultipleImages(data.imageUrls.length > 1);
       setFeedData(data);
-      setIsOwner(isLoggedIn && data.author.id === currentUser.id);
       setComments(data.comments || []);
     } catch (err) {
       toast.error("피드 정보를 불러오지 못했습니다.");
@@ -154,7 +155,7 @@ const FeedDetailModal = ({
       ]);
       setNewComment("");
     } catch (error) {
-      toast.error("댓글 등록에 실패했습니다.");
+      toast.error(error.message || "댓글 등록에 실패했습니다.");
     }
   };
 
@@ -205,7 +206,7 @@ const FeedDetailModal = ({
       );
       toast.success("댓글이 삭제되었습니다.");
     } catch (error) {
-      toast.error("댓글 삭제에 실패했습니다.");
+      toast.error(error.message || "댓글 삭제에 실패했습니다.");
     }
   };
 

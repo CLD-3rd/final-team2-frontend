@@ -1,18 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useLockBodyScroll, getLocationLabel, ProfileImage } from "@/shared";
 import { deleteTravelPost } from "@/features/travel-post";
 import ReactStars from "react-rating-stars-component";
 import toast from "react-hot-toast";
 
 const LocalCompanionCard = ({
+  currentUser,
   postData,
-  isLoggedIn,
   onLoginModalOpen,
   onEdit,
 }) => {
+  const [loading, setLoading] = useState(true);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const isLoggedIn = !!currentUser;
+  const isOwner = useMemo(() => {
+    return isLoggedIn && postData?.author.userId === currentUser?.userId;
+  }, [isLoggedIn, postData, currentUser]);
 
   useLockBodyScroll();
 
@@ -31,7 +36,9 @@ const LocalCompanionCard = ({
 
         onUpdateSuccess?.(); // ✅ PlannedCompanionPage 새로고침 트리거
       } catch (error) {
-        toast.error("모집글 삭제에 실패했습니다. 다시 시도해주세요.");
+        toast.error(
+          error.message || "모집글 삭제에 실패했습니다.\n다시 시도해주세요."
+        );
       }
     }
   };
@@ -50,7 +57,7 @@ const LocalCompanionCard = ({
             activeColor="#ffd700" // 골드 색상
           />
         </div>
-        {isLoggedIn && (
+        {isOwner && (
           <div className="more-menu-container">
             <button className="more-menu-button" onClick={handleMoreMenuClick}>
               ⋮

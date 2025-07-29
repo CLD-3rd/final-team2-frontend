@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLockBodyScroll, getLocationLabel, FallbackImage } from "@/shared";
 import {
   getTravelPostDetail,
@@ -14,15 +14,16 @@ const PostDetailModal = ({ currentUser, postId, onClose, onUpdateSuccess }) => {
   const [loading, setLoading] = useState(true);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isOwner, setIsOwner] = useState(false);
   const isLoggedIn = !!currentUser;
+  const isOwner = useMemo(() => {
+    return isLoggedIn && postData?.author.userId === currentUser?.userId;
+  }, [isLoggedIn, postData, currentUser]);
 
   useLockBodyScroll();
 
   const fetchPostDetail = async () => {
     try {
       const data = await getTravelPostDetail("BEFORE", postId);
-      setIsOwner(isLoggedIn && data.author.id === currentUser.id);
       setPostData(data);
     } catch (err) {
       toast.error("모집글 정보를 불러오지 못했습니다.");
@@ -35,18 +36,27 @@ const PostDetailModal = ({ currentUser, postId, onClose, onUpdateSuccess }) => {
     fetchPostDetail();
   }, [postId]);
 
-  if (loading)
+  // ✅ 로딩 처리
+  if (loading) {
     return (
       <div className="modal-overlay">
-        <p>로딩 중...</p>
+        <div className="feed-detail-modal">
+          <p>로딩 중...</p>
+        </div>
       </div>
     );
-  if (!postData)
+  }
+
+  if (!postData) {
     return (
       <div className="modal-overlay">
-        <p>데이터 없음</p>
+        <div className="feed-detail-modal">
+          <p>{"데이터가 없습니다."}</p>
+          <button onClick={onClose}>닫기</button>
+        </div>
       </div>
     );
+  }
 
   // 더 보기 메뉴 관련 핸들러 (+ 수정, 삭제)
   const handleMoreMenuClick = (e) => {
@@ -70,14 +80,16 @@ const PostDetailModal = ({ currentUser, postId, onClose, onUpdateSuccess }) => {
   const handleDeletePost = async () => {
     if (window.confirm("이 모집글을 삭제하시겠습니까?")) {
       try {
-        await deleteTravelPost(postData.id);
+        await deleteTravelPost("BEFORE", postData.id);
         toast.success("모집글이 삭제되었습니다.");
         setIsMoreMenuOpen(false);
 
         onClose(); // 상세 모달 닫기
         onUpdateSuccess?.();
       } catch (error) {
-        toast.error("모집글 삭제에 실패했습니다.\n다시 시도해주세요.");
+        toast.error(
+          error.message || "모집글 삭제에 실패했습니다.\n다시 시도해주세요."
+        );
       }
     }
   };
