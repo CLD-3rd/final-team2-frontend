@@ -5,12 +5,16 @@ export const getCurrentUser = async () => {
   try {
     const res = await axiosInstance.get("/api/users/me");
     if (res.status === 200 && res.data) {
-      return res.data; // { id, email }
+      return res.data; // 로그인 사용자 정보
     }
-    return null;
+    return null; // 데이터가 없으면 비로그인
   } catch (error) {
+    if (error.response?.status === 401) {
+      // ✅ 비로그인 상태 → 정상적인 흐름
+      return null;
+    }
     console.error("로그인 사용자 정보 조회 실패", error);
-    return null;
+    return null; // 기타 에러는 null 처리
   }
 };
 

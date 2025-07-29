@@ -21,23 +21,15 @@ function App() {
   // ✅ 로그인 상태 유지 (서버에 요청)
   useEffect(() => {
     const fetchCurrentUser = async () => {
-      try {
-        const user = await getCurrentUser();
-        if (user) {
-          setUserProfile({
-            nickname: user.nickname || user.email.split("@")[0],
-            profileImage:
-              user.profileImageUrl || "/images/default-user-profile.png",
-          });
-          setIsLoggedIn(true);
-        }
-      } catch (error) {
-        console.warn("로그인 상태 확인 실패:", error);
+      const user = await getCurrentUser();
+      if (user) {
+        setUserProfile(user);
+        setIsLoggedIn(true);
+      } else {
         setIsLoggedIn(false);
         setUserProfile(null);
-      } finally {
-        setLoading(false);
       }
+      setLoading(false);
     };
 
     fetchCurrentUser();
@@ -49,6 +41,12 @@ function App() {
     // ✅ 로그인 직후 유저 정보 다시 가져오기
     const user = await getCurrentUser();
     if (user) setUserProfile(user);
+  };
+
+  const hasAuthToken = () => {
+    return document.cookie
+      .split("; ")
+      .some((cookie) => cookie.startsWith("accessToken="));
   };
 
   const handleProfileUpdate = (updatedProfile) => {
