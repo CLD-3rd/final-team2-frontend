@@ -85,7 +85,7 @@ export const createTravelPost = async (type, payload) => {
 // ✅ 모집글 수정
 export const updateTravelPost = async (type, travelPostId, payload) => {
   try {
-    const { data } = await axiosInstance.patch(
+    const { data } = await axiosInstance.put(
       `${BASE_URL}/${travelPostId}`,
       payload,
       {
