@@ -32,12 +32,11 @@ export const getTravelPosts = async (
         location: filters.location || "", // ✅ 지역 검색
       },
     });
-
     const parsedPosts = parseTravelPostsResponse(data);
 
     return {
       posts: parsedPosts,
-      pageInfo: data?.data?.pageInfo,
+      pageInfo: data.pageInfo,
     };
   } catch (error) {
     const message =
