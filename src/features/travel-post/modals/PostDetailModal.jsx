@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useLockBodyScroll, FallbackImage, ProfileImage } from "@/shared";
+import {
+  useLockBodyScroll,
+  getLocationLabel,
+  FallbackImage,
+  ProfileImage,
+} from "@/shared";
 import {
   getTravelPostDetail,
   deleteTravelPost,
@@ -27,7 +32,6 @@ const PostDetailModal = ({
     try {
       const data = await getTravelPostDetail("BEFORE", postId);
       setPostData(data);
-      console.log(data);
     } catch (err) {
       toast.error("모집글 정보를 불러오지 못했습니다.");
     } finally {
@@ -111,7 +115,9 @@ const PostDetailModal = ({
           <div className="header-spacer"></div>
           <div className="location-info">
             <span className="location-pin">📍</span>
-            <span className="location-name">{postData.location}</span>
+            <span className="location-name">
+              {getLocationLabel(postData.location)}
+            </span>
             {isLoggedIn && (
               <div className="more-menu-container">
                 <button

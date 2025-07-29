@@ -41,7 +41,7 @@ const PlannedCompanionCard = ({
   };
 
   return (
-    <div className="companion-card" onClick={onPostClick}>
+    <div className="companion-card" onClick={() => onPostClick(postData.id)}>
       <div className="card-header">
         <div className="author-info">
           <div className="author-avatar">
