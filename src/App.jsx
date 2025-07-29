@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { Header, Sidebar } from "@/shared";
 import AppRouter from "@/AppRouter";
-import { CreateLocalModal } from "@/features/local-companion";
+import { CreateLocalModal } from "@/features/travel-post";
 import { LoginModal } from "@/features/user";
 import "@/App.css";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -62,10 +63,10 @@ function App() {
   // + 버튼을 보여줄 페이지들 정의
   const showFabPages = ["feed", "planned-companion", "local-companion"];
   const shouldShowFab = isLoggedIn && showFabPages.includes(currentPage);
-  console.log("[App] login : ", isLoggedIn);
 
   return (
     <div className="app">
+      <Toaster position="top-right" reverseOrder={false} />
       <Header
         isLoggedIn={isLoggedIn}
         onLogin={openLoginModal}
@@ -92,17 +93,6 @@ function App() {
           onLoginModalOpen={openLoginModal}
         />
       </div>
-
-      {isCreateModalOpen && (
-        <>
-          {currentPage === "local-companion" && (
-            <CreateLocalModal
-              onClose={closeCreateModal}
-              onPostCreate={handlePostCreate}
-            />
-          )}
-        </>
-      )}
 
       {isLoginModalOpen && (
         <LoginModal onClose={closeLoginModal} onLogin={handleLogin} />

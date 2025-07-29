@@ -10,20 +10,17 @@ import {
   deleteComment,
   UpdateFeedModal,
 } from "@/features/feed";
+import toast from "react-hot-toast";
 
 const FeedDetailModal = ({
   onClose,
   feedId,
   isLoggedIn,
-  onFeedDelete,
   onUpdateSuccess, // ✅ FeedPage에서 갱신할 콜백 추가
 }) => {
-  useLockBodyScroll();
-  console.log("[FeedDetail] login : ", isLoggedIn);
   const [feedData, setFeedData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -31,20 +28,25 @@ const FeedDetailModal = ({
   const [editingCommentText, setEditingCommentText] = useState("");
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [hasMultipleImages, setHasMultipleImages] = useState(false);
+
+  useLockBodyScroll();
+
+  const fetchFeedDetail = async () => {
+    try {
+      const data = await getFeedDetail(feedId);
+      setHasMultipleImages(data.imageUrls.length > 1);
+      setFeedData(data);
+      console.log(data);
+      setComments(data.comments || []); // ✅ 댓글 상태에 세팅
+    } catch (err) {
+      toast.error("피드 정보를 불러오지 못했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchFeedDetail = async () => {
-      try {
-        const data = await getFeedDetail(feedId);
-        setFeedData(data);
-        setComments(data.comments || []); // ✅ 댓글 상태에 세팅
-      } catch (err) {
-        console.error("피드 정보를 불러오지 못했습니다.", err);
-        setError("피드 정보를 불러올 수 없습니다.");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchFeedDetail();
   }, [feedId]);
 
@@ -93,26 +95,28 @@ const FeedDetailModal = ({
     if (window.confirm("이 피드를 삭제하시겠습니까?")) {
       try {
         await deleteFeed(feedData.id);
-        alert("피드가 삭제되었습니다.");
+        toast.success("피드가 삭제되었습니다.");
         setIsMoreMenuOpen(false);
 
         onClose(); // 상세 모달 닫기
         onUpdateSuccess?.(); // ✅ FeedPage 새로고침 트리거
       } catch (error) {
-        alert("피드 삭제에 실패했습니다. 다시 시도해주세요.");
+        toast.error("피드 삭제에 실패했습니다. 다시 시도해주세요.");
       }
     }
   };
 
-  const images = feedData.images || ["/images/feed-sample.jpg"];
-  const hasMultipleImages = images.length > 1;
   // 여러 이미지 처리 핸들러
   const handlePrevImage = () => {
-    setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? feedData.imageUrls.length - 1 : prev - 1
+    );
   };
 
   const handleNextImage = () => {
-    setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+    setCurrentImageIndex((prev) =>
+      prev === feedData.imageUrls.length - 1 ? 0 : prev + 1
+    );
   };
 
   const handleImageClick = (e) => {
@@ -149,7 +153,7 @@ const FeedDetailModal = ({
       ]);
       setNewComment("");
     } catch (error) {
-      alert("댓글 등록에 실패했습니다.");
+      toast.error("댓글 등록에 실패했습니다.");
     }
   };
 
@@ -178,7 +182,7 @@ const FeedDetailModal = ({
       setEditingCommentId(null);
       setEditingCommentText("");
     } catch (error) {
-      alert("댓글 수정에 실패했습니다.");
+      toast.error("댓글 수정에 실패했습니다.");
     }
   };
 
@@ -198,9 +202,9 @@ const FeedDetailModal = ({
       setComments((prev) =>
         prev.filter((comment) => comment.commentId !== commentId)
       );
-      alert("댓글이 삭제되었습니다.");
+      toast.success("댓글이 삭제되었습니다.");
     } catch (error) {
-      alert("댓글 삭제에 실패했습니다.");
+      toast.error("댓글 삭제에 실패했습니다.");
     }
   };
 
@@ -215,7 +219,7 @@ const FeedDetailModal = ({
           <div className="header-spacer"></div>
           <div className="location-info">
             <span className="location-pin">📍</span>
-            <span className="location-name">{feedData.region}</span>
+            <span className="location-name">{feedData.location}</span>
             {isLoggedIn && (
               <div className="more-menu-container">
                 <button
@@ -246,7 +250,7 @@ const FeedDetailModal = ({
         <div className="feed-modal-image-section">
           <div className="image-container">
             <FallbackImage
-              src={images[currentImageIndex] || "/placeholder.svg"}
+              src={feedData.imageUrls[currentImageIndex]}
               alt={feedData.title}
               className="feed-modal-image"
               onClick={handleImageClick}
@@ -269,10 +273,10 @@ const FeedDetailModal = ({
                   ›
                 </button>
                 <div className="image-pagination">
-                  {currentImageIndex + 1}/{images.length}
+                  {currentImageIndex + 1}/{feedData.imageUrls.length}
                 </div>
                 <div className="image-dots">
-                  {images.map((_, index) => (
+                  {feedData.imageUrls.map((_, index) => (
                     <button
                       key={index}
                       className={`image-dot ${

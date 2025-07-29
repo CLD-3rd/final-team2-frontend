@@ -26,7 +26,7 @@ const FilterBar = ({ filters, onFilterChange }) => {
   const searchOptions = [
     { value: "title", label: "제목" },
     { value: "author", label: "글쓴이" },
-    { value: "region", label: "지역" },
+    { value: "location", label: "지역" },
   ];
 
   const handleSearchCriteriaChange = (criteria) => {
@@ -45,11 +45,12 @@ const FilterBar = ({ filters, onFilterChange }) => {
     console.log(`🔍 검색 실행: "${searchValue}" in ${searchCriteria}`);
     // ✅ 검색 시 정렬을 최근 등록 순으로 강제 설정
     const updatedFilters = {
-      ...filters,
+      ...filters, // 기존 정렬 상태 유지
+      author: "", // 초기화
+      title: "",
+      location: "",
       [searchCriteria]: searchValue,
-      sort: "recent",
     };
-    setActiveSort("recent");
     onFilterChange(updatedFilters);
   };
 
@@ -112,6 +113,9 @@ const FilterBar = ({ filters, onFilterChange }) => {
             className="search-input"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleSearch();
+            }}
           />
           {/* 검색 버튼 */}
           <button className="search-button" onClick={handleSearch}>

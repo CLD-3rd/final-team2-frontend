@@ -1,64 +1,37 @@
 "use client";
 
-import { useState } from "react";
-import { FallbackImage, getRegionLabel } from "@/shared";
+import { FallbackImage, getLocationLabel } from "@/shared";
 
-const FeedCard = ({
-  title,
-  region,
-  author,
-  date,
-  images,
-  views,
-  likes,
-  onClick,
-}) => {
-  const [isLiked, setIsLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(likes);
-
-  const displayImage =
-    images && images.length > 0 ? images[0] : "/images/image-not-found.png";
-
-  const handleImageError = (e) => {
-    e.currentTarget.src = "/images/image-not-found.png";
-  };
-
-  const handleLikeClick = (e) => {
-    e.stopPropagation(); // 모달 열림 방지
-    setIsLiked(!isLiked);
-    setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
-    onLike?.(id, !isLiked); // API 호출
-  };
-
+const FeedCard = ({ feedData, onClick }) => {
   return (
     <div className="feed-card" onClick={onClick}>
       <div className="card-image">
         <FallbackImage
-          src={displayImage}
-          alt={title}
-          onError={handleImageError}
+          src={feedData.imageUrls[0]}
+          alt={feedData.title}
           className="feed-card-image"
         />
 
         {/* 이미지 개수 뱃지 */}
-        {images && images.length > 1 && (
-          <div className="image-count-badge">+{images.length - 1}</div>
+        {feedData.imageUrls && feedData.imageUrls.length > 1 && (
+          <div className="image-count-badge">
+            +{feedData.imageUrls.length - 1}
+          </div>
         )}
 
-        {/* ✅ 조회수 & 좋아요 오버레이 */}
+        {/* ✅ 조회수 오버레이 */}
         <div className="card-overlay-stats">
-          <span className="views">👁 {views}</span>
+          <span className="views">👁 {feedData.viewCount}</span>
         </div>
       </div>
 
       <div className="card-content">
-        <h3 className="card-title">{title}</h3>
-        <p className="card-region">{getRegionLabel(region)}</p>
+        <h3 className="card-title">{feedData.title}</h3>
+        <p className="card-location">{getLocationLabel(feedData.location)}</p>
         <div className="card-meta">
-          <span className="card-author">{author}</span>
-          <span className="card-date">{date}</span>
+          <span className="card-author">{feedData.author.nickname}</span>
+          <span className="card-date">{feedData.createdAt}</span>
         </div>
-        {/* ✅ 좋아요 버튼 */}
       </div>
     </div>
   );

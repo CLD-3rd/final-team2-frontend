@@ -1,15 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { DateRange } from "react-date-range";
-import { addDays, format } from "date-fns";
+import { format } from "date-fns";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
-import { regionOptions } from "@/shared";
+import { locationOptions } from "@/shared";
 
 const PostForm = ({
   formData,
   setFormData,
+  dateRange,
+  setDateRange,
   onSubmit,
   onClose,
   titleLabel,
@@ -17,17 +19,9 @@ const PostForm = ({
   includeBadge,
   includeDateRange,
   includeContent,
+  includeMaxParticipants,
   includeImage,
 }) => {
-  // ✅ 컴포넌트 내부로 이동
-  const [dateRange, setDateRange] = useState([
-    {
-      startDate: new Date(),
-      endDate: addDays(new Date(), 1),
-      key: "selection",
-    },
-  ]);
-
   useEffect(() => {
     if (includeDateRange) {
       const formatted = `${format(dateRange[0].startDate, "yy.MM.dd")}~${format(
@@ -37,6 +31,8 @@ const PostForm = ({
       setFormData((prev) => ({
         ...prev,
         dateRange: formatted,
+        startTime: dateRange[0].startDate.toISOString().split("T")[0],
+        endTime: dateRange[0].endDate.toISOString().split("T")[0],
       }));
     }
   }, [dateRange, includeDateRange, setFormData]);
@@ -67,17 +63,17 @@ const PostForm = ({
 
       {/* 지역 + 뱃지 */}
       <div className="form-row">
-        <div className="form-group region-group">
-          <label htmlFor="region">지역</label>
+        <div className="form-group location-group">
+          <label htmlFor="location">지역</label>
           <select
-            id="region"
-            name="region"
-            value={formData.region}
+            id="location"
+            name="location"
+            value={formData.location}
             onChange={handleChange}
             required
           >
             <option value="">지역을 선택하세요</option>
-            {regionOptions.map(({ value, label }) => (
+            {locationOptions.map(({ value, label }) => (
               <option key={value} value={value}>
                 {label}
               </option>
@@ -129,6 +125,24 @@ const PostForm = ({
             onChange={handleChange}
             rows="5"
             placeholder="내용을 입력하세요"
+            required
+          />
+        </div>
+      )}
+
+      {/* 최대 인원 입력 */}
+      {includeMaxParticipants && (
+        <div className="form-group">
+          <label htmlFor="maxParticipants">최대 인원</label>
+          <input
+            type="number"
+            id="maxParticipants"
+            name="maxParticipants"
+            value={formData.maxParticipants}
+            onChange={handleChange}
+            placeholder="최대 인원을 입력하세요"
+            min={2}
+            max={10}
             required
           />
         </div>

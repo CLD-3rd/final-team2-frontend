@@ -1,23 +1,29 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Filterbar } from "@/shared";
+import {
+  Filterbar,
+  InfiniteScrollWrapper,
+  LoadingIndicator,
+  EndMessage,
+} from "@/shared";
 import {
   FeedGrid,
   getFeeds,
   CreateFeedModal,
   FeedDetailModal,
 } from "@/features/feed";
+import toast from "react-hot-toast";
 
 const FeedPage = ({ onFeedCountChange, isLoggedIn }) => {
   const [filters, setFilters] = useState({
     sort: "recent",
   });
-  // console.log("[FeedPage] login : ", isLoggedIn);
 
-  const [feedData, setFeedData] = useState([]);
+  const [feeds, setFeeds] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(true);
-  const [reloadTrigger, setReloadTrigger] = useState(0);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedFeedId, setSelectedFeedId] = useState(null); // ✅ 상세 모달용 상태
@@ -25,75 +31,70 @@ const FeedPage = ({ onFeedCountChange, isLoggedIn }) => {
   const openCreateModal = () => setIsCreateModalOpen(true);
   const closeCreateModal = () => setIsCreateModalOpen(false);
 
-  const handleFilterChange = (newFilters) => {
-    setFilters(newFilters);
-  };
+  // ✅ 필터 변경 시 초기화
+  useEffect(() => {
+    setPage(1);
+    setFeeds([]);
+    fetchFeeds(1, false);
+  }, [filters]);
 
-  // const filteredFeedData = feedData
-  //   .filter((feed) => {
-  //     if (filters.title && !feed.title.includes(filters.title)) return false;
-  //     if (filters.author && !feed.author.nickname.includes(filters.author))
-  //       return false;
-  //     if (filters.region && feed.region !== filters.region) return false;
-  //     return true;
-  //   })
-  //   .sort((a, b) => {
-  //     if (filters.sort === "recent") {
-  //       return new Date(b.createdAt) - new Date(a.createdAt);
-  //     } else if (filters.sort === "view") {
-  //       return b.views - a.views;
-  //     }
-  //     return 0;
-  //   });
-
-  const fetchFeeds = async () => {
+  const fetchFeeds = async (pageNum = 1, append = false) => {
     setLoading(true);
     try {
-      console.log("[GetFeed] Sort : ", filters.sort);
-      const { feeds } = await getFeeds(filters);
-      setFeedData(feeds);
-      onFeedCountChange?.(feeds.length);
+      const { feeds, pageInfo } = await getFeeds(filters, pageNum);
+      setFeeds((prev) => (append ? [...prev, ...feeds] : feeds));
+      setHasMore(pageNum < pageInfo.totalPages);
+      onFeedCountChange?.(pageInfo.totalElements);
     } catch (error) {
-      console.error("피드 데이터를 불러오는 데 실패했습니다.", error);
+      toast.error("피드 데이터를 불러오는 데 실패했습니다.");
+      setHasMore(false);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchFeeds();
-  }, [filters]);
+  const loadMoreFeeds = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchFeeds(nextPage, true);
+  };
+
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+  };
 
   // ✅ 등록/수정 완료 시 새로고침
   const handleSuccess = () => {
-    setReloadTrigger((prev) => prev + 1);
+    setPage(1);
+    fetchFeeds(1, false);
     setIsCreateModalOpen(false);
     setSelectedFeedId(null);
   };
 
-  const handleFeedClick = (feedId) => {
-    setSelectedFeedId(feedId);
-  };
-
-  const closeDetailModal = () => {
-    setSelectedFeedId(null);
-  };
+  const handleFeedClick = (feedId) => setSelectedFeedId(feedId);
+  const closeDetailModal = () => setSelectedFeedId(null);
 
   return (
     <>
       <Filterbar filters={filters} onFilterChange={handleFilterChange} />
 
-      {!loading && feedData.length === 0 ? (
-        <div className="empty-feed-message">
-          아직 작성된 피드가 없습니다. 🥲
-        </div>
+      {loading && feeds.length === 0 ? (
+        <LoadingIndicator text="피드를 불러오는 중..." />
       ) : (
-        <FeedGrid
-          filters={filters}
-          feedData={feedData}
-          loading={loading}
-          onFeedClick={handleFeedClick}
-        />
+        <InfiniteScrollWrapper
+          dataLength={feeds.length}
+          next={loadMoreFeeds}
+          hasMore={hasMore}
+          loaderText={<LoadingIndicator text="피드를 불러오는 중..." />}
+          endText={<EndMessage text="모든 피드를 확인했어요!" />}
+        >
+          <FeedGrid
+            filters={filters}
+            feeds={feeds}
+            loading={loading}
+            onFeedClick={handleFeedClick}
+          />{" "}
+        </InfiniteScrollWrapper>
       )}
 
       {/* ✅ + 버튼 */}

@@ -2,16 +2,22 @@
 import { axiosInstance } from "@/shared";
 import { parseFeedsResponse, parseFeedDetailResponse } from "@/features/feed";
 
+const BASE_URL = "/api/feed";
+
 // ✅ feed 전체 조회
-export const getFeeds = async (filters = ({}, (page = 1)), size = 10) => {
+export const getFeeds = async (filters = {}, page = 1, size = 12) => {
   try {
-    const { data } = await axiosInstance.get(`/api/feed`, {
+    const { data } = await axiosInstance.get(BASE_URL, {
       params: {
         page,
         size,
-        sort: filters.sort,
+        sort: filters.sort || "recent", // ✅ 기본값
+        title: filters.title || "", // ✅ 제목 검색
+        author: filters.author || "", // ✅ 글쓴이 검색
+        location: filters.location || "", // ✅ 지역 검색
       },
     });
+    console.log();
     return {
       feeds: parseFeedsResponse(data),
       pageInfo: data?.data?.pageInfo,
@@ -24,35 +30,43 @@ export const getFeeds = async (filters = ({}, (page = 1)), size = 10) => {
     const testFeeds = {
       feeds: [
         {
-          feed_id: 1,
-          user_id: 101,
+          feedId: 1,
+          author: {
+            userId: 102,
+            nickname: "제주러버",
+            profileImgUrl: "/images/user-102.jpg",
+          },
           title: "제주도 여행 후기",
           content: "제주도에서의 멋진 경험을 공유합니다.",
-          image_url: "/images/test-feed.jpg",
+          imageUrls: ["/images/test-feed1.jpg", "/images/test-feed2.jpg"],
           location: "JEJU",
-          badge_request: "Y",
-          view_count: 134,
-          like_count: 57,
-          created_at: "2025-07-20",
-          modified_at: "2025-07-21",
+          badgeRequest: true,
+          viewCount: 134,
+          createdAt: "2025-07-20",
         },
         {
-          feed_id: 2,
-          user_id: 102,
+          feedId: 2,
+          author: {
+            userId: 103,
+            nickname: "부산홀릭",
+            profileImgUrl: "/images/user-103.jpg",
+          },
           title: "부산 해운대 여행기",
           content: "부산 바다 너무 예뻐요!",
-          image_url: "/images/test-feed2.jpg",
+          imageUrls: [
+            "/images/test-feed3.jpg",
+            "/images/test-feed4.jpg",
+            "/images/test-feed5.jpg",
+          ],
           location: "BUSAN",
-          badge_request: "N",
-          view_count: 200,
-          like_count: 89,
+          badgeRequest: false,
+          viewCount: 200,
           created_at: "2025-07-18",
-          modified_at: "2025-07-19",
         },
       ],
       pageInfo: {
         currentPage: 1,
-        pageSize: 10,
+        pageSize: 12,
         totalPages: 1,
         totalElements: 2,
       },
@@ -70,7 +84,7 @@ export const getFeeds = async (filters = ({}, (page = 1)), size = 10) => {
 // ✅ feed 상세 조회
 export const getFeedDetail = async (feedId) => {
   try {
-    const { data } = await axiosInstance.get(`/api/feed/${feedId}`);
+    const { data } = await axiosInstance.get(`${BASE_URL}/${feedId}`);
     return parseFeedDetailResponse(data);
   } catch (error) {
     const message =
@@ -79,20 +93,25 @@ export const getFeedDetail = async (feedId) => {
 
     // ✅ 테스트용 Mock 데이터
     const testFeedDetail = {
-      feedId: 1,
-      userId: 45,
+      feedId: 2,
+      author: {
+        userId: 103,
+        nickname: "부산홀릭",
+        profileImgUrl: "/images/user-103.jpg",
+      },
       title: "부산 여행기",
       content: "부산의 아름다운 바다와 맛집을 소개합니다.",
       imageUrls: [
-        "https://cdn.example.com/feed/123/img1.jpg",
-        "https://cdn.example.com/feed/123/img2.jpg",
+        "/images/test-feed3.jpg",
+        "/images/test-feed4.jpg",
+        "/images/test-feed5.jpg",
       ],
       location: "BUSAN",
-      view_count: 254,
-      created_at: "2025-07-24T12:30:00Z",
+      viewCount: 254,
+      createdAt: "2025-07-24T12:30:00Z",
       author: {
         nickname: "여행러버",
-        profileImage: "https://cdn.example.com/users/45/profile.jpg",
+        profileImgUrl: "https://cdn.example.com/users/45/profile.jpg",
       },
       comments: [
         {
@@ -100,7 +119,7 @@ export const getFeedDetail = async (feedId) => {
           author: {
             id: 101,
             nickname: "버",
-            profileImage: "/images/user-1.jpg",
+            profileImgUrl: "/images/user-1.jpg",
           },
           content: "정말 멋진 이네요! 저도 가보고 싶어요.",
           createdAt: "2025-07-23T12:30:00Z",
@@ -111,7 +130,7 @@ export const getFeedDetail = async (feedId) => {
           author: {
             id: 102,
             nickname: "사작가",
-            profileImage: "/images/user-2.jpg",
+            profileImgUrl: "/images/user-2.jpg",
           },
           content: "사진이 말 잘 나왔네요. 어떤 카메라로 찍으셨나요?",
           createdAt: "2025-07-24T13:00:00Z",
@@ -122,7 +141,7 @@ export const getFeedDetail = async (feedId) => {
           author: {
             id: 103,
             nickname: "용자님",
-            profileImage: "/images/user-profile.jpg",
+            profileImgUrl: "/images/user-profile.jpg",
           },
           content: "다음에 같가요!",
           createdAt: "2025-07-24T13:30:00Z",
@@ -141,7 +160,7 @@ export const getFeedDetail = async (feedId) => {
 // ✅ feed 등록
 export const createFeed = async (payload) => {
   try {
-    const { data } = await axiosInstance.post("/api/feed", payload, {
+    const { data } = await axiosInstance.post(BASE_URL, payload, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -158,11 +177,15 @@ export const createFeed = async (payload) => {
 // ✅ feed 수정
 export const updateFeed = async (feedId, payload) => {
   try {
-    const { data } = await axiosInstance.patch(`/api/feed/${feedId}`, payload, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    const { data } = await axiosInstance.patch(
+      `${BASE_URL}/${feedId}`,
+      payload,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
     return data;
   } catch (error) {
     const message =
@@ -175,7 +198,7 @@ export const updateFeed = async (feedId, payload) => {
 // ✅ feed 삭제
 export const deleteFeed = async (feedId) => {
   try {
-    const { data } = await axiosInstance.delete(`/api/feed/${feedId}`);
+    const { data } = await axiosInstance.delete(`${BASE_URL}/${feedId}`);
     return data;
   } catch (error) {
     const message =
@@ -189,7 +212,7 @@ export const deleteFeed = async (feedId) => {
 export const createComment = async (feedId, payload) => {
   try {
     const { data } = await axiosInstance.post(
-      `/api/feed/${feedId}/comments`,
+      `${BASE_URL}/${feedId}/comments`,
       payload
     );
     return data;
@@ -205,7 +228,7 @@ export const createComment = async (feedId, payload) => {
 export const updateComment = async (feedId, commentId, payload) => {
   try {
     const { data } = await axiosInstance.patch(
-      `/api/feed/${feedId}/comments/${commentId}`,
+      `${BASE_URL}/${feedId}/comments/${commentId}`,
       payload
     );
     return data;
@@ -221,7 +244,7 @@ export const updateComment = async (feedId, commentId, payload) => {
 export const deleteComment = async (feedId, commentId) => {
   try {
     const { data } = await axiosInstance.delete(
-      `/api/feed/${feedId}/comments/${commentId}`
+      `${BASE_URL}/${feedId}/comments/${commentId}`
     );
     return data;
   } catch (error) {
