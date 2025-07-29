@@ -31,7 +31,8 @@ const PlannedCompanionCard = ({
         toast.success("참여 신청이 완료되었습니다!");
       } catch (error) {
         toast.error(
-          "사전 동행 모집 참여 신청에 실패했습니다.\n다시 시도해주세요."
+          error.message ||
+            "사전 동행 모집 참여 신청에 실패했습니다.\n다시 시도해주세요."
         );
       } finally {
         onUpdateSuccess?.();

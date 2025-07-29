@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { useLockBodyScroll, getLocationLabel, ProfileImage } from "@/shared";
 import { deleteTravelPost } from "@/features/travel-post";
-import ReactStars from "react-rating-stars-component";
+import StarRatings from "react-star-ratings";
 import toast from "react-hot-toast";
 
 const LocalCompanionCard = ({
@@ -48,13 +48,13 @@ const LocalCompanionCard = ({
       <div className="card-row">
         {/* ⭐ 별점 표시 */}
         <div className="card-rating">
-          <ReactStars
-            count={5}
-            value={postData.author.rating} // ✅ 소수점 반영
-            isHalf={true} // ✅ 반 별 지원
-            size={20} // 별 크기
-            edit={false} // 읽기 전용
-            activeColor="#ffd700" // 골드 색상
+          <StarRatings
+            rating={postData?.author?.rating || 0} // 기본값 0
+            starRatedColor="#ffd700" // 별 색상 (골드)
+            numberOfStars={5}
+            name="rating"
+            starDimension="20px" // 별 크기
+            starSpacing="3px"
           />
         </div>
         {isOwner && (
@@ -108,13 +108,13 @@ const LocalCompanionCard = ({
       </div>
 
       {/* 태그 */}
-      <div className="card-tags">
+      {/* <div className="card-tags">
         {postData.author.tags.map((tag, index) => (
           <span key={index} className="tag">
             {tag}
           </span>
         ))}
-      </div>
+      </div> */}
     </div>
   );
 };
