@@ -15,11 +15,9 @@ import {
 } from "@/features/feed";
 import toast from "react-hot-toast";
 
-const FeedPage = ({ onFeedCountChange, isLoggedIn }) => {
+const FeedPage = ({ currentUser, onFeedCountChange, onLoginModalOpen }) => {
   const [feeds, setFeeds] = useState([]);
-  const [filters, setFilters] = useState({
-    sort: "recent",
-  });
+  const [filters, setFilters] = useState({ sort: "recent" });
 
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
@@ -28,8 +26,7 @@ const FeedPage = ({ onFeedCountChange, isLoggedIn }) => {
   const [selectedFeedId, setSelectedFeedId] = useState(null); // ✅ 상세 모달용 상태
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  const openCreateModal = () => setIsCreateModalOpen(true);
-  const closeCreateModal = () => setIsCreateModalOpen(false);
+  const isLoggedIn = !!currentUser;
 
   // ✅ 필터 변경 시 초기화
   useEffect(() => {
@@ -60,19 +57,20 @@ const FeedPage = ({ onFeedCountChange, isLoggedIn }) => {
     fetchFeeds(nextPage, true);
   };
 
-  const handleFilterChange = (newFilters) => {
-    setFilters(newFilters);
-  };
+  const handleFilterChange = (newFilters) => setFilters(newFilters);
 
   // ✅ 등록/수정 완료 시 새로고침
   const handleSuccess = () => {
     setPage(0);
     fetchFeeds(0, false);
-    setIsCreateModalOpen(false);
+    closeCreateModal();
     setSelectedFeedId(null);
   };
 
   const handleFeedClick = (feedId) => setSelectedFeedId(feedId);
+
+  const openCreateModal = () => setIsCreateModalOpen(true);
+  const closeCreateModal = () => setIsCreateModalOpen(false);
   const closeDetailModal = () => setSelectedFeedId(null);
 
   return (
@@ -113,9 +111,9 @@ const FeedPage = ({ onFeedCountChange, isLoggedIn }) => {
       {/* ✅ 피드 상세 모달 */}
       {selectedFeedId && (
         <FeedDetailModal
+          currentUser={currentUser}
           feedId={selectedFeedId}
           onClose={closeDetailModal}
-          isLoggedIn={isLoggedIn}
           onUpdateSuccess={handleSuccess} // ✅ 수정 시 새로고침
         />
       )}

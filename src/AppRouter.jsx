@@ -10,20 +10,21 @@ import { ChatPage } from "@/features/chat";
 import { ErrorPage } from "@/shared";
 
 const MainContent = ({
+  currentUser,
   sidebarOpen,
   currentPage,
   onFeedCountChange,
-  isLoggedIn,
-  userProfile,
   onProfileUpdate,
   onLoginModalOpen,
 }) => {
   const renderPage = () => {
+    const isLoggedIn = !!currentUser;
+
     switch (currentPage) {
       case "planned-companion":
         return (
           <PlannedCompanionPage
-            isLoggedIn={isLoggedIn}
+            currentUser={currentUser}
             onLoginModalOpen={onLoginModalOpen}
           />
         );
@@ -37,13 +38,12 @@ const MainContent = ({
       case "profile":
         return (
           <ProfileManagementPage
-            userProfile={userProfile}
+            currentUser={currentUser}
             onProfileUpdate={onProfileUpdate}
           />
         );
       case "schedule":
-        return <ScheduleManagementPage
-        userProfile={userProfile}/>;
+        return <ScheduleManagementPage currentUser={currentUser} />;
       case "chat":
         return <ChatPage />;
       case "support":
@@ -60,8 +60,8 @@ const MainContent = ({
       default:
         return (
           <FeedPage
+            currentUser={currentUser}
             onFeedCountChange={onFeedCountChange}
-            isLoggedIn={isLoggedIn}
             onLoginModalOpen={onLoginModalOpen}
           />
         );

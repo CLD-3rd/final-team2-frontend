@@ -2,7 +2,9 @@
 
 import { ProfileImage } from "@/shared";
 
-const Header = ({ isLoggedIn, onLogin, onLogout, userProfile }) => {
+const Header = ({ currentUser, onLogin, onLogout }) => {
+  const isLoggedIn = !!currentUser;
+
   return (
     <header className="header bg-white">
       <div className="header-left">
@@ -17,20 +19,15 @@ const Header = ({ isLoggedIn, onLogin, onLogout, userProfile }) => {
       </div>
 
       <div className="header-right">
-        {isLoggedIn && userProfile ? (
+        {isLoggedIn ? (
           <div className="user-menu flex items-center gap-3">
             <ProfileImage
-              src={
-                userProfile.profileImage || "/images/default-user-profile.png"
-              }
+              src={currentUser.profileImgUrl}
               alt="프로필"
               className="profile-image"
-              onError={(e) => {
-                e.currentTarget.src = "/images/default-user-profile.png";
-              }}
             />
             <span className="username font-semibold">
-              {userProfile.nickname || "사용자"}
+              {currentUser.nickname || "사용자"}
             </span>
             <button
               onClick={onLogout}

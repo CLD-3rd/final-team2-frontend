@@ -16,7 +16,6 @@ const PlannedCompanionCard = ({
   postData,
   isLoggedIn,
   onLoginModalOpen,
-  onEdit,
   onUpdateSuccess,
   onPostClick,
 }) => {

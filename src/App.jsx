@@ -6,63 +6,44 @@ import AppRouter from "@/AppRouter";
 import { LoginModal, getCurrentUser, logoutUser } from "@/features/user";
 import "@/App.css";
 import { Toaster } from "react-hot-toast";
-import { axiosInstance } from "@/shared"; // ✅ withCredentials: true 포함된 axios
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState("planned-companion");
   const [feedCount, setFeedCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  const [userProfile, setUserProfile] = useState(null);
-
   // ✅ 로그인 상태 유지 (서버에 요청)
   useEffect(() => {
     const fetchCurrentUser = async () => {
       const user = await getCurrentUser();
-      if (user) {
-        setUserProfile(user);
-        setIsLoggedIn(true);
-      } else {
-        setIsLoggedIn(false);
-        setUserProfile(null);
-      }
+      setCurrentUser(user || null);
       setLoading(false);
     };
-
     fetchCurrentUser();
   }, []);
 
   const handleLogin = async () => {
-    setIsLoggedIn(true);
     setIsLoginModalOpen(false);
-    // ✅ 로그인 직후 유저 정보 다시 가져오기
     const user = await getCurrentUser();
-    if (user) setUserProfile(user);
-  };
-
-  const hasAuthToken = () => {
-    return document.cookie
-      .split("; ")
-      .some((cookie) => cookie.startsWith("accessToken="));
-  };
-
-  const handleProfileUpdate = (updatedProfile) => {
-    setUserProfile(updatedProfile);
+    if (user) setCurrentUser(user);
   };
 
   const handleLogout = async () => {
     try {
       const success = await logoutUser();
       if (success) {
-        setIsLoggedIn(false);
-        setUserProfile(null);
+        setCurrentUser(null);
       }
     } catch (err) {
       console.error("로그아웃 실패:", err);
     }
+  };
+
+  const handleProfileUpdate = (updatedProfile) => {
+    setCurrentUser(updatedProfile); // ✅ 전역 currentUser 업데이트
   };
 
   const openLoginModal = () => setIsLoginModalOpen(true);
@@ -75,15 +56,14 @@ function App() {
     <div className="app">
       <Toaster position="top-right" reverseOrder={false} />
       <Header
-        isLoggedIn={isLoggedIn}
+        currentUser={currentUser}
         onLogin={openLoginModal}
         onLogout={handleLogout}
-        userProfile={userProfile}
       />
 
       <div className="app-body">
         <Sidebar
-          isLoggedIn={isLoggedIn}
+          isLoggedIn={!!currentUser}
           isOpen={sidebarOpen}
           onToggle={toggleSidebar}
           currentPage={currentPage}
@@ -91,11 +71,10 @@ function App() {
           feedCount={feedCount}
         />
         <AppRouter
+          currentUser={currentUser}
           sidebarOpen={sidebarOpen}
           currentPage={currentPage}
           onFeedCountChange={handleFeedCountChange}
-          isLoggedIn={isLoggedIn}
-          userProfile={userProfile}
           onProfileUpdate={handleProfileUpdate}
           onLoginModalOpen={openLoginModal}
         />
