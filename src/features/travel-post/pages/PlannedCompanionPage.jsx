@@ -20,7 +20,7 @@ const PlannedCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
   const [posts, setPosts] = useState([]);
   const [filters, setFilters] = useState({ sort: "recent" });
 
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(true);
 
@@ -29,16 +29,16 @@ const PlannedCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  // ✅ 필터 변경 시 초기화
-  useEffect(() => {
-    setPage(1);
-    setPosts([]);
-    fetchPosts(1, false);
-  }, [filters]);
-
   // ✅ 모달 열기/닫기
   const openCreateModal = () => setIsCreateModalOpen(true);
   const closeCreateModal = () => setIsCreateModalOpen(false);
+
+  // ✅ 필터 변경 시 초기화
+  useEffect(() => {
+    setPage(0);
+    setPosts([]);
+    fetchPosts(0, false);
+  }, [filters]);
 
   const fetchPosts = async (pageNum = 1, append = false) => {
     setLoading(true);
@@ -46,11 +46,11 @@ const PlannedCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
       const { posts: newPosts, pageInfo } = await getTravelPosts(
         "BEFORE",
         filters,
-        pageNum,
-        12
+        pageNum
       );
       setPosts((prev) => (append ? [...prev, ...newPosts] : newPosts));
-      setHasMore(pageNum < pageInfo.totalPages);
+
+      setHasMore(pageNum + 1 < pageInfo.totalPages);
     } catch (error) {
       toast.error("사전 동행 모집글 조회 실패");
       setHasMore(false);
@@ -59,6 +59,7 @@ const PlannedCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
     }
   };
 
+  /** ✅ 더 불러오기 */
   const loadMorePosts = () => {
     const nextPage = page + 1;
     setPage(nextPage);
@@ -71,7 +72,7 @@ const PlannedCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
   };
 
   const handleEditSuccess = () => {
-    fetchPosts();
+    fetchPosts(0, false);
     setIsEditModalOpen(false);
     setSelectedPost(null);
   };
@@ -85,7 +86,7 @@ const PlannedCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
   };
 
   const handlePostCreate = async () => {
-    await fetchPosts(); // ✅ 새 글 등록 후 목록 갱신
+    await fetchPosts(0, false); // ✅ 새 글 등록 후 목록 갱신
     closeCreateModal();
   };
 

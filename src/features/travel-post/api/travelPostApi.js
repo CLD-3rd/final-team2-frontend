@@ -17,14 +17,14 @@ const BASE_URL = "/api/travel-posts";
 export const getTravelPosts = async (
   type,
   filters = {},
-  page = 1,
+  page = 0,
   size = 12
 ) => {
   try {
     const { data } = await axiosInstance.get(BASE_URL, {
       params: {
         postType: type,
-        page: page - 1,
+        page: page,
         size,
         sort: filters.sort || "recent", // ✅ 기본값
         title: filters.title || "", // ✅ 제목 검색
@@ -32,10 +32,8 @@ export const getTravelPosts = async (
         location: filters.location || "", // ✅ 지역 검색
       },
     });
-    const parsedPosts = parseTravelPostsResponse(data);
-
     return {
-      posts: parsedPosts,
+      posts: parseTravelPostsResponse(data),
       pageInfo: data.pageInfo,
     };
   } catch (error) {
