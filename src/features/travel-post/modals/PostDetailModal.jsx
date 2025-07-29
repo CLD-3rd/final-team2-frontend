@@ -23,8 +23,7 @@ const PostDetailModal = ({ currentUser, postId, onClose, onUpdateSuccess }) => {
     try {
       const data = await getTravelPostDetail("BEFORE", postId);
       setPostData(data);
-      setIsOwner(isLoggedIn && postData.author.id === currentUser.id);
-      console.log(isOwner);
+      setIsOwner(isLoggedIn && data.author.id === currentUser.id);
     } catch (err) {
       toast.error("모집글 정보를 불러오지 못했습니다.");
     } finally {

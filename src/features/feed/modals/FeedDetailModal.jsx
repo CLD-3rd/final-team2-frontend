@@ -38,7 +38,7 @@ const FeedDetailModal = ({
       const data = await getFeedDetail(feedId);
       setHasMultipleImages(data.imageUrls.length > 1);
       setFeedData(data);
-      setIsOwner(isLoggedIn && postData.author.id === currentUser.id);
+      setIsOwner(isLoggedIn && data.author.id === currentUser.id);
       setComments(data.comments || []);
     } catch (err) {
       toast.error("피드 정보를 불러오지 못했습니다.");
