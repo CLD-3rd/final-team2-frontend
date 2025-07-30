@@ -36,6 +36,7 @@ function App() {
       const success = await logoutUser();
       if (success) {
         setCurrentUser(null);
+        window.location.reload(); // ✅ 페이지 새로고침
       }
     } catch (err) {
       console.error("로그아웃 실패:", err);
