@@ -9,12 +9,24 @@ class WSManager {
   }
 
   connect = () => {
-    return new Promise((resolve, reject) => {
-      const socket = new SockJS("/ws"); // 서버 엔드포인트
-      this.stompClient = Stomp.over(socket);
-      this.stompClient.connect({}, () => resolve(), (error) => reject(error));
-    });
-  };
+  return new Promise((resolve, reject) => {
+    const token = localStorage.getItem("accessToken");
+    console.log("Access Token:", token); // ← 여기 추가
+
+    const socket = new SockJS(`http://localhost:8080/ws`);
+    this.stompClient = Stomp.over(socket);
+
+    this.stompClient.connect(
+      { Authorization: `Bearer ${token}` }, // 헤더로 JWT 전달
+      () => resolve(),
+      (error) => reject(error)
+    );
+  });
+};
+
+
+
+
 
   cleanupChatSubscriptions = () => {
     this.subscriptions.forEach(sub => sub.unsubscribe());
