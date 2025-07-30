@@ -2,7 +2,7 @@
 import { axiosInstance } from "@/shared";
 import { parseFeedsResponse, parseFeedDetailResponse } from "@/features/feed";
 
-const BASE_URL = "/api/feed";
+const BASE_URL = "/api/feeds";
 
 // ✅ feed 전체 조회
 export const getFeeds = async (filters = {}, page = 1, size = 12) => {
@@ -26,56 +26,6 @@ export const getFeeds = async (filters = {}, page = 1, size = 12) => {
     const message =
       error.response?.data?.message || "피드 조회 중 오류가 발생했습니다.";
     console.error("피드 조회 실패:", message);
-    // ✅ 테스트용 데이터
-    const testFeeds = {
-      feeds: [
-        {
-          feedId: 1,
-          author: {
-            userId: 102,
-            nickname: "제주러버",
-            profileImgUrl: "/images/user-102.jpg",
-          },
-          title: "제주도 여행 후기",
-          content: "제주도에서의 멋진 경험을 공유합니다.",
-          imageUrls: ["/images/test-feed1.jpg", "/images/test-feed2.jpg"],
-          location: "JEJU",
-          badgeRequest: true,
-          viewCount: 134,
-          createdAt: "2025-07-20",
-        },
-        {
-          feedId: 2,
-          author: {
-            userId: 103,
-            nickname: "부산홀릭",
-            profileImgUrl: "/images/user-103.jpg",
-          },
-          title: "부산 해운대 여행기",
-          content: "부산 바다 너무 예뻐요!",
-          imageUrls: [
-            "/images/test-feed3.jpg",
-            "/images/test-feed4.jpg",
-            "/images/test-feed5.jpg",
-          ],
-          location: "BUSAN",
-          badgeRequest: false,
-          viewCount: 200,
-          created_at: "2025-07-18",
-        },
-      ],
-      pageInfo: {
-        currentPage: 1,
-        pageSize: 12,
-        totalPages: 1,
-        totalElements: 2,
-      },
-    };
-
-    return {
-      feeds: parseFeedsResponse(testFeeds),
-      pageInfo: testFeeds.pageInfo,
-    };
 
     throw new Error(message);
   }

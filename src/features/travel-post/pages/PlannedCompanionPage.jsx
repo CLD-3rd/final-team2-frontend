@@ -49,7 +49,7 @@ const PlannedCompanionPage = ({ currentUser, onLoginModalOpen }) => {
       setPosts((prev) => (append ? [...prev, ...newPosts] : newPosts));
       setHasMore(pageNum + 1 < pageInfo.totalPages);
     } catch (error) {
-      toast.error("사전 동행 모집글 조회 실패");
+      toast.error(error.message || "사전 동행 모집글 조회 실패");
       setHasMore(false);
     } finally {
       setLoading(false);

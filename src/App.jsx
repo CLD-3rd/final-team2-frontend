@@ -11,7 +11,7 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState("planned-companion");
+  const [currentPage, setCurrentPage] = useState("feed");
   const [feedCount, setFeedCount] = useState(0);
   const [loading, setLoading] = useState(true);
 

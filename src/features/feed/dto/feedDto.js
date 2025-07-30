@@ -2,7 +2,7 @@ import { formatTime } from "@/shared/utils/formatTime";
 
 // ✅ Feed 목록 조회 시
 export const parseFeedsResponse = (data) => {
-  if (!data || !Array.isArray(data.feeds)) return [];
+  if (!data) return [];
 
   return data.feeds.map((feed) => ({
     id: feed.feedId,
@@ -13,11 +13,10 @@ export const parseFeedsResponse = (data) => {
     },
     title: feed.title,
     content: feed.content,
-    imageUrls: feed.imageUrls,
+    imageUrl: feed.imageUrl,
     location: feed.location,
-    badgeRequest: feed.badgeRequest,
     viewCount: feed.viewCount,
-    createdAt: feed.createdAt,
+    createdAt: formatTime(feed.createdAt),
   }));
 };
 
@@ -35,7 +34,7 @@ export const parseFeedDetailResponse = (data) => {
     title: data.title,
     content: data.content,
     location: data.location,
-    imageUrls: data.imageUrls,
+    imageUrl: data.imageUrl,
     createdAt: formatTime(data.created_at),
     comments: (data.comments || []).map((comment) => ({
       id: comment.commentId,
