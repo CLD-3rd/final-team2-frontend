@@ -67,7 +67,7 @@ export const getTravelPostDetail = async (type, travelPostId) => {
 // ✅ 모집글 생성
 export const createTravelPost = async (type, payload) => {
   try {
-    const { data } = await axiosInstance.post(`${BASE_URL}/requests`, payload, {
+    const { data } = await axiosInstance.post(BASE_URL, payload, {
       params: { postType: type },
       headers: {
         "Content-Type": "multipart/form-data",
@@ -126,7 +126,7 @@ export const deleteTravelPost = async (type, travelPostId) => {
 export const requestTravelPostJoin = async (type, travelPostId) => {
   try {
     const { data } = await axiosInstance.post(
-      `${BASE_URL}/requests/${travelPostId}`,
+      `${BASE_URL}/${travelPostId}/participations`,
       {},
       {
         params: { postType: type },
