@@ -22,27 +22,27 @@ const FeedDetailModal = ({
   const [loading, setLoading] = useState(true);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  // const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingCommentText, setEditingCommentText] = useState("");
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [hasMultipleImages, setHasMultipleImages] = useState(false);
+  // const [hasMultipleImages, setHasMultipleImages] = useState(false);
   const isLoggedIn = !!currentUser;
   const isOwner = useMemo(() => {
-    return isLoggedIn && postData?.author.userId === currentUser?.userId;
-  }, [isLoggedIn, postData, currentUser]);
+    return isLoggedIn && feedData?.author.userId === currentUser?.userId;
+  }, [isLoggedIn, feedData, currentUser]);
 
   useLockBodyScroll();
 
   const fetchFeedDetail = async () => {
     try {
       const data = await getFeedDetail(feedId);
-      setHasMultipleImages(data.imageUrls.length > 1);
+      // setHasMultipleImages(data.imageUrls.length > 1);
       setFeedData(data);
-      setComments(data.comments || []);
-    } catch (err) {
-      toast.error("피드 정보를 불러오지 못했습니다.");
+      setComments(data.comments);
+    } catch (error) {
+      toast.error(error.message || "피드 정보를 불러오지 못했습니다.");
     } finally {
       setLoading(false);
     }
@@ -109,31 +109,31 @@ const FeedDetailModal = ({
   };
 
   // 여러 이미지 처리 핸들러
-  const handlePrevImage = () => {
-    setCurrentImageIndex((prev) =>
-      prev === 0 ? feedData.imageUrls.length - 1 : prev - 1
-    );
-  };
+  // const handlePrevImage = () => {
+  //   setCurrentImageIndex((prev) =>
+  //     prev === 0 ? feedData.imageUrls.length - 1 : prev - 1
+  //   );
+  // };
 
-  const handleNextImage = () => {
-    setCurrentImageIndex((prev) =>
-      prev === feedData.imageUrls.length - 1 ? 0 : prev + 1
-    );
-  };
+  // const handleNextImage = () => {
+  //   setCurrentImageIndex((prev) =>
+  //     prev === feedData.imageUrls.length - 1 ? 0 : prev + 1
+  //   );
+  // };
 
-  const handleImageClick = (e) => {
-    if (!hasMultipleImages) return;
+  // const handleImageClick = (e) => {
+  //   if (!hasMultipleImages) return;
 
-    const rect = e.currentTarget.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const imageWidth = rect.width;
+  //   const rect = e.currentTarget.getBoundingClientRect();
+  //   const clickX = e.clientX - rect.left;
+  //   const imageWidth = rect.width;
 
-    if (clickX < imageWidth / 2) {
-      handlePrevImage();
-    } else {
-      handleNextImage();
-    }
-  };
+  //   if (clickX < imageWidth / 2) {
+  //     handlePrevImage();
+  //   } else {
+  //     handleNextImage();
+  //   }
+  // };
 
   // 댓글 관련 핸들러
   // 댓글 등록 시 UI 갱신
@@ -252,15 +252,15 @@ const FeedDetailModal = ({
         <div className="feed-modal-image-section">
           <div className="image-container">
             <FallbackImage
-              src={feedData.imageUrls[currentImageIndex]}
+              src={feedData.imageUrl}
               alt={feedData.title}
               className="feed-modal-image"
-              onClick={handleImageClick}
-              style={{ cursor: hasMultipleImages ? "pointer" : "default" }}
+              // onClick={handleImageClick}
+              // style={{ cursor: hasMultipleImages ? "pointer" : "default" }}
             />
 
             {/* 이미지가 2장 이상일 때만 네비게이션 표시 */}
-            {hasMultipleImages && (
+            {/* {hasMultipleImages && (
               <>
                 <button
                   className="image-nav-btn prev-btn"
@@ -289,7 +289,7 @@ const FeedDetailModal = ({
                   ))}
                 </div>
               </>
-            )}
+            )} */}
           </div>
         </div>
 
@@ -320,13 +320,13 @@ const FeedDetailModal = ({
               <div key={comment.id} className="comment-item">
                 <div className="comment-avatar">
                   <ProfileImage
-                    src={comment.profileImage}
-                    alt={comment.author}
+                    src={comment.profileImgUrl}
+                    alt={comment.nickname}
                   />
                 </div>
                 <div className="comment-content">
                   <div className="comment-header">
-                    <span className="comment-author">{comment.author}</span>
+                    <span className="comment-author">{comment.nickname}</span>
                     <span className="comment-timestamp">
                       {comment.timestamp}
                     </span>

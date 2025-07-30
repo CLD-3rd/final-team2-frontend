@@ -17,7 +17,6 @@ export const getFeeds = async (filters = {}, page = 1, size = 12) => {
         location: filters.location || "", // ✅ 지역 검색
       },
     });
-    console.log();
     return {
       feeds: parseFeedsResponse(data),
       pageInfo: data?.pageInfo,
@@ -40,68 +39,6 @@ export const getFeedDetail = async (feedId) => {
     const message =
       error.response?.data?.message || "피드 상세 조회 중 오류가 발생했습니다.";
     console.error("피드 상세 조회 실패:", message);
-
-    // ✅ 테스트용 Mock 데이터
-    const testFeedDetail = {
-      feedId: 2,
-      author: {
-        userId: 103,
-        nickname: "부산홀릭",
-        profileImgUrl: "/images/user-103.jpg",
-      },
-      title: "부산 여행기",
-      content: "부산의 아름다운 바다와 맛집을 소개합니다.",
-      imageUrls: [
-        "/images/test-feed3.jpg",
-        "/images/test-feed4.jpg",
-        "/images/test-feed5.jpg",
-      ],
-      location: "BUSAN",
-      viewCount: 254,
-      createdAt: "2025-07-24T12:30:00Z",
-      author: {
-        nickname: "여행러버",
-        profileImgUrl: "https://cdn.example.com/users/45/profile.jpg",
-      },
-      comments: [
-        {
-          commentId: 1,
-          author: {
-            id: 101,
-            nickname: "버",
-            profileImgUrl: "/images/user-1.jpg",
-          },
-          content: "정말 멋진 이네요! 저도 가보고 싶어요.",
-          createdAt: "2025-07-23T12:30:00Z",
-          isMyComment: false,
-        },
-        {
-          commentId: 2,
-          author: {
-            id: 102,
-            nickname: "사작가",
-            profileImgUrl: "/images/user-2.jpg",
-          },
-          content: "사진이 말 잘 나왔네요. 어떤 카메라로 찍으셨나요?",
-          createdAt: "2025-07-24T13:00:00Z",
-          isMyComment: false,
-        },
-        {
-          commentId: 3,
-          author: {
-            id: 103,
-            nickname: "용자님",
-            profileImgUrl: "/images/user-profile.jpg",
-          },
-          content: "다음에 같가요!",
-          createdAt: "2025-07-24T13:30:00Z",
-          isMyComment: true,
-        },
-      ],
-    };
-
-    // ✅ testFeedDetail의 data만 전달
-    return parseFeedDetailResponse(testFeedDetail);
 
     throw new Error(message);
   }

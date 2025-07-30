@@ -35,10 +35,10 @@ export const parseFeedDetailResponse = (data) => {
     content: data.content,
     location: data.location,
     imageUrl: data.imageUrl,
-    createdAt: formatTime(data.created_at),
+    createdAt: formatTime(data.createdAt),
     comments: (data.comments || []).map((comment) => ({
       id: comment.commentId,
-      author: comment.author.nickname,
+      nickname: comment.author.nickname,
       profileImgUrl: comment.author.profileImgUrl,
       content: comment.content,
       timestamp: formatTime(comment.createdAt), // "방금 전", "2시간 전" 같은 포맷 함수 사용
