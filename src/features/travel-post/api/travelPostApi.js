@@ -32,7 +32,6 @@ export const getTravelPosts = async (
         location: filters.location || "", // ✅ 지역 검색
       },
     });
-    console.log(data);
     return {
       posts: parseTravelPostsResponse(data),
       pageInfo: data.pageInfo,

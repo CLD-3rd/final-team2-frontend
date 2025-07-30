@@ -17,7 +17,7 @@ import toast from "react-hot-toast";
 
 const FeedPage = ({ currentUser, onFeedCountChange, onLoginModalOpen }) => {
   const [feeds, setFeeds] = useState([]);
-  const [filters, setFilters] = useState({ sort: "recent" });
+  const [filters, setFilters] = useState({ sort: "view" });
 
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);

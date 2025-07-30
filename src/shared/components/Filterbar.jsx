@@ -6,7 +6,7 @@ const FilterBar = ({ filters, onFilterChange }) => {
   const [searchCriteria, setSearchCriteria] = useState("title");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-  const [activeSort, setActiveSort] = useState(filters.sort || "recent");
+  const [activeSort, setActiveSort] = useState(filters.sort || "view");
 
   const dropdownRef = useRef(null);
 
@@ -125,16 +125,16 @@ const FilterBar = ({ filters, onFilterChange }) => {
         {/* 정렬 버튼 */}
         <div className="sort-options">
           <button
-            className={`sort-button ${activeSort === "recent" ? "active" : ""}`}
-            onClick={() => handleSortChange("recent")}
-          >
-            최근 등록 순
-          </button>
-          <button
             className={`sort-button ${activeSort === "view" ? "active" : ""}`}
             onClick={() => handleSortChange("view")}
           >
             조회 순
+          </button>
+          <button
+            className={`sort-button ${activeSort === "recent" ? "active" : ""}`}
+            onClick={() => handleSortChange("recent")}
+          >
+            최근 등록 순
           </button>
         </div>
       </div>

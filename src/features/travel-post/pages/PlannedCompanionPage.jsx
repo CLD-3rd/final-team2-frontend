@@ -18,7 +18,7 @@ import toast from "react-hot-toast";
 
 const PlannedCompanionPage = ({ currentUser, onLoginModalOpen }) => {
   const [posts, setPosts] = useState([]);
-  const [filters, setFilters] = useState({ sort: "recent" });
+  const [filters, setFilters] = useState({ sort: "view" });
 
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
