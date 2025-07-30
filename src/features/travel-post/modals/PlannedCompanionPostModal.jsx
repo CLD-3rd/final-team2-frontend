@@ -14,7 +14,7 @@ const PlannedCompanionPostModal = ({
     title: "",
     content: "",
     location: "",
-    dateRange: "",
+    dateRange: null,
     maxParticipants: "",
     image: null,
   });
@@ -64,7 +64,7 @@ const PlannedCompanionPostModal = ({
       formPayload.append("endTime", endDate); // 2025-08-15
 
       // ✅ 최대 인원 추가
-      formPayload.append("maxParticipants", Number(formData.maxParticipants)); // 숫자 값
+      formPayload.append("recruitLimit", Number(formData.maxParticipants)); // 숫자 값
 
       if (formData.image) {
         formPayload.append("images", formData.image);
@@ -105,6 +105,7 @@ const PlannedCompanionPostModal = ({
           formData={formData}
           setFormData={setFormData}
           dateRange={dateRange}
+          setDateRange={setDateRange}
           onSubmit={handleSubmit}
           onClose={onClose}
           titleLabel="여행 제목"

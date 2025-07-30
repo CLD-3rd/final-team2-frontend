@@ -3,9 +3,8 @@ import { useLockBodyScroll } from "@/shared";
 
 const LoginModal = ({ onClose, onLogin }) => {
   const handleGoogleLogin = () => {
-    // Handle Google login logic here
-    console.log("Google login clicked");
-    // For now, just simulate login
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+    window.location.href = `${apiBaseUrl}/oauth2/authorization/google`;
     onLogin();
   };
 

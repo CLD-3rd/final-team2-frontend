@@ -16,7 +16,6 @@ const PlannedCompanionCard = ({
   postData,
   isLoggedIn,
   onLoginModalOpen,
-  onEdit,
   onUpdateSuccess,
   onPostClick,
 }) => {
@@ -32,7 +31,8 @@ const PlannedCompanionCard = ({
         toast.success("참여 신청이 완료되었습니다!");
       } catch (error) {
         toast.error(
-          "사전 동행 모집 참여 신청에 실패했습니다.\n다시 시도해주세요."
+          error.message ||
+            "사전 동행 모집 참여 신청에 실패했습니다.\n다시 시도해주세요."
         );
       } finally {
         onUpdateSuccess?.();
@@ -41,7 +41,7 @@ const PlannedCompanionCard = ({
   };
 
   return (
-    <div className="companion-card" onClick={onPostClick}>
+    <div className="companion-card" onClick={() => onPostClick(postData.id)}>
       <div className="card-header">
         <div className="author-info">
           <div className="author-avatar">

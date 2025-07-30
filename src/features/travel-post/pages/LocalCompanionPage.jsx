@@ -19,7 +19,7 @@ const LocalCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
   const [posts, setPosts] = useState([]);
   const [filters, setFilters] = useState({ sort: "recent" });
 
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(true);
 
@@ -29,9 +29,9 @@ const LocalCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
 
   // ✅ 필터 변경 시 초기화
   useEffect(() => {
-    setPage(1);
+    setPage(0);
     setPosts([]);
-    fetchPosts(1, false);
+    fetchPosts(0, false);
   }, [filters]);
 
   const fetchPosts = async (pageNum = 1, append = false) => {
@@ -40,11 +40,10 @@ const LocalCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
       const { posts: newPosts, pageInfo } = await getTravelPosts(
         "NOW",
         filters,
-        pageNum,
-        12
+        pageNum
       );
       setPosts((prev) => (append ? [...prev, ...newPosts] : newPosts));
-      setHasMore(pageNum < pageInfo.totalPages);
+      setHasMore(pageNum + 1 < pageInfo.totalPages);
     } catch (error) {
       toast.error("현지 동행 모집글 조회 실패");
       setHasMore(false);
@@ -69,13 +68,13 @@ const LocalCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
   };
 
   const handleEditSuccess = () => {
-    fetchPosts(1, false);
+    fetchPosts(0, false);
     setIsEditModalOpen(false);
     setSelectedPost(null);
   };
 
   const handlePostCreate = async () => {
-    await fetchPosts(1, false);
+    await fetchPosts(0, false);
     setIsCreateModalOpen(false);
   };
 

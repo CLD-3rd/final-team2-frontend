@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {FallbackImage} from "@/shared";
+import { FallbackImage } from "@/shared";
 import { getUserReviewStats, parseUserReviewResponse } from "@/features/user"; // DTO를 거친 API 함수
 import { getUserBadges, parseUserBadgeResponse } from "@/features/user";
 import { getUserInfo, parseUserInfoResponse } from "@/features/user";
@@ -9,27 +9,29 @@ import ProfileEditModal from "../modals/ProfileEditModal";
 import TravelTagEditModal from "../modals/TravelTagEditModal";
 import BadgeEditModal from "@/features/user/modals/BadgeEditModal";
 
-const ProfileManagementPage = ({ userProfile: globalUserProfile, onProfileUpdate }) => {
-  const [userProfile, setUserProfile] = useState(globalUserProfile);
+const ProfileManagementPage = ({ currentUser, onProfileUpdate }) => {
+  const [userProfile, setUserProfile] = useState(currentUser);
 
+  // ✅ 사용자 기본 정보 가져오기
   useEffect(() => {
-  const fetchUserInfo = async () => {
-    const rawInfo = await getUserInfo(globalUserProfile.id);
-    const userInfo = parseUserInfoResponse(rawInfo);
-    // userProfile.username, userProfile.profileImage를 업데이트
-    setUserProfile((prev) => ({
-      ...prev,
-      ...userInfo, 
-    }));
-  };
-  fetchUserInfo();
-  }, [globalUserProfile.id]);
+    if (!currentUser?.id) return;
+    const fetchUserInfo = async () => {
+      const rawInfo = await getUserInfo(currentUser.id);
+      const userInfo = parseUserInfoResponse(rawInfo);
+      setUserProfile((prev) => ({
+        ...prev,
+        ...userInfo,
+      }));
+    };
+    fetchUserInfo();
+  }, [currentUser?.id]);
 
+  // ✅ 리뷰 통계
   useEffect(() => {
+    if (!currentUser?.id) return;
     const fetchReviewStats = async () => {
-      const rawData = await getUserReviewStats(globalUserProfile.id); 
+      const rawData = await getUserReviewStats(currentUser.id);
       const reviewData = parseUserReviewResponse(rawData);
-      // DTO 변환 후 { rating, reviewCount } 구조
       setUserProfile((prev) => ({
         ...prev,
         rating: reviewData.rating,
@@ -37,41 +39,51 @@ const ProfileManagementPage = ({ userProfile: globalUserProfile, onProfileUpdate
       }));
     };
     fetchReviewStats();
-  }, [globalUserProfile.id]);
+  }, [currentUser?.id]);
 
+  // ✅ 뱃지 목록
   useEffect(() => {
+    if (!currentUser?.id) return;
     const fetchBadges = async () => {
-      const rawBadgeData = await getUserBadges(globalUserProfile.id);
+      const rawBadgeData = await getUserBadges(currentUser.id);
       const badgeList = parseUserBadgeResponse(rawBadgeData);
       setUserProfile((prev) => ({
         ...prev,
         ownedBadges: badgeList,
       }));
     };
-  
     fetchBadges();
-  }, [globalUserProfile.id]);
+  }, [currentUser?.id]);
 
-const [isTravelTagModalOpen, setIsTravelTagModalOpen] = useState(false);
-const [isProfileEditModalOpen, setIsProfileEditModalOpen] = useState(false);
-const [isBadgeEditModalOpen, setIsBadgeEditModalOpen] = useState(false);
+  const [isTravelTagModalOpen, setIsTravelTagModalOpen] = useState(false);
+  const [isProfileEditModalOpen, setIsProfileEditModalOpen] = useState(false);
+  const [isBadgeEditModalOpen, setIsBadgeEditModalOpen] = useState(false);
 
-
-const renderStars = (rating) => {
-  const fullStars = Math.floor(rating);
-  const hasHalfStar = rating % 1 >= 0.5;
-  return Array.from({ length: 5 }, (_, index) => {
-    if (index < fullStars) {
-      return <span key={index} className="profile-star filled">★</span>;
-    } else if (index === fullStars && hasHalfStar) {
-      return <span key={index} className="profile-star half">★</span>;
-    } else {
-      return <span key={index} className="profile-star">★</span>;
-    }
-  });
-};
-
-  
+  const renderStars = (rating) => {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    return Array.from({ length: 5 }, (_, index) => {
+      if (index < fullStars) {
+        return (
+          <span key={index} className="profile-star filled">
+            ★
+          </span>
+        );
+      } else if (index === fullStars && hasHalfStar) {
+        return (
+          <span key={index} className="profile-star half">
+            ★
+          </span>
+        );
+      } else {
+        return (
+          <span key={index} className="profile-star">
+            ★
+          </span>
+        );
+      }
+    });
+  };
 
   const handleTravelTagSave = (finalTags) => {
     const updatedProfile = {
@@ -108,8 +120,8 @@ const renderStars = (rating) => {
             className="profile-image-container"
             style={{ position: "relative" }}
           >
-            <img
-              src={userProfile.profileImage || "/placeholder.svg"}
+            <FallbackImage
+              src={userProfile.profileImage}
               // alt 삭제
               className="profile-image-large"
             />
@@ -140,7 +152,9 @@ const renderStars = (rating) => {
             <div className="rating-stars">
               {renderStars(userProfile.rating || 0)}
             </div>
-            <span className="rating-count">({userProfile.reviewCount || 0}명)</span>
+            <span className="rating-count">
+              ({userProfile.reviewCount || 0}명)
+            </span>
           </div>
         </div>
       </div>

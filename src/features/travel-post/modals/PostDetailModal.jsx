@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useLockBodyScroll, FallbackImage, ProfileImage } from "@/shared";
+import { useState, useEffect, useMemo } from "react";
+import { useLockBodyScroll, getLocationLabel, FallbackImage } from "@/shared";
 import {
   getTravelPostDetail,
   deleteTravelPost,
@@ -9,17 +9,15 @@ import {
 } from "@/features/travel-post";
 import toast from "react-hot-toast";
 
-const PostDetailModal = ({
-  postId,
-  onClose,
-  isLoggedIn,
-  onUpdateSuccess, // ✅ PostPage에서 갱신할 콜백 추가
-}) => {
+const PostDetailModal = ({ currentUser, postId, onClose, onUpdateSuccess }) => {
   const [postData, setPostData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const isLoggedIn = !!currentUser;
+  const isOwner = useMemo(() => {
+    return isLoggedIn && postData?.author.userId === currentUser?.userId;
+  }, [isLoggedIn, postData, currentUser]);
 
   useLockBodyScroll();
 
@@ -27,7 +25,6 @@ const PostDetailModal = ({
     try {
       const data = await getTravelPostDetail("BEFORE", postId);
       setPostData(data);
-      console.log(data);
     } catch (err) {
       toast.error("모집글 정보를 불러오지 못했습니다.");
     } finally {
@@ -43,18 +40,18 @@ const PostDetailModal = ({
   if (loading) {
     return (
       <div className="modal-overlay">
-        <div className="post-detail-modal">
+        <div className="feed-detail-modal">
           <p>로딩 중...</p>
         </div>
       </div>
     );
   }
 
-  if (error || !postData) {
+  if (!postData) {
     return (
       <div className="modal-overlay">
-        <div className="post-detail-modal">
-          <p>{error || "데이터가 없습니다."}</p>
+        <div className="feed-detail-modal">
+          <p>{"데이터가 없습니다."}</p>
           <button onClick={onClose}>닫기</button>
         </div>
       </div>
@@ -83,21 +80,18 @@ const PostDetailModal = ({
   const handleDeletePost = async () => {
     if (window.confirm("이 모집글을 삭제하시겠습니까?")) {
       try {
-        await deleteTravelPost(postData.id);
+        await deleteTravelPost("BEFORE", postData.id);
         toast.success("모집글이 삭제되었습니다.");
         setIsMoreMenuOpen(false);
 
         onClose(); // 상세 모달 닫기
         onUpdateSuccess?.();
       } catch (error) {
-        toast.error("모집글 삭제에 실패했습니다.\n다시 시도해주세요.");
+        toast.error(
+          error.message || "모집글 삭제에 실패했습니다.\n다시 시도해주세요."
+        );
       }
     }
-  };
-
-  const handleCancelEdit = () => {
-    setEditingCommentId(null);
-    setEditingCommentText("");
   };
 
   return (
@@ -111,8 +105,10 @@ const PostDetailModal = ({
           <div className="header-spacer"></div>
           <div className="location-info">
             <span className="location-pin">📍</span>
-            <span className="location-name">{postData.location}</span>
-            {isLoggedIn && (
+            <span className="location-name">
+              {getLocationLabel(postData.location)}
+            </span>
+            {isOwner && (
               <div className="more-menu-container">
                 <button
                   className="more-menu-button"
@@ -164,6 +160,7 @@ const PostDetailModal = ({
             <p>{postData.content}</p>
           </div>
         </div>
+
         {/* ✅ Post 수정 모달 */}
         {isEditModalOpen && (
           <UpdatePlannedModal

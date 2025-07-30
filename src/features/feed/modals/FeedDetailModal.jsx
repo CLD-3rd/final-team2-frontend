@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLockBodyScroll, FallbackImage, ProfileImage } from "@/shared";
 import {
   getFeedDetail,
@@ -13,14 +13,13 @@ import {
 import toast from "react-hot-toast";
 
 const FeedDetailModal = ({
-  onClose,
+  currentUser,
   feedId,
-  isLoggedIn,
+  onClose,
   onUpdateSuccess, // ✅ FeedPage에서 갱신할 콜백 추가
 }) => {
   const [feedData, setFeedData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -29,6 +28,10 @@ const FeedDetailModal = ({
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [hasMultipleImages, setHasMultipleImages] = useState(false);
+  const isLoggedIn = !!currentUser;
+  const isOwner = useMemo(() => {
+    return isLoggedIn && postData?.author.userId === currentUser?.userId;
+  }, [isLoggedIn, postData, currentUser]);
 
   useLockBodyScroll();
 
@@ -37,8 +40,7 @@ const FeedDetailModal = ({
       const data = await getFeedDetail(feedId);
       setHasMultipleImages(data.imageUrls.length > 1);
       setFeedData(data);
-      console.log(data);
-      setComments(data.comments || []); // ✅ 댓글 상태에 세팅
+      setComments(data.comments || []);
     } catch (err) {
       toast.error("피드 정보를 불러오지 못했습니다.");
     } finally {
@@ -61,11 +63,11 @@ const FeedDetailModal = ({
     );
   }
 
-  if (error || !feedData) {
+  if (!feedData) {
     return (
       <div className="modal-overlay">
         <div className="feed-detail-modal">
-          <p>{error || "데이터가 없습니다."}</p>
+          <p>{"데이터가 없습니다."}</p>
           <button onClick={onClose}>닫기</button>
         </div>
       </div>
@@ -153,7 +155,7 @@ const FeedDetailModal = ({
       ]);
       setNewComment("");
     } catch (error) {
-      toast.error("댓글 등록에 실패했습니다.");
+      toast.error(error.message || "댓글 등록에 실패했습니다.");
     }
   };
 
@@ -204,7 +206,7 @@ const FeedDetailModal = ({
       );
       toast.success("댓글이 삭제되었습니다.");
     } catch (error) {
-      toast.error("댓글 삭제에 실패했습니다.");
+      toast.error(error.message || "댓글 삭제에 실패했습니다.");
     }
   };
 
@@ -220,7 +222,7 @@ const FeedDetailModal = ({
           <div className="location-info">
             <span className="location-pin">📍</span>
             <span className="location-name">{feedData.location}</span>
-            {isLoggedIn && (
+            {isOwner && (
               <div className="more-menu-container">
                 <button
                   className="more-menu-button"

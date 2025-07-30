@@ -1,82 +1,69 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header, Sidebar } from "@/shared";
 import AppRouter from "@/AppRouter";
-import { CreateLocalModal } from "@/features/travel-post";
-import { LoginModal } from "@/features/user";
+import { LoginModal, getCurrentUser, logoutUser } from "@/features/user";
 import "@/App.css";
 import { Toaster } from "react-hot-toast";
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState("feed");
+  const [currentPage, setCurrentPage] = useState("planned-companion");
   const [feedCount, setFeedCount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  const [userProfile, setUserProfile] = useState({
-    id : 12,
-    badges: [],    
-    travelTags: [],
-    ownedBadges: [],
-  });
+  // ✅ 로그인 상태 유지 (서버에 요청)
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      const user = await getCurrentUser();
+      setCurrentUser(user || null);
+      setLoading(false);
+    };
+    fetchCurrentUser();
+  }, []);
 
-  const handleLogin = () => {
-    setIsLoggedIn(true);
+  const handleLogin = async () => {
     setIsLoginModalOpen(false);
+    const user = await getCurrentUser();
+    if (user) setCurrentUser(user);
+  };
+
+  const handleLogout = async () => {
+    try {
+      const success = await logoutUser();
+      if (success) {
+        setCurrentUser(null);
+      }
+    } catch (err) {
+      console.error("로그아웃 실패:", err);
+    }
   };
 
   const handleProfileUpdate = (updatedProfile) => {
-    setUserProfile(updatedProfile);
+    setCurrentUser(updatedProfile); // ✅ 전역 currentUser 업데이트
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-  };
-
-  const openLoginModal = () => {
-    setIsLoginModalOpen(true);
-  };
-
-  const closeLoginModal = () => {
-    setIsLoginModalOpen(false);
-  };
-
-  const closeCreateModal = () => {
-    setIsCreateModalOpen(false);
-  };
-
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
-  const handlePageChange = (pageId) => {
-    setCurrentPage(pageId);
-  };
-
-  const handleFeedCountChange = (count) => {
-    setFeedCount(count);
-  };
-
-  // + 버튼을 보여줄 페이지들 정의
-  const showFabPages = ["feed", "planned-companion", "local-companion"];
-  const shouldShowFab = isLoggedIn && showFabPages.includes(currentPage);
+  const openLoginModal = () => setIsLoginModalOpen(true);
+  const closeLoginModal = () => setIsLoginModalOpen(false);
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  const handlePageChange = (pageId) => setCurrentPage(pageId);
+  const handleFeedCountChange = (count) => setFeedCount(count);
 
   return (
     <div className="app">
       <Toaster position="top-right" reverseOrder={false} />
       <Header
-        isLoggedIn={isLoggedIn}
+        currentUser={currentUser}
         onLogin={openLoginModal}
         onLogout={handleLogout}
-        userProfile={userProfile}
       />
 
       <div className="app-body">
         <Sidebar
-          isLoggedIn={isLoggedIn}
+          isLoggedIn={!!currentUser}
           isOpen={sidebarOpen}
           onToggle={toggleSidebar}
           currentPage={currentPage}
@@ -84,11 +71,10 @@ function App() {
           feedCount={feedCount}
         />
         <AppRouter
+          currentUser={currentUser}
           sidebarOpen={sidebarOpen}
           currentPage={currentPage}
           onFeedCountChange={handleFeedCountChange}
-          isLoggedIn={isLoggedIn}
-          userProfile={userProfile}
           onProfileUpdate={handleProfileUpdate}
           onLoginModalOpen={openLoginModal}
         />

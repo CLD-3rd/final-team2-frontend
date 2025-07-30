@@ -7,10 +7,11 @@
 html,
 body,
 #root {
-  height: 100%;
+  min-height: 100%;
   margin: 0;
   padding: 0;
   background-color: #f5ede0;
+  overflow-y: auto;
 }
 
 :root {
@@ -302,11 +303,6 @@ body {
 
 /* Main Content */
 .main-content {
-  /* background: linear-gradient(
-    135deg,
-    var(--color-accent-light) 0%,
-    #f5ede0 100%
-  ); */
   background-color: #f5ede0;
   flex: 1;
   padding: 110px 20px 20px 20px;
@@ -3581,8 +3577,8 @@ body {
 
 .profile-star.half {
   background: linear-gradient(90deg, gold 50%, #ccc 50%);
-  background-clip: text;             /* 표준 속성 */
-  -webkit-background-clip: text;     /* 크롬, 사파리 */
+  background-clip: text; /* 표준 속성 */
+  -webkit-background-clip: text; /* 크롬, 사파리 */
   color: transparent;
   -webkit-text-fill-color: transparent;
 }

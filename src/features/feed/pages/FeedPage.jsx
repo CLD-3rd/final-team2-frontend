@@ -15,35 +15,32 @@ import {
 } from "@/features/feed";
 import toast from "react-hot-toast";
 
-const FeedPage = ({ onFeedCountChange, isLoggedIn }) => {
-  const [filters, setFilters] = useState({
-    sort: "recent",
-  });
-
+const FeedPage = ({ currentUser, onFeedCountChange, onLoginModalOpen }) => {
   const [feeds, setFeeds] = useState([]);
-  const [page, setPage] = useState(1);
+  const [filters, setFilters] = useState({ sort: "recent" });
+
+  const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(true);
 
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedFeedId, setSelectedFeedId] = useState(null); // ✅ 상세 모달용 상태
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  const openCreateModal = () => setIsCreateModalOpen(true);
-  const closeCreateModal = () => setIsCreateModalOpen(false);
+  const isLoggedIn = !!currentUser;
 
   // ✅ 필터 변경 시 초기화
   useEffect(() => {
-    setPage(1);
+    setPage(0);
     setFeeds([]);
-    fetchFeeds(1, false);
+    fetchFeeds(0, false);
   }, [filters]);
 
   const fetchFeeds = async (pageNum = 1, append = false) => {
     setLoading(true);
     try {
-      const { feeds, pageInfo } = await getFeeds(filters, pageNum);
-      setFeeds((prev) => (append ? [...prev, ...feeds] : feeds));
-      setHasMore(pageNum < pageInfo.totalPages);
+      const { feeds: newFeeds, pageInfo } = await getFeeds(filters, pageNum);
+      setFeeds((prev) => (append ? [...prev, ...newFeeds] : newFeeds));
+      setHasMore(pageNum + 1 < pageInfo.totalPages);
       onFeedCountChange?.(pageInfo.totalElements);
     } catch (error) {
       toast.error("피드 데이터를 불러오는 데 실패했습니다.");
@@ -53,25 +50,27 @@ const FeedPage = ({ onFeedCountChange, isLoggedIn }) => {
     }
   };
 
+  /** ✅ 더 불러오기 */
   const loadMoreFeeds = () => {
     const nextPage = page + 1;
     setPage(nextPage);
     fetchFeeds(nextPage, true);
   };
 
-  const handleFilterChange = (newFilters) => {
-    setFilters(newFilters);
-  };
+  const handleFilterChange = (newFilters) => setFilters(newFilters);
 
   // ✅ 등록/수정 완료 시 새로고침
   const handleSuccess = () => {
-    setPage(1);
-    fetchFeeds(1, false);
-    setIsCreateModalOpen(false);
+    setPage(0);
+    fetchFeeds(0, false);
+    closeCreateModal();
     setSelectedFeedId(null);
   };
 
   const handleFeedClick = (feedId) => setSelectedFeedId(feedId);
+
+  const openCreateModal = () => setIsCreateModalOpen(true);
+  const closeCreateModal = () => setIsCreateModalOpen(false);
   const closeDetailModal = () => setSelectedFeedId(null);
 
   return (
@@ -112,9 +111,9 @@ const FeedPage = ({ onFeedCountChange, isLoggedIn }) => {
       {/* ✅ 피드 상세 모달 */}
       {selectedFeedId && (
         <FeedDetailModal
+          currentUser={currentUser}
           feedId={selectedFeedId}
           onClose={closeDetailModal}
-          isLoggedIn={isLoggedIn}
           onUpdateSuccess={handleSuccess} // ✅ 수정 시 새로고침
         />
       )}

@@ -1,5 +1,33 @@
 import { axiosInstance } from "@/shared";
 
+// ✅ 현재 로그인한 사용자 정보 조회 (/api/users/me)
+export const getCurrentUser = async () => {
+  try {
+    const res = await axiosInstance.get("/api/users/me");
+    if (res.status === 200 && res.data) {
+      return res.data; // 로그인 사용자 정보
+    }
+    return null; // 데이터가 없으면 비로그인
+  } catch (error) {
+    if (error.response?.status === 401) {
+      // ✅ 비로그인 상태 → 정상적인 흐름
+      return null;
+    }
+    console.error("로그인 사용자 정보 조회 실패", error);
+    return null; // 기타 에러는 null 처리
+  }
+};
+
+// ✅ 로그아웃 API (/api/users/logout)
+export const logoutUser = async () => {
+  try {
+    await axiosInstance.post("/api/users/logout");
+    return true; // 성공 시 true
+  } catch (error) {
+    console.error("로그아웃 실패", error);
+    return false;
+  }
+};
 
 // 유저 정보 조회 API
 export const getUserInfo = async (userId) => {
@@ -26,7 +54,6 @@ export const getUserInfo = async (userId) => {
   }
 };
 
-
 // ✅ 유저 리뷰 통계 조회
 export const getUserReviewStats = async (userId) => {
   try {
@@ -51,8 +78,6 @@ export const getUserReviewStats = async (userId) => {
     return testReviewStats;
   }
 };
-
-
 
 // ✅ 유저 뱃지 조회
 export const getUserBadges = async (userId) => {
@@ -94,4 +119,3 @@ export const getUserBadges = async (userId) => {
     return testBadges;
   }
 };
-

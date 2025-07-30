@@ -20,7 +20,7 @@ export const getFeeds = async (filters = {}, page = 1, size = 12) => {
     console.log();
     return {
       feeds: parseFeedsResponse(data),
-      pageInfo: data?.data?.pageInfo,
+      pageInfo: data?.pageInfo,
     };
   } catch (error) {
     const message =
