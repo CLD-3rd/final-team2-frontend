@@ -46,7 +46,7 @@ const PlannedCompanionPostModal = ({
       ]);
     }
   }, [initialData]);
-  console.log(formData);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);

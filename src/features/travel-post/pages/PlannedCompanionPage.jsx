@@ -148,7 +148,7 @@ const PlannedCompanionPage = ({ currentUser, onLoginModalOpen }) => {
         <UpdatePlannedModal
           onClose={() => setIsEditModalOpen(false)}
           initialData={selectedPost}
-          onSuccess={handleEditSuccess}
+          onSuccess={handleSuccess}
           mode="edit"
         />
       )}
