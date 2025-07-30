@@ -15,8 +15,8 @@ const InfiniteScrollWrapper = ({
       dataLength={dataLength}
       next={next}
       hasMore={hasMore}
-      loader={<p className="loading-text">{loaderText}</p>}
-      endMessage={<p className="end-text">{endText}</p>}
+      loader={loaderText}
+      endMessage={endText}
       style={{ overflow: "visible" }} // ✅ 부모 레이아웃 깨짐 방지
     >
       {children}
