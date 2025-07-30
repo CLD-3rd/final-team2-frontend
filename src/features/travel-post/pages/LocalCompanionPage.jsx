@@ -103,6 +103,7 @@ const LocalCompanionPage = ({ currentUser, onLoginModalOpen }) => {
                 postData={post}
                 onLoginModalOpen={onLoginModalOpen}
                 onEdit={handleEditRequest}
+                onUpdateSuccess={handleSuccess}
               />
             ))}
           </div>
