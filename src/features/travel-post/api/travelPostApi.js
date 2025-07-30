@@ -26,7 +26,7 @@ export const getTravelPosts = async (
         postType: type,
         page: page,
         size,
-        sort: filters.sort || "recent", // ✅ 기본값
+        sort: filters.sort || "view", // ✅ 기본값
         title: filters.title || "", // ✅ 제목 검색
         author: filters.author || "", // ✅ 글쓴이 검색
         location: filters.location || "", // ✅ 지역 검색
@@ -126,10 +126,7 @@ export const requestTravelPostJoin = async (type, travelPostId) => {
   try {
     const { data } = await axiosInstance.post(
       `${BASE_URL}/${travelPostId}/participations`,
-      {},
-      {
-        params: { postType: type },
-      }
+      { params: { postType: type } }
     );
     return data;
   } catch (error) {
