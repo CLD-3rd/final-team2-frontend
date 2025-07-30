@@ -71,6 +71,10 @@ const PlannedCompanionCard = ({
           alt={postData.title}
           className="companion-card-image"
         />
+        {/* ✅ 조회수 오버레이 */}
+        <div className="card-overlay-stats">
+          <span className="views">👁 {postData.viewCount}</span>
+        </div>
       </div>
 
       <div className="card-content">

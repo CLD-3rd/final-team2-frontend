@@ -991,6 +991,7 @@ body {
 
 /* 사전 동행 모집 카드 스타일 추가 */
 .card-image-container {
+  position: relative;
   height: 200px;
   margin: 16px;
   border-radius: 8px;
