@@ -79,6 +79,7 @@ export const getUserReviewStats = async (userId) => {
   }
 };
 
+
 // ✅ 유저 뱃지 조회
 export const getUserBadges = async (userId) => {
   try {
@@ -118,4 +119,6 @@ export const getUserBadges = async (userId) => {
     };
     return testBadges;
   }
+
+  
 };

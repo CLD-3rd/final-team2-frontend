@@ -23,6 +23,8 @@ const ChatPage = () => {
   const [loading, setLoading] = useState(false)
   const emojiPickerRef = useRef(null)
 
+  
+
   const emojis = [
     "😊", "😂", "🥰", "😍", "🤔", "😎", "😭", "😤", "🥺", "😴",
     "👍", "👎", "👏", "🙌", "👋", "✌️", "🤝", "💪", "🙏", "👌",
@@ -56,26 +58,30 @@ useEffect(() => {
     })
     .catch((err) => console.error("WebSocket Connect Failed:", err));
 
-  return () => wsManager.disconnect();
+  return () => {if(wsManager.connected){wsManager.disconnect()}};
 }, []);
 
-  // 채팅방 구독만 관리
+// 채팅방 구독만 관리
 useEffect(() => {
   if (!selectedChat) return;
 
-  wsManager.cleanupChatSubscriptions();
+  const subscribe = async () => {
+    await wsManager.ensureConnected(); // WebSocket 연결 보장
+    wsManager.cleanupChatSubscriptions();
 
-  if (chatType === "direct") {
-    wsManager.subscribeChat(null, false, (msg) => {
-      setChatMessages(prev => [...prev, msg]);
-    });
-  } else if (chatType === "group") {
-    wsManager.subscribeChat(selectedChat.roomId, true, (msg) => {
-      setChatMessages(prev => [...prev, msg]);
-    });
-  }
+    if (chatType === "direct") {
+      wsManager.subscribeChat(null, false, (msg) => {
+        setChatMessages(prev => [...prev, msg]);
+      });
+    } else if (chatType === "group") {
+      wsManager.subscribeChat(selectedChat.roomId, true, (msg) => {
+        setChatMessages(prev => [...prev, msg]);
+      });
+    }
+  };
+
+  subscribe();
 }, [selectedChat, chatType]);
-
 
 
 
@@ -95,19 +101,20 @@ useEffect(() => {
   }, [])
 
   // [GET /api/users] 모든 사용자 목록 가져오기
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await getUsers()
-        console.log("GET /api/users - 모든 사용자 목록 가져오기 성공:", response)
-        const usersData = parseUsersResponse(response)
-        setUsers(usersData)
-      } catch (error) {
-        console.error("Failed to fetch users:", error)
-      }
-    }
-    fetchUsers()
-  }, [])
+// 기존 useEffect 삭제
+// useEffect(() => { fetchUsers() }, [])
+
+const fetchUsers = async () => {
+  try {
+    const response = await getUsers();
+    console.log("GET /api/users - 모든 사용자 목록 가져오기 성공:", response);
+    const usersData = parseUsersResponse(response);
+    setUsers(usersData);
+  } catch (error) {
+    console.error("Failed to fetch users:", error);
+  }
+};
+
 
   // [GET /api/chat/my-rooms/direct] DM 채팅방 목록 가져오기
   useEffect(() => {
@@ -312,6 +319,26 @@ useEffect(() => {
               </button>
             </div>
           </div>
+
+          {/* 여기 버튼 추가 */}
+<div style={{ padding: "10px 0" }}>
+  <button onClick={fetchUsers} style={{ width: "100%" }}>
+    사용자 검색
+  </button>
+</div>
+
+{/* 검색된 사용자 목록 */}
+{users.length > 0 && (
+  <div style={{ padding: "10px" }}>
+    {users.map(user => (
+      <div key={user.id} style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}>
+        <span>{user.email}</span>
+        <button onClick={() => startNewDirectChat(user)}>DM</button>
+      </div>
+    ))}
+  </div>
+)}
+
           <div className="chat-list">
             {chatType === "direct" && (
               // DM 모드: 사용자 목록과 기존 DM 채팅방 표시
@@ -319,7 +346,7 @@ useEffect(() => {
                 {users
                   .filter(user => 
                     user.id !== currentUser?.id && 
-                    user.name?.toLowerCase().includes(searchQuery.toLowerCase())
+                    user.email?.toLowerCase().includes(searchQuery.toLowerCase())
                   )
                   .map(user => (
                     <div
@@ -331,14 +358,14 @@ useEffect(() => {
                         <div className="chat-avatar" style={{ backgroundColor: "#8b5cf6", width: 40, height: 40, borderRadius: "50%", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
                           <ProfileImage
                             src={user.profileImage}
-                            alt={user.name?.charAt(0) || "상대방 프로필"}
+                            alt={user.email?.charAt(0) || "상대방 프로필"}
                             style={{ width: 40, height: 40, objectFit: "cover" }}
                           />
                         </div>
                       </div>
                       <div className="chat-info">
                         <div className="chat-header-row">
-                          <span className="chat-name">{user.name}</span>
+                          <span className="chat-name">{user.email}</span>
                         </div>
                         <div className="chat-preview-row">
                           <span className="chat-preview">Start new chat</span>
