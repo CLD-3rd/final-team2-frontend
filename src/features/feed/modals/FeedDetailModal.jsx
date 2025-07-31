@@ -176,7 +176,7 @@ const FeedDetailModal = ({
 
     try {
       // ✅ API 호출
-      await updateComment(feedId, commentId, editingCommentText);
+      await updateComment(feedId, commentId, { content: editingCommentText });
       toast.success("댓글이 수정되었습니다.");
       setEditingCommentId(null);
       setEditingCommentText("");
