@@ -34,18 +34,23 @@ function App() {
   };
 
   useEffect(() => {
-  if (currentUser) {
-    wsManager.connect()
-      .then(() => {
-        console.log("WS 연결 성공");
-        // 알림 구독 예시
-        wsManager.subscribeNotifications((msg) => {
-          console.log("알림 수신:", msg);
-        });
-      })
-      .catch(err => console.error("WS 연결 실패:", err));
-  }
+  if (!currentUser) return;
+
+  wsManager.connect()
+    .then(() => {
+      wsManager.subscribeNotifications((msg) => {
+        console.log("🔔 알림 수신:", msg);
+      });
+      wsManager.startHealthCheck?.();
+    })
+    .catch(err => console.error("❌ WS 연결 실패:", err));
+
+  return () => {
+    wsManager.disconnect(); // 필요 시 정리
+    wsManager.stopHealthCheck?.();
+  };
 }, [currentUser]);
+
 
 
   const handleLogout = async () => {

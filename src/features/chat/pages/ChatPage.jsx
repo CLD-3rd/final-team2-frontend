@@ -32,65 +32,45 @@ const ChatPage = () => {
   ]
 
   // 최초 1회 연결 + 알림 구독
+
+
 useEffect(() => {
-  wsManager.connect()
-    .then(() => {
-      console.log("WebSocket Connected");
+  const manageChatSubscription = async () => {
+    if (!selectedChat || !selectedChat.roomId) return;
 
-      wsManager.subscribeNotifications((notification) => {
-        console.log("새 알림:", notification);
-        if (notification.roomId) {
-          // DM & Group 모두 처리
-          setDirectRooms(prev =>
-            prev.map(room => room.roomId === notification.roomId
-              ? { ...room, unreadCount: (room.unreadCount || 0) + 1 }
-              : room
-            )
-          );
-          setGroupRooms(prev =>
-            prev.map(room => room.roomId === notification.roomId
-              ? { ...room, unreadCount: (room.unreadCount || 0) + 1 }
-              : room
-            )
-          );
-        }
-      });
-    })
-    .catch((err) => console.error("WebSocket Connect Failed:", err));
-
-  return () => {if(wsManager.connected){wsManager.disconnect()}};
-}, []);
-
-// 채팅방 구독만 관리
-useEffect(() => {
-  if (!selectedChat) return;
-
-  const subscribe = async () => {
     await wsManager.ensureConnected();
 
-    // 이미 해당 roomId로 구독 중이면 재구독하지 않음
-    if (wsManager.currentRoomId === selectedChat.roomId) return;
+    const isGroup = chatType === "group";
+    const alreadySubscribed =
+      wsManager.currentRoomId === selectedChat.roomId &&
+      wsManager.currentChatType === chatType &&
+      wsManager.isActuallyConnected();
 
-    wsManager.cleanupChatSubscriptions();
-    wsManager.currentRoomId = selectedChat.roomId;
+    if (alreadySubscribed) return;
 
-    console.log("selectedChat.roomId:", selectedChat?.roomId);
-    console.log("현재 구독 중인 roomId:", wsManager.currentRoomId);
-    if (chatType === "direct") {
-      wsManager.subscribeChat(selectedChat.roomId, false, (msg) => {
-        console.log("수신:", msg);
-        setChatMessages(prev => [...prev, msg]);
+    wsManager.cleanupChatSubscriptions(); // 이전 구독 해제
+    wsManager.subscribeChat(selectedChat.roomId, isGroup, (msg) => {
+      const myId = Number(wsManager.getCurrentUserId());
+      if (Number(msg.senderId) === myId) return;
+
+      setChatMessages(prev => {
+        const alreadyExists = prev.some(
+          m => m.timestamp === msg.timestamp && m.content === msg.content
+        );
+        if (alreadyExists) return prev;
+        return [...prev, msg];
       });
-    } else if (chatType === "group") {
-      wsManager.subscribeChat(selectedChat.roomId, true, (msg) => {
-        console.log("수신:", msg);
-        setChatMessages(prev => [...prev, msg]);
-      });
-    }
+    });
   };
 
-  subscribe();
+  manageChatSubscription();
+
+  return () => {
+    wsManager.cleanupChatSubscriptions(); // 다른 채팅방 이동 시 구독 해제
+  };
 }, [selectedChat, chatType]);
+
+
 
 
 
@@ -141,7 +121,7 @@ const startNewDirectChat = async (user) => {
     setChatType("direct");
 
     // ✅ 메시지 초기화 전에 API로 메시지 히스토리 먼저 가져오기
-    const messageHistory = await getRoomMessages(newRoom.roomId); // 여긴 실제 API 함수로 대체
+    const messageHistory = await getChatMessages(newRoom.roomId); // 여긴 실제 API 함수로 대체
     setChatMessages(messageHistory); // 초기 메시지 설정
 
   } catch (error) {
@@ -270,8 +250,9 @@ const sendMessage = (message) => {
 
   // 채팅방 선택
   const handleChatSelect = (chat) => {
-  setSelectedChat(chat);
-  console.log("선택한 채팅방:", chat);  // 클릭한 chat을 바로 찍음
+  wsManager.currentRoomId = null; // ✅ 강제 초기화
+  setSelectedChat(null);
+  setTimeout(() => setSelectedChat(chat), 0);
 };
 
 

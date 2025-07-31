@@ -7,84 +7,151 @@ class WSManager {
     this.stompClient = null;
     this.subscriptions = [];
     this.currentRoomId = null;
+    this.lastSubscribe = null;
+    this.connected = false;
   }
 
-  getAccessToken = () => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; accessToken=`);
-  if (parts.length === 2) return parts.pop().split(";").shift();
-  return null;
+  startHealthCheck = () => {
+  if (this.healthCheckInterval) return; // 이미 실행 중이면 무시
+
+  this.healthCheckInterval = setInterval(async () => {
+    if (!this.isActuallyConnected()) {
+      console.warn("🧠 WebSocket 끊김 감지 → 재연결 시도");
+      try {
+        await this.connect(); // 자동 재연결 + 구독 복구됨
+      } catch (e) {
+        console.error("❌ 재연결 실패", e);
+      }
+    }
+  }, 10000); // 10초마다 체크
 };
 
-  connect = () => {
-    return new Promise((resolve, reject) => {
-      if (this.connected && this.stompClient) {
-        console.log("이미 WebSocket이 연결되어 있음.");
-        return resolve(this.stompClient);
+stopHealthCheck = () => {
+  if (this.healthCheckInterval) {
+    clearInterval(this.healthCheckInterval);
+    this.healthCheckInterval = null;
+  }
+};
+
+  isActuallyConnected() {
+    return this.stompClient && this.stompClient.connected;
+  }
+
+  getTokenFromCookie() {
+  const name = "accessToken=";
+  const cookies = document.cookie.split(";");
+
+  for (let cookie of cookies) {
+    cookie = cookie.trim();
+    if (cookie.startsWith(name)) {
+      return cookie.substring(name.length);
+    }
+  }
+  return null;
+}
+
+connect = () => {
+  return new Promise((resolve, reject) => {
+    if (this.connected && this.isActuallyConnected()) {
+      console.log("🔗 이미 WebSocket 연결됨");
+      return resolve(this.stompClient);
+    }
+
+    const token = this.getTokenFromCookie();
+    if (!token) {
+      console.error("❌ 쿠키에 Access Token 없음");
+      return reject("Access Token not found in cookie");
+    }
+
+    const socket = new SockJS(`${import.meta.env.VITE_API_BASE_URL}/ws`);
+    this.stompClient = Stomp.over(socket);
+
+    this.stompClient.onclose = () => {
+      console.warn("❌ WebSocket 연결 끊김");
+      this.connected = false;
+
+      // 자동 재연결
+      setTimeout(() => {
+        console.log("🔁 WebSocket 재연결 시도");
+        this.connect(); // 다시 시도
+      }, 3000);
+    };
+
+    this.stompClient.connect(
+      { Authorization: `Bearer ${token}` },
+      () => {
+        this.connected = true;
+        console.log("✅ WebSocket 연결 성공");
+        resolve(this.stompClient);
+
+        if (this.lastSubscribe) {
+      const { roomId, isGroup, callback } = this.lastSubscribe;
+      console.log("🔁 재연결 후 구독 재시도:", roomId);
+      this.subscribeChat(roomId, isGroup, callback, true);
+    }
+      },
+      (error) => {
+        console.error("🚫 WebSocket 연결 실패:", error);
+        this.connected = false;
+        reject(error);
       }
+    );
+  });
+};
 
-      const token = this.getAccessToken();
-      if (!token) {
-        console.error("Access Token이 없음. WebSocket 연결 불가.");
-        return reject("Access Token not found");
-      }
+getCurrentUserId() {
+  const token = this.getTokenFromCookie();
+  if (!token) return null;
 
-      console.log("Access Token:", token);
-      const socket = new SockJS(`${import.meta.env.VITE_API_BASE_URL}/ws`);
-      this.stompClient = Stomp.over(socket);
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.userId || payload.sub || payload.id; // 토큰 구조에 따라 조정
+  } catch (err) {
+    console.error("JWT 파싱 실패", err);
+    return null;
+  }
+}
 
-      this.stompClient.connect(
-        { Authorization: `Bearer ${token}` },
-        () => {
-          this.connected = true;
-          console.log("WebSocket 연결 완료");
-          resolve(this.stompClient);
-        },
-        (error) => {
-          console.error("WebSocket 연결 실패:", error);
-          reject(error);
-        }
-      );
-    });
-  };
 
   ensureConnected = async () => {
-    if (!this.connected) {
-      await this.connect();
-    }
-  };
+  if (!this.connected || !this.isActuallyConnected()) {
+    await this.connect();
+  }
+};
   cleanupChatSubscriptions = () => {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     this.subscriptions = [];
   };
 
   // src/features/chat/ws/wsManager.js
-subscribeChat = async (roomId, isGroup, callback) => {
-  await this.ensureConnected(); // 연결 보장
-  this.cleanupChatSubscriptions(); 
+subscribeChat = async (roomId, isGroup, callback, isRecovery = false) => {
+  console.log("📩 구독 시도:", roomId, isGroup ? "(Group)" : "(Direct)");
+  await this.ensureConnected();
+  this.cleanupChatSubscriptions();
 
-  let sub;
-  if (isGroup) {
-    sub = this.stompClient.subscribe(
-      `/sub/chat/room/${roomId}`,
-      (message) => {
-        console.log("그룹 메시지 수신:", message.body);
-        callback(JSON.parse(message.body));
-      }
-    );
-  } else {
-    sub = this.stompClient.subscribe(
-      `/user/queue/messages`,
-      (message) => {
-        console.log("📩 1:1 메시지 수신:", message.body);
-        callback(JSON.parse(message.body));
-      }
-    );
-  }
+  const handleMessage = (message) => {
+    const raw = JSON.parse(message.body);
+    const currentUserId = this.getCurrentUserId();
+    const parsed = {
+      ...raw,
+      sender: Number(raw.senderId) === Number(currentUserId) ? "me" : "other",
+      type: "text",
+    };
+    callback(parsed);
+  };
+
+  const sub = isGroup
+    ? this.stompClient.subscribe(`/sub/chat/room/${roomId}`, handleMessage)
+    : this.stompClient.subscribe(`/user/queue/messages`, handleMessage);
 
   this.subscriptions.push(sub);
   this.currentRoomId = roomId;
+  this.currentChatType = isGroup ? "group" : "direct";
+
+  this.lastSubscribe = { roomId, isGroup, callback };
 };
+
+
 
 
   sendMessage = (roomId, message, isGroup = false, recipientId = null) => {
