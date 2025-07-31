@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import {
+  useLockBodyScroll,
   Filterbar,
   InfiniteScrollWrapper,
   LoadingIndicator,
@@ -27,6 +28,8 @@ const FeedPage = ({ currentUser, onFeedCountChange, onLoginModalOpen }) => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const isLoggedIn = !!currentUser;
+
+  useLockBodyScroll();
 
   // ✅ 필터 변경 시 초기화
   useEffect(() => {

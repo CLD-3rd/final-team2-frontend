@@ -35,7 +35,7 @@ const FeedPostModal = ({
       formPayload.append("title", formData.title);
       formPayload.append("content", formData.content);
       formPayload.append("location", formData.location);
-      formPayload.append("badgeRequest", formData.badgeRequest);
+      formPayload.append("badgeRequest", formData.badgeRequest || false);
       if (formData.image) {
         formPayload.append("image", formData.image);
       }

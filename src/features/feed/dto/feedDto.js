@@ -1,4 +1,4 @@
-import { formatTime } from "@/shared/utils/formatTime";
+import { formatTime } from "@/shared";
 
 // ✅ Feed 목록 조회 시
 export const parseFeedsResponse = (data) => {

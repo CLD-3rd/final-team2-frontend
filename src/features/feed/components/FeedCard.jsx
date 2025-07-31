@@ -1,6 +1,6 @@
 "use client";
 
-import { FallbackImage, getLocationLabel } from "@/shared";
+import { getLocationLabel, FallbackImage } from "@/shared";
 
 const FeedCard = ({ feedData, onClick }) => {
   return (

@@ -64,15 +64,11 @@ export const createFeed = async (payload) => {
 // ✅ feed 수정
 export const updateFeed = async (feedId, payload) => {
   try {
-    const { data } = await axiosInstance.patch(
-      `${BASE_URL}/${feedId}`,
-      payload,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
+    const { data } = await axiosInstance.put(`${BASE_URL}/${feedId}`, payload, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return data;
   } catch (error) {
     const message =

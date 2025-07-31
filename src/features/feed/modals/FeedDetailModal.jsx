@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { useLockBodyScroll, FallbackImage, ProfileImage } from "@/shared";
+import {
+  useLockBodyScroll,
+  getLocationLabel,
+  FallbackImage,
+  ProfileImage,
+} from "@/shared";
 import {
   getFeedDetail,
   deleteFeed,
@@ -221,7 +226,9 @@ const FeedDetailModal = ({
           <div className="header-spacer"></div>
           <div className="location-info">
             <span className="location-pin">📍</span>
-            <span className="location-name">{feedData.location}</span>
+            <span className="location-name">
+              {getLocationLabel(feedData.location)}
+            </span>
             {isOwner && (
               <div className="more-menu-container">
                 <button
