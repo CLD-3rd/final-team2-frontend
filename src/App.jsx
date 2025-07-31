@@ -11,7 +11,7 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState("planned-companion");
+  const [currentPage, setCurrentPage] = useState("feed");
   const [feedCount, setFeedCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
@@ -36,6 +36,7 @@ function App() {
       const success = await logoutUser();
       if (success) {
         setCurrentUser(null);
+        window.location.reload(); // ✅ 페이지 새로고침
       }
     } catch (err) {
       console.error("로그아웃 실패:", err);

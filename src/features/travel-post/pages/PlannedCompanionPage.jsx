@@ -18,7 +18,7 @@ import toast from "react-hot-toast";
 
 const PlannedCompanionPage = ({ currentUser, onLoginModalOpen }) => {
   const [posts, setPosts] = useState([]);
-  const [filters, setFilters] = useState({ sort: "recent" });
+  const [filters, setFilters] = useState({ sort: "view" });
 
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
@@ -49,7 +49,7 @@ const PlannedCompanionPage = ({ currentUser, onLoginModalOpen }) => {
       setPosts((prev) => (append ? [...prev, ...newPosts] : newPosts));
       setHasMore(pageNum + 1 < pageInfo.totalPages);
     } catch (error) {
-      toast.error("사전 동행 모집글 조회 실패");
+      toast.error(error.message || "사전 동행 모집글 조회 실패");
       setHasMore(false);
     } finally {
       setLoading(false);
@@ -148,7 +148,7 @@ const PlannedCompanionPage = ({ currentUser, onLoginModalOpen }) => {
         <UpdatePlannedModal
           onClose={() => setIsEditModalOpen(false)}
           initialData={selectedPost}
-          onSuccess={handleEditSuccess}
+          onSuccess={handleSuccess}
           mode="edit"
         />
       )}

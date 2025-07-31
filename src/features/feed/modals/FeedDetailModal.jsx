@@ -1,10 +1,16 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { useLockBodyScroll, FallbackImage, ProfileImage } from "@/shared";
+import {
+  useLockBodyScroll,
+  getLocationLabel,
+  FallbackImage,
+  ProfileImage,
+} from "@/shared";
 import {
   getFeedDetail,
   deleteFeed,
+  getComments,
   createComment,
   updateComment,
   deleteComment,
@@ -22,27 +28,27 @@ const FeedDetailModal = ({
   const [loading, setLoading] = useState(true);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  // const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingCommentText, setEditingCommentText] = useState("");
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [hasMultipleImages, setHasMultipleImages] = useState(false);
+  // const [hasMultipleImages, setHasMultipleImages] = useState(false);
   const isLoggedIn = !!currentUser;
   const isOwner = useMemo(() => {
-    return isLoggedIn && postData?.author.userId === currentUser?.userId;
-  }, [isLoggedIn, postData, currentUser]);
+    return isLoggedIn && feedData?.author.userId === currentUser?.userId;
+  }, [isLoggedIn, feedData, currentUser]);
 
   useLockBodyScroll();
 
   const fetchFeedDetail = async () => {
     try {
       const data = await getFeedDetail(feedId);
-      setHasMultipleImages(data.imageUrls.length > 1);
+      // setHasMultipleImages(data.imageUrls.length > 1);
       setFeedData(data);
-      setComments(data.comments || []);
-    } catch (err) {
-      toast.error("피드 정보를 불러오지 못했습니다.");
+      setComments(data.comments);
+    } catch (error) {
+      toast.error(error.message || "피드 정보를 불러오지 못했습니다.");
     } finally {
       setLoading(false);
     }
@@ -88,7 +94,6 @@ const FeedDetailModal = ({
   };
 
   const handleEditPost = () => {
-    console.log("Edit post:", feedData.id);
     setIsMoreMenuOpen(false);
     setIsEditModalOpen(true); // FeedPostModal 열기
   };
@@ -109,57 +114,54 @@ const FeedDetailModal = ({
   };
 
   // 여러 이미지 처리 핸들러
-  const handlePrevImage = () => {
-    setCurrentImageIndex((prev) =>
-      prev === 0 ? feedData.imageUrls.length - 1 : prev - 1
-    );
-  };
+  // const handlePrevImage = () => {
+  //   setCurrentImageIndex((prev) =>
+  //     prev === 0 ? feedData.imageUrls.length - 1 : prev - 1
+  //   );
+  // };
 
-  const handleNextImage = () => {
-    setCurrentImageIndex((prev) =>
-      prev === feedData.imageUrls.length - 1 ? 0 : prev + 1
-    );
-  };
+  // const handleNextImage = () => {
+  //   setCurrentImageIndex((prev) =>
+  //     prev === feedData.imageUrls.length - 1 ? 0 : prev + 1
+  //   );
+  // };
 
-  const handleImageClick = (e) => {
-    if (!hasMultipleImages) return;
+  // const handleImageClick = (e) => {
+  //   if (!hasMultipleImages) return;
 
-    const rect = e.currentTarget.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const imageWidth = rect.width;
+  //   const rect = e.currentTarget.getBoundingClientRect();
+  //   const clickX = e.clientX - rect.left;
+  //   const imageWidth = rect.width;
 
-    if (clickX < imageWidth / 2) {
-      handlePrevImage();
-    } else {
-      handleNextImage();
-    }
-  };
+  //   if (clickX < imageWidth / 2) {
+  //     handlePrevImage();
+  //   } else {
+  //     handleNextImage();
+  //   }
+  // };
 
   // 댓글 관련 핸들러
-  // 댓글 등록 시 UI 갱신
+  // 댓글 등록
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!newComment.trim()) return;
 
     try {
-      const newCommentData = await createComment(feedId, newComment);
-      setComments((prev) => [
-        ...prev,
-        {
-          commentId: newCommentData.id,
-          author: newCommentData.author,
-          content: newCommentData.content,
-          createdAt: newCommentData.createdAt,
-          isMyComment: true,
-        },
-      ]);
-      setNewComment("");
+      // ✅ API 호출
+      await createComment(feedId, {
+        content: newComment,
+      });
+      toast.success("댓글이 등록되었습니다.");
+      setNewComment(""); // 입력값 초기화
+      // 댓글 등록 후 최신 댓글 목록 불러오기
+      const updatedComments = await getComments(feedId);
+      setComments(updatedComments); // 댓글 목록 갱신
     } catch (error) {
       toast.error(error.message || "댓글 등록에 실패했습니다.");
     }
   };
 
-  //댓글 수정
+  // 댓글 수정
   const handleEditComment = (commentId, currentContent) => {
     setEditingCommentId(commentId);
     setEditingCommentText(currentContent);
@@ -170,21 +172,15 @@ const FeedDetailModal = ({
 
     try {
       // ✅ API 호출
-      await updateComment(feedId, commentId, editingCommentText);
-
-      // ✅ UI 갱신
-      setComments((prev) =>
-        prev.map((comment) =>
-          comment.commentId === commentId
-            ? { ...comment, content: editingCommentText }
-            : comment
-        )
-      );
-
+      await updateComment(feedId, commentId, { content: editingCommentText });
+      toast.success("댓글이 수정되었습니다.");
       setEditingCommentId(null);
       setEditingCommentText("");
+      // 댓글 수정 후 최신 댓글 목록 불러오기
+      const updatedComments = await getComments(feedId);
+      setComments(updatedComments); // 댓글 목록 갱신
     } catch (error) {
-      toast.error("댓글 수정에 실패했습니다.");
+      toast.error(error.message || "댓글 수정에 실패했습니다.");
     }
   };
 
@@ -199,12 +195,10 @@ const FeedDetailModal = ({
     try {
       // ✅ API 호출
       await deleteComment(feedId, commentId);
-
-      // ✅ UI 갱신
-      setComments((prev) =>
-        prev.filter((comment) => comment.commentId !== commentId)
-      );
       toast.success("댓글이 삭제되었습니다.");
+      // 댓글 삭제 후 최신 댓글 목록 불러오기
+      const updatedComments = await getComments(feedId);
+      setComments(updatedComments); // 댓글 목록 갱신
     } catch (error) {
       toast.error(error.message || "댓글 삭제에 실패했습니다.");
     }
@@ -221,7 +215,10 @@ const FeedDetailModal = ({
           <div className="header-spacer"></div>
           <div className="location-info">
             <span className="location-pin">📍</span>
-            <span className="location-name">{feedData.location}</span>
+            <span className="location-name">
+              {getLocationLabel(feedData.location)}
+            </span>
+            {/* 더보기 메뉴 */}
             {isOwner && (
               <div className="more-menu-container">
                 <button
@@ -252,15 +249,15 @@ const FeedDetailModal = ({
         <div className="feed-modal-image-section">
           <div className="image-container">
             <FallbackImage
-              src={feedData.imageUrls[currentImageIndex]}
+              src={feedData.imageUrl}
               alt={feedData.title}
               className="feed-modal-image"
-              onClick={handleImageClick}
-              style={{ cursor: hasMultipleImages ? "pointer" : "default" }}
+              // onClick={handleImageClick}
+              // style={{ cursor: hasMultipleImages ? "pointer" : "default" }}
             />
 
             {/* 이미지가 2장 이상일 때만 네비게이션 표시 */}
-            {hasMultipleImages && (
+            {/* {hasMultipleImages && (
               <>
                 <button
                   className="image-nav-btn prev-btn"
@@ -289,7 +286,7 @@ const FeedDetailModal = ({
                   ))}
                 </div>
               </>
-            )}
+            )} */}
           </div>
         </div>
 
@@ -320,16 +317,17 @@ const FeedDetailModal = ({
               <div key={comment.id} className="comment-item">
                 <div className="comment-avatar">
                   <ProfileImage
-                    src={comment.profileImage}
-                    alt={comment.author}
+                    src={comment.profileImgUrl}
+                    alt={comment.nickname}
                   />
                 </div>
                 <div className="comment-content">
                   <div className="comment-header">
-                    <span className="comment-author">{comment.author}</span>
+                    <span className="comment-author">{comment.nickname}</span>
                     <span className="comment-timestamp">
                       {comment.timestamp}
                     </span>
+                    {/* 댓글 수정/삭제 버튼 */}
                     {comment.isMyComment && isLoggedIn && (
                       <div className="comment-actions-menu">
                         <button
@@ -383,24 +381,25 @@ const FeedDetailModal = ({
               </div>
             ))}
           </div>
-
-          <form
-            className="comment-input-section"
-            onSubmit={handleCommentSubmit}
-          >
-            <div className="comment-input-container">
-              <input
-                type="text"
-                placeholder="댓글을 입력하세요..."
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                className="comment-input"
-              />
-              <button type="submit" className="comment-submit-button">
-                등록
-              </button>
-            </div>
-          </form>
+          {isLoggedIn && (
+            <form
+              className="comment-input-section"
+              onSubmit={handleCommentSubmit}
+            >
+              <div className="comment-input-container">
+                <input
+                  type="text"
+                  placeholder="댓글을 입력하세요..."
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  className="comment-input"
+                />
+                <button type="submit" className="comment-submit-button">
+                  등록
+                </button>
+              </div>
+            </form>
+          )}
         </div>
         {/* ✅ Feed 수정 모달 */}
         {isEditModalOpen && (

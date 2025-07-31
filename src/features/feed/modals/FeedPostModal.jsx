@@ -35,26 +35,26 @@ const FeedPostModal = ({
       formPayload.append("title", formData.title);
       formPayload.append("content", formData.content);
       formPayload.append("location", formData.location);
-      formPayload.append("badge_request", formData.badgeRequest);
+      formPayload.append("badgeRequest", formData.badgeRequest || false);
       if (formData.image) {
-        formPayload.append("images", formData.image);
+        formPayload.append("image", formData.image);
       }
-
       if (mode === "edit" && initialData?.id) {
         await updateFeed(initialData.id, formPayload);
+        toast.success("피드가 수정되었습니다!");
       } else {
         await createFeed(formPayload);
+        toast.success("피드가 등록되었습니다!");
       }
 
-      // ✅ 성공 시 콜백 실행 (FeedPage에서 reloadTrigger 증가)
-      toast.success("피드가 등록되었습니다!");
       onSuccess?.();
       onClose();
     } catch (error) {
       toast.error(
-        mode === "edit"
-          ? "피드 수정에 실패했습니다."
-          : "피드 등록에 실패했습니다."
+        error.message ||
+          (mode === "edit"
+            ? "피드 수정에 실패했습니다."
+            : "피드 등록에 실패했습니다.")
       );
     }
   };

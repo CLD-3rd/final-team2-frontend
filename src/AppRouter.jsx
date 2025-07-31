@@ -18,8 +18,6 @@ const MainContent = ({
   onLoginModalOpen,
 }) => {
   const renderPage = () => {
-    const isLoggedIn = !!currentUser;
-
     switch (currentPage) {
       case "planned-companion":
         return (
@@ -31,7 +29,7 @@ const MainContent = ({
       case "local-companion":
         return (
           <LocalCompanionPage
-            isLoggedIn={isLoggedIn}
+            currentUser={currentUser}
             onLoginModalOpen={onLoginModalOpen}
           />
         );

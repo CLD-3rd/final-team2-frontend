@@ -1,23 +1,23 @@
 "use client";
 
-import { FallbackImage, getLocationLabel } from "@/shared";
+import { getLocationLabel, FallbackImage } from "@/shared";
 
 const FeedCard = ({ feedData, onClick }) => {
   return (
     <div className="feed-card" onClick={onClick}>
       <div className="card-image">
         <FallbackImage
-          src={feedData.imageUrls[0]}
+          src={feedData.imageUrl}
           alt={feedData.title}
           className="feed-card-image"
         />
 
         {/* 이미지 개수 뱃지 */}
-        {feedData.imageUrls && feedData.imageUrls.length > 1 && (
+        {/* {feedData.imageUrls && feedData.imageUrls.length > 1 && (
           <div className="image-count-badge">
             +{feedData.imageUrls.length - 1}
           </div>
-        )}
+        )} */}
 
         {/* ✅ 조회수 오버레이 */}
         <div className="card-overlay-stats">

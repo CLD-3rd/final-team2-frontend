@@ -46,7 +46,7 @@ const PlannedCompanionPostModal = ({
       ]);
     }
   }, [initialData]);
-  console.log(formData);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -69,7 +69,6 @@ const PlannedCompanionPostModal = ({
       if (formData.image) {
         formPayload.append("images", formData.image);
       }
-
       if (mode === "create") {
         await createTravelPost("BEFORE", formPayload);
         toast.success("사전 동행 모집글이 등록되었습니다!");
