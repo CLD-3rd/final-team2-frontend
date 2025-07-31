@@ -43,7 +43,7 @@ export const parseFeedDetailResponse = (data) => {
       profileImgUrl: comment.author.profileImgUrl,
       content: comment.content,
       timestamp: formatTime(comment.createdAt), // "방금 전", "2시간 전" 같은 포맷 함수 사용
-      isMyComment: comment.isMyComment || false,
+      isMyComment: comment.isMyComment,
     })),
   };
 };

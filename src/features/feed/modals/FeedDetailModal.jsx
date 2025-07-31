@@ -46,6 +46,7 @@ const FeedDetailModal = ({
       // setHasMultipleImages(data.imageUrls.length > 1);
       setFeedData(data);
       setComments(data.comments);
+      console.log(data);
     } catch (error) {
       toast.error(error.message || "피드 정보를 불러오지 못했습니다.");
     } finally {
@@ -147,7 +148,9 @@ const FeedDetailModal = ({
     if (!newComment.trim()) return;
 
     try {
-      const newCommentData = await createComment(feedId, newComment);
+      const newCommentData = await createComment(feedId, {
+        content: newComment,
+      });
       setComments((prev) => [
         ...prev,
         {
@@ -229,6 +232,7 @@ const FeedDetailModal = ({
             <span className="location-name">
               {getLocationLabel(feedData.location)}
             </span>
+            {/* 더보기 메뉴 */}
             {isOwner && (
               <div className="more-menu-container">
                 <button
@@ -337,6 +341,7 @@ const FeedDetailModal = ({
                     <span className="comment-timestamp">
                       {comment.timestamp}
                     </span>
+                    {/* 댓글 수정/삭제 버튼 */}
                     {comment.isMyComment && isLoggedIn && (
                       <div className="comment-actions-menu">
                         <button
@@ -390,24 +395,25 @@ const FeedDetailModal = ({
               </div>
             ))}
           </div>
-
-          <form
-            className="comment-input-section"
-            onSubmit={handleCommentSubmit}
-          >
-            <div className="comment-input-container">
-              <input
-                type="text"
-                placeholder="댓글을 입력하세요..."
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                className="comment-input"
-              />
-              <button type="submit" className="comment-submit-button">
-                등록
-              </button>
-            </div>
-          </form>
+          {isLoggedIn && (
+            <form
+              className="comment-input-section"
+              onSubmit={handleCommentSubmit}
+            >
+              <div className="comment-input-container">
+                <input
+                  type="text"
+                  placeholder="댓글을 입력하세요..."
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  className="comment-input"
+                />
+                <button type="submit" className="comment-submit-button">
+                  등록
+                </button>
+              </div>
+            </form>
+          )}
         </div>
         {/* ✅ Feed 수정 모달 */}
         {isEditModalOpen && (
