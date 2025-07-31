@@ -10,16 +10,6 @@ export default defineConfig({
     },
   },
   define: {
-    global: "window",
-  },
-  server: {
-    proxy: {
-      "/api": {
-        target: "http://localhost:8080",
-        changeOrigin: true,
-        secure: false,
-      },
-    },
-    historyApiFallback: true, // React Router fallback 설정
+    global: 'window', // 여기를 추가!
   },
 });

@@ -12,7 +12,7 @@ export const parseDirectChatRoomResponse = (response, currentUser) => {
     isOnline: false, // API에서 제공되지 않는 경우 기본값
     avatarColor: "#8b5cf6", // 기본 색상
     otherUserId: room.otherUserId,
-    otherUserEmail: room.otherUserEmail
+    otherUserEmail: room.otherUserEmail,
   }));
 };
 

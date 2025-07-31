@@ -6,6 +6,8 @@ import AppRouter from "@/AppRouter";
 import { LoginModal, getCurrentUser, logoutUser } from "@/features/user";
 import "@/App.css";
 import { Toaster } from "react-hot-toast";
+import { wsManager } from "@/features/chat/ws/wsManager";
+
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -30,6 +32,21 @@ function App() {
     const user = await getCurrentUser();
     if (user) setCurrentUser(user);
   };
+
+  useEffect(() => {
+  if (currentUser) {
+    wsManager.connect()
+      .then(() => {
+        console.log("WS 연결 성공");
+        // 알림 구독 예시
+        wsManager.subscribeNotifications((msg) => {
+          console.log("알림 수신:", msg);
+        });
+      })
+      .catch(err => console.error("WS 연결 실패:", err));
+  }
+}, [currentUser]);
+
 
   const handleLogout = async () => {
     try {

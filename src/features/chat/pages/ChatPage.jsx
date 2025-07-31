@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import ProfileImage from "../../../shared/components/ProfileImage";
-import { getDirectChatRooms, getGroupChatRooms, getChatMessages, getCurrentUser, getUsers } from "../api/chatApi";
+import { getDirectChatRooms, getGroupChatRooms, getChatMessages, getCurrentUser, getUsers, createDirectChatRoom } from "../api/chatApi";
 import { parseDirectChatRoomResponse, parseGroupChatRoomResponse, parseChatMessageResponse, parseUsersResponse, parseCurrentUserResponse } from "../dto/chatDto";
 import { wsManager } from "../ws/wsManager";
 
@@ -66,15 +66,24 @@ useEffect(() => {
   if (!selectedChat) return;
 
   const subscribe = async () => {
-    await wsManager.ensureConnected(); // WebSocket 연결 보장
-    wsManager.cleanupChatSubscriptions();
+    await wsManager.ensureConnected();
 
+    // 이미 해당 roomId로 구독 중이면 재구독하지 않음
+    if (wsManager.currentRoomId === selectedChat.roomId) return;
+
+    wsManager.cleanupChatSubscriptions();
+    wsManager.currentRoomId = selectedChat.roomId;
+
+    console.log("selectedChat.roomId:", selectedChat?.roomId);
+    console.log("현재 구독 중인 roomId:", wsManager.currentRoomId);
     if (chatType === "direct") {
-      wsManager.subscribeChat(null, false, (msg) => {
+      wsManager.subscribeChat(selectedChat.roomId, false, (msg) => {
+        console.log("수신:", msg);
         setChatMessages(prev => [...prev, msg]);
       });
     } else if (chatType === "group") {
       wsManager.subscribeChat(selectedChat.roomId, true, (msg) => {
+        console.log("수신:", msg);
         setChatMessages(prev => [...prev, msg]);
       });
     }
@@ -82,6 +91,7 @@ useEffect(() => {
 
   subscribe();
 }, [selectedChat, chatType]);
+
 
 
 
@@ -114,6 +124,32 @@ const fetchUsers = async () => {
     console.error("Failed to fetch users:", error);
   }
 };
+
+const startNewDirectChat = async (user) => {
+  try {
+    const response = await createDirectChatRoom(user.id);
+    console.log("1대1 채팅방 생성 성공:", response);
+
+    const newRoom = response.roomId ? response : parseDirectChatRoomResponse([response], currentUser)[0];
+
+    setDirectRooms((prevRooms) => {
+      const exists = prevRooms.some((room) => room.roomId === newRoom.roomId);
+      return exists ? prevRooms : [...prevRooms, newRoom];
+    });
+
+    setSelectedChat(newRoom);
+    setChatType("direct");
+
+    // ✅ 메시지 초기화 전에 API로 메시지 히스토리 먼저 가져오기
+    const messageHistory = await getRoomMessages(newRoom.roomId); // 여긴 실제 API 함수로 대체
+    setChatMessages(messageHistory); // 초기 메시지 설정
+
+  } catch (error) {
+    console.error("DM 채팅방 생성 실패:", error);
+  }
+};
+
+
 
 
   // [GET /api/chat/my-rooms/direct] DM 채팅방 목록 가져오기
@@ -194,17 +230,22 @@ const fetchUsers = async () => {
 
   // [SEND /pub/chat.direct.send/{currentRoomId}] DM 메시지 전송 (WebSocket)
   // [SEND /pub/chat.group.send/{currentRoomId}] 그룹 메시지 전송 (WebSocket)
-  const sendMessage = async (message) => {
+const sendMessage = (message) => {
   if (!currentRoomId || !message.trim()) return;
+
+  const recipient = chatType === "direct" ? selectedChat?.otherUserId : null;
 
   const msgPayload = {
     roomId: currentRoomId,
     content: message,
     type: "TALK",
-    recipientId: chatType === "direct" ? selectedChat?.recipientId : null,
+    recipientId: recipient,
+    senderId: currentUser?.id, // ← 이건 사실 서버에서 Principal 로 추출하므로 없어도 됨
   };
 
-  wsManager.sendMessage(currentRoomId, msgPayload, chatType === "group", selectedChat?.recipientId);
+  console.log("보내는 메시지 payload:", msgPayload);
+
+  wsManager.sendMessage(currentRoomId, msgPayload, chatType === "group", recipient);
 
   setChatMessages(prev => [
     ...prev,
@@ -219,6 +260,7 @@ const fetchUsers = async () => {
 };
 
 
+
   // 채팅 타입 변경 (DM/Group)
   const handleChatTypeChange = (type) => {
     setChatType(type)
@@ -228,8 +270,9 @@ const fetchUsers = async () => {
 
   // 채팅방 선택
   const handleChatSelect = (chat) => {
-    setSelectedChat(chat)
-  }
+  setSelectedChat(chat);
+  console.log("선택한 채팅방:", chat);  // 클릭한 chat을 바로 찍음
+};
 
 
 
@@ -247,6 +290,7 @@ const fetchUsers = async () => {
     if (messageInput.trim()) {
       sendMessage(messageInput)
       setMessageInput("")
+      console.log(currentRoomId, selectedChat?.recipientId)
     }
   }
 
