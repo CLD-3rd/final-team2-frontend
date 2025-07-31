@@ -47,7 +47,6 @@ const FeedDetailModal = ({
       // setHasMultipleImages(data.imageUrls.length > 1);
       setFeedData(data);
       setComments(data.comments);
-      console.log(data);
     } catch (error) {
       toast.error(error.message || "피드 정보를 불러오지 못했습니다.");
     } finally {
@@ -95,7 +94,6 @@ const FeedDetailModal = ({
   };
 
   const handleEditPost = () => {
-    console.log("Edit post:", feedData.id);
     setIsMoreMenuOpen(false);
     setIsEditModalOpen(true); // FeedPostModal 열기
   };
@@ -149,7 +147,6 @@ const FeedDetailModal = ({
     if (!newComment.trim()) return;
 
     try {
-      console.log(comments);
       // ✅ API 호출
       await createComment(feedId, {
         content: newComment,
@@ -159,7 +156,6 @@ const FeedDetailModal = ({
       // 댓글 등록 후 최신 댓글 목록 불러오기
       const updatedComments = await getComments(feedId);
       setComments(updatedComments); // 댓글 목록 갱신
-      console.log(updateComment);
     } catch (error) {
       toast.error(error.message || "댓글 등록에 실패했습니다.");
     }

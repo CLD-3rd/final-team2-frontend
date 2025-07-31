@@ -41,14 +41,12 @@ const FeedPostModal = ({
       }
       if (mode === "edit" && initialData?.id) {
         await updateFeed(initialData.id, formPayload);
+        toast.success("피드가 수정되었습니다!");
       } else {
-        console.log(formData);
-
         await createFeed(formPayload);
+        toast.success("피드가 등록되었습니다!");
       }
 
-      // ✅ 성공 시 콜백 실행 (FeedPage에서 reloadTrigger 증가)
-      toast.success("피드가 등록되었습니다!");
       onSuccess?.();
       onClose();
     } catch (error) {

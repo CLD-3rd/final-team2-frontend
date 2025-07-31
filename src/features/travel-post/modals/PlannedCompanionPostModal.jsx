@@ -69,7 +69,6 @@ const PlannedCompanionPostModal = ({
       if (formData.image) {
         formPayload.append("images", formData.image);
       }
-      console.log(formPayload);
       if (mode === "create") {
         await createTravelPost("BEFORE", formPayload);
         toast.success("사전 동행 모집글이 등록되었습니다!");
