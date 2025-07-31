@@ -35,6 +35,7 @@ export const parseFeedDetailResponse = (data) => {
     content: data.content,
     location: data.location,
     imageUrl: data.imageUrl,
+    badgeRequest: data.badgeRequest,
     createdAt: formatTime(data.createdAt),
     comments: (data.comments || []).map((comment) => ({
       id: comment.commentId,
