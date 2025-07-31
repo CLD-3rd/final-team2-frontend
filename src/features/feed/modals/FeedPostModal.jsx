@@ -35,14 +35,15 @@ const FeedPostModal = ({
       formPayload.append("title", formData.title);
       formPayload.append("content", formData.content);
       formPayload.append("location", formData.location);
-      formPayload.append("badge_request", formData.badgeRequest);
+      formPayload.append("badgeRequest", formData.badgeRequest);
       if (formData.image) {
-        formPayload.append("images", formData.image);
+        formPayload.append("image", formData.image);
       }
-
       if (mode === "edit" && initialData?.id) {
         await updateFeed(initialData.id, formPayload);
       } else {
+        console.log(formData);
+
         await createFeed(formPayload);
       }
 
@@ -52,9 +53,10 @@ const FeedPostModal = ({
       onClose();
     } catch (error) {
       toast.error(
-        mode === "edit"
-          ? "피드 수정에 실패했습니다."
-          : "피드 등록에 실패했습니다."
+        error.message ||
+          (mode === "edit"
+            ? "피드 수정에 실패했습니다."
+            : "피드 등록에 실패했습니다.")
       );
     }
   };
