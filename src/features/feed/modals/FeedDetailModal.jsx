@@ -10,6 +10,7 @@ import {
 import {
   getFeedDetail,
   deleteFeed,
+  getComments,
   createComment,
   updateComment,
   deleteComment,
@@ -142,32 +143,29 @@ const FeedDetailModal = ({
   // };
 
   // 댓글 관련 핸들러
-  // 댓글 등록 시 UI 갱신
+  // 댓글 등록
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!newComment.trim()) return;
 
     try {
-      const newCommentData = await createComment(feedId, {
+      console.log(comments);
+      // ✅ API 호출
+      await createComment(feedId, {
         content: newComment,
       });
-      setComments((prev) => [
-        ...prev,
-        {
-          commentId: newCommentData.id,
-          author: newCommentData.author,
-          content: newCommentData.content,
-          createdAt: newCommentData.createdAt,
-          isMyComment: true,
-        },
-      ]);
-      setNewComment("");
+      toast.success("댓글이 등록되었습니다.");
+      setNewComment(""); // 입력값 초기화
+      // 댓글 등록 후 최신 댓글 목록 불러오기
+      const updatedComments = await getComments(feedId);
+      setComments(updatedComments); // 댓글 목록 갱신
+      console.log(updateComment);
     } catch (error) {
       toast.error(error.message || "댓글 등록에 실패했습니다.");
     }
   };
 
-  //댓글 수정
+  // 댓글 수정
   const handleEditComment = (commentId, currentContent) => {
     setEditingCommentId(commentId);
     setEditingCommentText(currentContent);
@@ -179,20 +177,14 @@ const FeedDetailModal = ({
     try {
       // ✅ API 호출
       await updateComment(feedId, commentId, editingCommentText);
-
-      // ✅ UI 갱신
-      setComments((prev) =>
-        prev.map((comment) =>
-          comment.commentId === commentId
-            ? { ...comment, content: editingCommentText }
-            : comment
-        )
-      );
-
+      toast.success("댓글이 수정되었습니다.");
       setEditingCommentId(null);
       setEditingCommentText("");
+      // 댓글 수정 후 최신 댓글 목록 불러오기
+      const updatedComments = await getComments(feedId);
+      setComments(updatedComments); // 댓글 목록 갱신
     } catch (error) {
-      toast.error("댓글 수정에 실패했습니다.");
+      toast.error(error.message || "댓글 수정에 실패했습니다.");
     }
   };
 
@@ -207,12 +199,10 @@ const FeedDetailModal = ({
     try {
       // ✅ API 호출
       await deleteComment(feedId, commentId);
-
-      // ✅ UI 갱신
-      setComments((prev) =>
-        prev.filter((comment) => comment.commentId !== commentId)
-      );
       toast.success("댓글이 삭제되었습니다.");
+      // 댓글 삭제 후 최신 댓글 목록 불러오기
+      const updatedComments = await getComments(feedId);
+      setComments(updatedComments); // 댓글 목록 갱신
     } catch (error) {
       toast.error(error.message || "댓글 삭제에 실패했습니다.");
     }

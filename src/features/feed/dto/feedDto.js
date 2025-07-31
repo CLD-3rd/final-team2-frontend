@@ -47,3 +47,17 @@ export const parseFeedDetailResponse = (data) => {
     })),
   };
 };
+
+// ✅ 댓글 목록 조회 시
+export const parseCommentsResponse = (data) => {
+  if (!data) return [];
+
+  return data.map((comment) => ({
+    id: comment.commentId,
+    nickname: comment.author.nickname,
+    profileImgUrl: comment.author.profileImgUrl,
+    content: comment.content,
+    timestamp: formatTime(comment.createdAt), // "방금 전", "2시간 전" 같은 포맷 함수 사용
+    isMyComment: comment.isMyComment,
+  }));
+};

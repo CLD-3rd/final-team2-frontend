@@ -1,6 +1,10 @@
 // src/api/feed.js
 import { axiosInstance } from "@/shared";
-import { parseFeedsResponse, parseFeedDetailResponse } from "@/features/feed";
+import {
+  parseFeedsResponse,
+  parseFeedDetailResponse,
+  parseCommentsResponse,
+} from "@/features/feed";
 
 const BASE_URL = "/api/feeds";
 
@@ -91,6 +95,19 @@ export const deleteFeed = async (feedId) => {
   }
 };
 
+// ✅ 댓글 목록 조회
+export const getComments = async (feedId) => {
+  try {
+    const { data } = await axiosInstance.get(`${BASE_URL}/${feedId}/comments`);
+    return parseCommentsResponse(data);
+  } catch (error) {
+    const message =
+      error.response?.data?.message || "댓글 조회 중 오류가 발생했습니다.";
+    console.error("댓글 조회 실패:", message);
+    throw new Error(message);
+  }
+};
+
 // ✅ 댓글 등록
 export const createComment = async (feedId, payload) => {
   try {
@@ -110,7 +127,7 @@ export const createComment = async (feedId, payload) => {
 // ✅ 댓글 수정
 export const updateComment = async (feedId, commentId, payload) => {
   try {
-    const { data } = await axiosInstance.patch(
+    const { data } = await axiosInstance.put(
       `${BASE_URL}/${feedId}/comments/${commentId}`,
       payload
     );
