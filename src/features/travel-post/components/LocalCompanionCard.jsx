@@ -13,6 +13,7 @@ const LocalCompanionCard = ({
   postData,
   onLoginModalOpen,
   onEdit,
+  onUpdateSuccess,
 }) => {
   const [loading, setLoading] = useState(true);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
@@ -36,7 +37,7 @@ const LocalCompanionCard = ({
         toast.success("모집글이 삭제되었습니다.");
         setIsMoreMenuOpen(false);
 
-        onUpdateSuccess?.(); // ✅ PlannedCompanionPage 새로고침 트리거
+        onUpdateSuccess?.(); // ✅ LocalCompanionPage 새로고침 트리거
       } catch (error) {
         toast.error(
           error.message || "모집글 삭제에 실패했습니다.\n다시 시도해주세요."

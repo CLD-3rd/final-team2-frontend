@@ -72,7 +72,6 @@ const PostDetailModal = ({ currentUser, postId, onClose, onUpdateSuccess }) => {
   };
 
   const handleEditPost = () => {
-    console.log("Edit post:", postData.id);
     setIsMoreMenuOpen(false);
     setIsEditModalOpen(true); // PostPostModal 열기
   };

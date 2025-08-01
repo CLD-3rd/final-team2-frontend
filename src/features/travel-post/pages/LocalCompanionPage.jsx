@@ -15,9 +15,9 @@ import {
 } from "@/features/travel-post";
 import toast from "react-hot-toast";
 
-const LocalCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
+const LocalCompanionPage = ({ currentUser, onLoginModalOpen }) => {
   const [posts, setPosts] = useState([]);
-  const [filters, setFilters] = useState({ sort: "recent" });
+  const [filters, setFilters] = useState({ sort: "view" });
 
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
@@ -26,6 +26,8 @@ const LocalCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
   const [selectedPost, setSelectedPost] = useState(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const isLoggedIn = !!currentUser;
 
   // ✅ 필터 변경 시 초기화
   useEffect(() => {
@@ -62,15 +64,16 @@ const LocalCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
     setFilters(newFilters);
   };
 
+  // ✅ 등록/수정 완료 시 새로고침
+  const handleSuccess = () => {
+    setPage(0);
+    fetchPosts(0, false);
+    setIsEditModalOpen(false);
+  };
+
   const handleEditRequest = (postData) => {
     setSelectedPost(postData);
     setIsEditModalOpen(true);
-  };
-
-  const handleEditSuccess = () => {
-    fetchPosts(0, false);
-    setIsEditModalOpen(false);
-    setSelectedPost(null);
   };
 
   const handlePostCreate = async () => {
@@ -96,10 +99,11 @@ const LocalCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
             {posts.map((post) => (
               <LocalCompanionCard
                 key={post.id}
+                currentUser={currentUser}
                 postData={post}
-                isLoggedIn={isLoggedIn}
                 onLoginModalOpen={onLoginModalOpen}
                 onEdit={handleEditRequest}
+                onUpdateSuccess={handleSuccess}
               />
             ))}
           </div>
@@ -126,7 +130,7 @@ const LocalCompanionPage = ({ isLoggedIn, onLoginModalOpen }) => {
         <UpdateLocalModal
           onClose={() => setIsEditModalOpen(false)}
           initialData={selectedPost}
-          onSuccess={handleEditSuccess}
+          onSuccess={handleSuccess}
           mode="edit"
         />
       )}
