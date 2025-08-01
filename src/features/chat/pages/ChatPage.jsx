@@ -211,19 +211,21 @@ const startNewDirectChat = async (user) => {
   // [SEND /pub/chat.direct.send/{currentRoomId}] DM 메시지 전송 (WebSocket)
   // [SEND /pub/chat.group.send/{currentRoomId}] 그룹 메시지 전송 (WebSocket)
 const sendMessage = (message) => {
+
+
   if (!currentRoomId || !message.trim()) return;
 
   const recipient = chatType === "direct" ? selectedChat?.otherUserId : null;
 
   const msgPayload = {
-    roomId: currentRoomId,
+    // roomId: currentRoomId,
     content: message,
     type: "TALK",
     recipientId: recipient,
-    senderId: currentUser?.id, // ← 이건 사실 서버에서 Principal 로 추출하므로 없어도 됨
   };
 
   console.log("보내는 메시지 payload:", msgPayload);
+  console.log("🧪 payload 타입:", typeof msgPayload);
 
   wsManager.sendMessage(currentRoomId, msgPayload, chatType === "group", recipient);
 

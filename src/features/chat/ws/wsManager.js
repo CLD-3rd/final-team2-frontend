@@ -161,6 +161,10 @@ subscribeChat = async (roomId, isGroup, callback, isRecovery = false) => {
     if (!isGroup) message.recipientId = recipientId;
 
     this.stompClient.send(destination, {}, JSON.stringify(message));
+    console.log("🧪 wsManager.sendMessage 호출됨");
+    console.log("destination:", destination);
+    console.log("payload:", message);
+    console.log("typeof payload:", typeof message);
   };
 
   // 반드시 connect 이후 실행
