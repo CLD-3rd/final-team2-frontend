@@ -1,58 +1,58 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLockBodyScroll, ProfileImage } from "@/shared";
+import { updateUserProfile } from "@/features/user";
+import { toast } from "react-hot-toast";
 
-const ProfileEditModal = ({ onClose, userProfile, onSave }) => {
+const ProfileEditModal = ({ onClose, userProfile, onProfileUpdate }) => {
   useLockBodyScroll();
-  const [formData, setFormData] = useState({
-    username: userProfile.username,
-    profileImage: null,
-    currentImageUrl: userProfile.profileImage,
-  });
 
-  const [imagePreview, setImagePreview] = useState(userProfile.profileImage);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  const [nickname, setNickname] = useState(userProfile.nickname || "");
+  const [imagePreview, setImagePreview] = useState(userProfile.profileImgUrl);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFormData((prev) => ({
-        ...prev,
-        profileImage: file,
-      }));
-
-      // 이미지 미리보기 생성
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target.result);
-      };
-      reader.readAsDataURL(file);
+      setSelectedImage(file);
+      setImagePreview(URL.createObjectURL(file)); // ✅ FileReader 대신 사용
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 새 프로필 데이터 생성
-    const updatedProfile = {
-      ...userProfile,
-      username: formData.username,
-      profileImage: formData.profileImage
-        ? imagePreview
-        : formData.currentImageUrl,
-    };
+    try {
+      const formPayload = new FormData();
+      formPayload.append("nickname", nickname);
+      if (selectedImage) {
+        formPayload.append("profileImage", selectedImage);
+      }
 
-    onSave(updatedProfile);
-    onClose();
+      const updatedUserProfile = await updateUserProfile(formPayload);
+
+      onProfileUpdate({
+        ...userProfile,
+        nickname: updatedUserProfile.nickname,
+        profileImgUrl: updatedUserProfile.profileImgUrl,
+      });
+
+      toast.success("프로필이 수정되었습니다!");
+      onClose();
+    } catch (error) {
+      toast.error(error.message || "사용자 프로필 수정에 실패했습니다.");
+    }
   };
+
+  // ✅ 메모리 누수 방지 - 컴포넌트 unmount 시 revoke
+  useEffect(() => {
+    return () => {
+      if (imagePreview && imagePreview.startsWith("blob:")) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -60,7 +60,7 @@ const ProfileEditModal = ({ onClose, userProfile, onSave }) => {
         className="profile-edit-modal-content"
         onClick={(e) => e.stopPropagation()}
       >
-        <button className="modal-close" onClick={onClose}>
+        <button className="modal-close" aria-label="닫기" onClick={onClose}>
           ×
         </button>
 
@@ -74,7 +74,7 @@ const ProfileEditModal = ({ onClose, userProfile, onSave }) => {
               <div className="profile-image-edit-container">
                 <div className="profile-image-preview">
                   <ProfileImage
-                    src={imagePreview || "/placeholder.svg"}
+                    src={imagePreview}
                     alt="프로필 미리보기"
                     className="preview-image"
                   />
@@ -91,7 +91,7 @@ const ProfileEditModal = ({ onClose, userProfile, onSave }) => {
                     사진 변경
                   </label>
                   <p className="file-help-text">
-                    JPG, PNG 파일만 업로드 가능합니다.
+                    <br></br>JPG, PNG 파일만 업로드 가능합니다.
                   </p>
                 </div>
               </div>
@@ -103,8 +103,8 @@ const ProfileEditModal = ({ onClose, userProfile, onSave }) => {
               <input
                 type="text"
                 name="username"
-                value={formData.username}
-                onChange={handleInputChange}
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
                 className="username-input"
                 placeholder="사용자명을 입력하세요"
                 required

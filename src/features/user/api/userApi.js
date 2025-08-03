@@ -29,6 +29,25 @@ export const logoutUser = async () => {
   }
 };
 
+// ✅ 유저 프로필 수정
+export const updateUserProfile = async (payload) => {
+  try {
+    const res = await axiosInstance.put(`/api/users/profile`, payload, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return res.data;
+  } catch (error) {
+    const message =
+      error.response?.data?.message ||
+      "사용자 프로필 수정 중 오류가 발생했습니다.";
+    console.error("사용자 프로필 수정 실패:", message);
+
+    throw new Error(message);
+  }
+};
+
 // 유저 정보 조회 API
 export const getUserInfo = async (userId) => {
   try {

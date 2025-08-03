@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Edit } from "lucide-react";
 import { FallbackImage } from "@/shared";
 import { getUserReviewStats, parseUserReviewResponse } from "@/features/user"; // DTO를 거친 API 함수
 import { getUserBadges, parseUserBadgeResponse } from "@/features/user";
@@ -10,7 +11,15 @@ import TravelTagEditModal from "../modals/TravelTagEditModal";
 import BadgeEditModal from "@/features/user/modals/BadgeEditModal";
 
 const ProfileManagementPage = ({ currentUser, onProfileUpdate }) => {
-  const [userProfile, setUserProfile] = useState(currentUser);
+  const [userProfile, setUserProfile] = useState({
+    ...currentUser,
+    badges: currentUser?.badges || [],
+    ownedBadges: currentUser?.ownedBadges || [],
+    travelTags: currentUser?.travelTags || [],
+  });
+  const [isTravelTagModalOpen, setIsTravelTagModalOpen] = useState(false);
+  const [isProfileEditModalOpen, setIsProfileEditModalOpen] = useState(false);
+  const [isBadgeEditModalOpen, setIsBadgeEditModalOpen] = useState(false);
 
   // ✅ 사용자 기본 정보 가져오기
   useEffect(() => {
@@ -55,10 +64,6 @@ const ProfileManagementPage = ({ currentUser, onProfileUpdate }) => {
     fetchBadges();
   }, [currentUser?.id]);
 
-  const [isTravelTagModalOpen, setIsTravelTagModalOpen] = useState(false);
-  const [isProfileEditModalOpen, setIsProfileEditModalOpen] = useState(false);
-  const [isBadgeEditModalOpen, setIsBadgeEditModalOpen] = useState(false);
-
   const renderStars = (rating) => {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
@@ -97,8 +102,7 @@ const ProfileManagementPage = ({ currentUser, onProfileUpdate }) => {
 
   const handleProfileSave = (updatedProfile) => {
     setUserProfile(updatedProfile);
-    onProfileUpdate(updatedProfile); // 전역 상태 업데이트
-    console.log("Profile updated:", updatedProfile);
+    onProfileUpdate(updatedProfile); // ✅ 여기서 setCurrentUser 대신
   };
 
   // 뱃지 저장 핸들러 추가
@@ -121,23 +125,23 @@ const ProfileManagementPage = ({ currentUser, onProfileUpdate }) => {
             style={{ position: "relative" }}
           >
             <FallbackImage
-              src={userProfile.profileImage}
+              src={userProfile.profileImgUrl}
               // alt 삭제
               className="profile-image-large"
             />
             <button
-              className="profile-edit-icon"
+              className="profile-edit-icon absolute bottom-2 right-2 bg-white rounded-full p-2 shadow-md hover:bg-gray-100"
               onClick={() => setIsProfileEditModalOpen(true)}
               title="프로필 편집"
               style={{ zIndex: 10 }}
             >
-              <FallbackImage src="/images/edit-icon.png" alt="편집" />
+              <Edit size={20} strokeWidth={2} className="text-gray-700" />
             </button>
           </div>
         </div>
 
         <div className="profile-info-section">
-          <h1 className="profile-username">{userProfile.username}</h1>
+          <h1 className="profile-username">{userProfile.nickname}</h1>
           <div className="profile-badges">
             {userProfile.badges.map((badge, index) => (
               <span key={index} className="profile-badge">
@@ -222,7 +226,7 @@ const ProfileManagementPage = ({ currentUser, onProfileUpdate }) => {
         <ProfileEditModal
           onClose={() => setIsProfileEditModalOpen(false)}
           userProfile={userProfile}
-          onSave={handleProfileSave}
+          onProfileUpdate={handleProfileSave}
         />
       )}
       {/* 모달 추가 */}
