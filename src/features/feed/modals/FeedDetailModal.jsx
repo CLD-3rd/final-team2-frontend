@@ -107,9 +107,7 @@ const FeedDetailModal = ({
 
         onClose(); // 상세 모달 닫기
         onUpdateSuccess?.(); // ✅ FeedPage 새로고침 트리거
-      } catch (error) {
-        toast.error("피드 삭제에 실패했습니다. 다시 시도해주세요.");
-      }
+      } catch (error) {}
     }
   };
 
@@ -156,9 +154,7 @@ const FeedDetailModal = ({
       // 댓글 등록 후 최신 댓글 목록 불러오기
       const updatedComments = await getComments(feedId);
       setComments(updatedComments); // 댓글 목록 갱신
-    } catch (error) {
-      toast.error(error.message || "댓글 등록에 실패했습니다.");
-    }
+    } catch (error) {}
   };
 
   // 댓글 수정

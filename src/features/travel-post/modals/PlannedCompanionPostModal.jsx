@@ -67,7 +67,7 @@ const PlannedCompanionPostModal = ({
       formPayload.append("recruitLimit", Number(formData.maxParticipants)); // 숫자 값
 
       if (formData.image) {
-        formPayload.append("images", formData.image);
+        formPayload.append("image", formData.image);
       }
       if (mode === "create") {
         await createTravelPost("BEFORE", formPayload);
