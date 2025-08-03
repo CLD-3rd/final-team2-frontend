@@ -171,7 +171,7 @@ const ProfileManagementPage = ({ currentUser, onProfileUpdate }) => {
             <div className="travel-tags">
               {userProfile.travelTags.map((tag, index) => (
                 <span key={index} className="travel-tag">
-                  {tag}
+                  {tag.description}
                 </span>
               ))}
             </div>
