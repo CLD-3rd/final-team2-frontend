@@ -1,53 +1,64 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState } from "react";
 
 const BadgeEditModal = ({ onClose, userProfile, onSave }) => {
   // 사용자가 보유한 모든 뱃지
-  const allOwnedBadges = userProfile.ownedBadges || []
+  const allOwnedBadges = userProfile.ownedBadges || [];
 
   // 현재 프로필에 표시되는 뱃지들
-  const [selectedBadges, setSelectedBadges] = useState(userProfile.badges || [])
+  const [selectedBadges, setSelectedBadges] = useState(
+    userProfile.badges || []
+  );
 
   const handleBadgeToggle = (badge) => {
     if (selectedBadges.includes(badge)) {
       // 이미 선택된 뱃지면 제거
-      setSelectedBadges((prev) => prev.filter((b) => b !== badge))
+      setSelectedBadges((prev) => prev.filter((b) => b !== badge));
     } else {
       // 선택되지 않은 뱃지면 추가
-      setSelectedBadges((prev) => [...prev, badge])
+      setSelectedBadges((prev) => [...prev, badge]);
     }
-  }
+  };
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    onSave(selectedBadges)
-    onClose()
-  }
+    e.preventDefault();
+    onSave(selectedBadges);
+    onClose();
+  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="badge-edit-modal-content" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="badge-edit-modal-content"
+        onClick={(e) => e.stopPropagation()}
+      >
         <button className="modal-close" onClick={onClose}>
           ×
         </button>
 
         <div className="badge-edit-modal-body">
           <h2 className="modal-title">프로필에 표시할 뱃지 선택</h2>
-          <p className="modal-subtitle">보유 중인 뱃지 중에서 프로필에 표시할 뱃지를 선택하세요.</p>
+          <p className="modal-subtitle">
+            보유 중인 뱃지 중에서 프로필에 표시할 뱃지를 선택하세요.
+          </p>
 
           <form onSubmit={handleSubmit}>
             <div className="badge-selection-grid">
               {allOwnedBadges.map((badge, index) => (
                 <div
                   key={index}
-                  className={`badge-selection-item ${selectedBadges.includes(badge) ? "selected" : ""}`}
+                  className={`badge-selection-item ${
+                    selectedBadges.includes(badge) ? "selected" : ""
+                  }`}
                   onClick={() => handleBadgeToggle(badge)}
                 >
                   <div className="badge-icon">🏅</div>
                   <div className="badge-info">
                     <span className="badge-name">{badge}</span>
-                    {selectedBadges.includes(badge) && <span className="selected-indicator">✓</span>}
+                    {selectedBadges.includes(badge) && (
+                      <span className="selected-indicator">✓</span>
+                    )}
                   </div>
                 </div>
               ))}
@@ -59,7 +70,11 @@ const BadgeEditModal = ({ onClose, userProfile, onSave }) => {
                 {selectedBadges.map((badge, index) => (
                   <span key={index} className="selected-badge-tag">
                     {badge}
-                    <button type="button" className="remove-badge-btn" onClick={() => handleBadgeToggle(badge)}>
+                    <button
+                      type="button"
+                      className="remove-badge-btn"
+                      onClick={() => handleBadgeToggle(badge)}
+                    >
                       ×
                     </button>
                   </span>
@@ -79,7 +94,7 @@ const BadgeEditModal = ({ onClose, userProfile, onSave }) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default BadgeEditModal
+export default BadgeEditModal;

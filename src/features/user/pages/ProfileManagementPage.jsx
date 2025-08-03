@@ -3,66 +3,47 @@
 import { useEffect, useState } from "react";
 import { Edit } from "lucide-react";
 import { FallbackImage } from "@/shared";
-import { getUserReviewStats, parseUserReviewResponse } from "@/features/user"; // DTO를 거친 API 함수
-import { getUserBadges, parseUserBadgeResponse } from "@/features/user";
-import { getUserInfo, parseUserInfoResponse } from "@/features/user";
-import ProfileEditModal from "../modals/ProfileEditModal";
-import TravelTagEditModal from "../modals/TravelTagEditModal";
-import BadgeEditModal from "@/features/user/modals/BadgeEditModal";
+import {
+  getUserProfile,
+  ProfileEditModal,
+  TravelTagEditModal,
+  BadgeEditModal,
+} from "@/features/user";
+import { toast } from "react-hot-toast";
 
 const ProfileManagementPage = ({ currentUser, onProfileUpdate }) => {
-  const [userProfile, setUserProfile] = useState({
-    ...currentUser,
-    badges: currentUser?.badges || [],
-    ownedBadges: currentUser?.ownedBadges || [],
-    travelTags: currentUser?.travelTags || [],
-  });
+  const [userProfile, setUserProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   const [isTravelTagModalOpen, setIsTravelTagModalOpen] = useState(false);
   const [isProfileEditModalOpen, setIsProfileEditModalOpen] = useState(false);
   const [isBadgeEditModalOpen, setIsBadgeEditModalOpen] = useState(false);
 
-  // ✅ 사용자 기본 정보 가져오기
   useEffect(() => {
-    if (!currentUser?.id) return;
-    const fetchUserInfo = async () => {
-      const rawInfo = await getUserInfo(currentUser.id);
-      const userInfo = parseUserInfoResponse(rawInfo);
-      setUserProfile((prev) => ({
-        ...prev,
-        ...userInfo,
-      }));
-    };
-    fetchUserInfo();
+    fetchProfileData();
   }, [currentUser?.id]);
 
-  // ✅ 리뷰 통계
-  useEffect(() => {
-    if (!currentUser?.id) return;
-    const fetchReviewStats = async () => {
-      const rawData = await getUserReviewStats(currentUser.id);
-      const reviewData = parseUserReviewResponse(rawData);
-      setUserProfile((prev) => ({
-        ...prev,
-        rating: reviewData.rating,
-        reviewCount: reviewData.reviewCount,
-      }));
-    };
-    fetchReviewStats();
-  }, [currentUser?.id]);
-
-  // ✅ 뱃지 목록
-  useEffect(() => {
-    if (!currentUser?.id) return;
-    const fetchBadges = async () => {
-      const rawBadgeData = await getUserBadges(currentUser.id);
-      const badgeList = parseUserBadgeResponse(rawBadgeData);
-      setUserProfile((prev) => ({
-        ...prev,
-        ownedBadges: badgeList,
-      }));
-    };
-    fetchBadges();
-  }, [currentUser?.id]);
+  const fetchProfileData = async () => {
+    try {
+      setLoading(true);
+      const profileData = await getUserProfile(currentUser.id);
+      setUserProfile({
+        ...profileData.user, // userId, nickname, profileImgUrl, email
+        reviewCount: profileData.reviewCount,
+        rating: profileData.averageRating,
+        displayBadges: (profileData.displayBadges || []).map((b) => b.name), // 표시할 뱃지
+        ownedBadges: (profileData.ownedBadges || []).map((b) => b.name), // 보유 뱃지
+        travelTags: profileData.travelTags || [],
+      });
+      console.log(profileData);
+    } catch (error) {
+      toast.error(
+        error.message || "프로필 정보를 불러오는 중 오류가 발생했습니다."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const renderStars = (rating) => {
     const fullStars = Math.floor(rating);
@@ -109,12 +90,21 @@ const ProfileManagementPage = ({ currentUser, onProfileUpdate }) => {
   const handleBadgeSave = (selectedBadges) => {
     const updatedProfile = {
       ...userProfile,
-      badges: selectedBadges,
+      displayBadges: selectedBadges,
     };
     setUserProfile(updatedProfile);
     onProfileUpdate(updatedProfile);
     console.log("Badge selection saved:", selectedBadges);
   };
+
+  // ✅ 로딩 중이면 스피너 or 메시지 표시
+  if (loading) {
+    return <div className="loading">프로필 불러오는 중...</div>;
+  }
+
+  if (!userProfile) {
+    return <div className="error">프로필 데이터를 불러오지 못했습니다.</div>;
+  }
 
   return (
     <div className="profile-management-page">
@@ -143,10 +133,10 @@ const ProfileManagementPage = ({ currentUser, onProfileUpdate }) => {
         <div className="profile-info-section">
           <h1 className="profile-username">{userProfile.nickname}</h1>
           <div className="profile-badges">
-            {userProfile.badges.map((badge, index) => (
+            {userProfile.displayBadges.map((badge, index) => (
               <span key={index} className="profile-badge">
                 {badge}
-                {index < userProfile.badges.length - 1}
+                {index < userProfile.displayBadges.length - 1}
               </span>
             ))}
           </div>
