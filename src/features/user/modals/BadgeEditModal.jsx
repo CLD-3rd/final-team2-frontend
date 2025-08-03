@@ -8,13 +8,13 @@ const BadgeEditModal = ({ onClose, userProfile, onSave }) => {
 
   // 현재 프로필에 표시되는 뱃지들
   const [selectedBadges, setSelectedBadges] = useState(
-    userProfile.badges || []
+    userProfile.displayBadges || []
   );
 
   const handleBadgeToggle = (badge) => {
-    if (selectedBadges.includes(badge)) {
+    if (selectedBadges.some((b) => b.id === badge.id)) {
       // 이미 선택된 뱃지면 제거
-      setSelectedBadges((prev) => prev.filter((b) => b !== badge));
+      setSelectedBadges((prev) => prev.filter((b) => b.id !== badge.id));
     } else {
       // 선택되지 않은 뱃지면 추가
       setSelectedBadges((prev) => [...prev, badge]);
@@ -49,14 +49,16 @@ const BadgeEditModal = ({ onClose, userProfile, onSave }) => {
                 <div
                   key={index}
                   className={`badge-selection-item ${
-                    selectedBadges.includes(badge) ? "selected" : ""
+                    selectedBadges.some((b) => b.id === badge.id)
+                      ? "selected"
+                      : ""
                   }`}
                   onClick={() => handleBadgeToggle(badge)}
                 >
                   <div className="badge-icon">🏅</div>
                   <div className="badge-info">
-                    <span className="badge-name">{badge}</span>
-                    {selectedBadges.includes(badge) && (
+                    <span className="badge-name">{badge.name}</span>
+                    {selectedBadges.some((b) => b.id === badge.id) && (
                       <span className="selected-indicator">✓</span>
                     )}
                   </div>
@@ -69,7 +71,7 @@ const BadgeEditModal = ({ onClose, userProfile, onSave }) => {
               <div className="selected-badges-list">
                 {selectedBadges.map((badge, index) => (
                   <span key={index} className="selected-badge-tag">
-                    {badge}
+                    {badge.name}
                     <button
                       type="button"
                       className="remove-badge-btn"

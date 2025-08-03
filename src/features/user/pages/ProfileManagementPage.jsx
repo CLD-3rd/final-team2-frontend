@@ -5,6 +5,7 @@ import { Edit } from "lucide-react";
 import { FallbackImage } from "@/shared";
 import {
   getUserProfile,
+  updateUserBadge,
   ProfileEditModal,
   TravelTagEditModal,
   BadgeEditModal,
@@ -31,8 +32,8 @@ const ProfileManagementPage = ({ currentUser, onProfileUpdate }) => {
         ...profileData.user, // userId, nickname, profileImgUrl, email
         reviewCount: profileData.reviewCount,
         rating: profileData.averageRating,
-        displayBadges: (profileData.displayBadges || []).map((b) => b.name), // 표시할 뱃지
-        ownedBadges: (profileData.ownedBadges || []).map((b) => b.name), // 보유 뱃지
+        displayBadges: profileData.displayBadges || [], // 표시할 뱃지
+        ownedBadges: profileData.ownedBadges || [], // 보유 뱃지
         travelTags: profileData.travelTags || [],
       });
       console.log(profileData);
@@ -87,14 +88,25 @@ const ProfileManagementPage = ({ currentUser, onProfileUpdate }) => {
   };
 
   // 뱃지 저장 핸들러 추가
-  const handleBadgeSave = (selectedBadges) => {
-    const updatedProfile = {
-      ...userProfile,
-      displayBadges: selectedBadges,
-    };
-    setUserProfile(updatedProfile);
-    onProfileUpdate(updatedProfile);
-    console.log("Badge selection saved:", selectedBadges);
+  const handleBadgeSave = async (selectedBadges) => {
+    try {
+      // selectedBadges는 Badge 객체 배열
+      const badgeIds = selectedBadges.map((badge) => badge.id);
+
+      await updateUserBadge(badgeIds);
+
+      // UI 반영
+      const updatedProfile = {
+        ...userProfile,
+        displayBadges: selectedBadges,
+      };
+      setUserProfile(updatedProfile);
+      onProfileUpdate(updatedProfile);
+
+      toast.success("표시할 뱃지가 업데이트되었습니다!");
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   // ✅ 로딩 중이면 스피너 or 메시지 표시
@@ -132,11 +144,11 @@ const ProfileManagementPage = ({ currentUser, onProfileUpdate }) => {
 
         <div className="profile-info-section">
           <h1 className="profile-username">{userProfile.nickname}</h1>
+          {/* 표시 뱃지 */}
           <div className="profile-badges">
-            {userProfile.displayBadges.map((badge, index) => (
-              <span key={index} className="profile-badge">
-                {badge}
-                {index < userProfile.displayBadges.length - 1}
+            {userProfile.displayBadges.map((badge) => (
+              <span key={badge.id} className="profile-badge">
+                {badge.name}
               </span>
             ))}
           </div>
@@ -194,10 +206,10 @@ const ProfileManagementPage = ({ currentUser, onProfileUpdate }) => {
           </div>
           <div className="section-content">
             <div className="badge-list">
-              {userProfile.ownedBadges.map((badge, index) => (
-                <div key={index} className="badge-item">
+              {userProfile.ownedBadges.map((badge) => (
+                <div key={badge.id} className="badge-item">
                   <span className="badge-icon">🏅</span>
-                  <span className="badge-name">{badge}</span>
+                  <span className="badge-name">{badge.name}</span>
                 </div>
               ))}
             </div>
