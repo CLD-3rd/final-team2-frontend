@@ -5,13 +5,18 @@ import { useEffect, useState } from "react";
 import {
   getSchedules,
   updateParticipantStatus,
+  getApprovedParticipantCount,
+  getParticipants,
 } from "@/features/user/api/scheduleApi";
 import { parseScheduleResponse } from "@/features/user/dto/scheduleDto";
 import EvaluationModal from "@/features/user/modals/EvaluationModal";
+import { wsManager } from "@/features/chat/ws/wsManager";
 
 const ScheduleManagementPage = ({ currentUser }) => {
   // 오늘 날짜 0시 기준
-  const currentUserId = currentUser.id;
+  const currentUserId = Number(wsManager.getCurrentUserId());
+  if (!currentUserId) return null;
+  console.log("📅 현재 사용자 ID (from wsManager):", currentUserId);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -33,19 +38,29 @@ const ScheduleManagementPage = ({ currentUser }) => {
   const [closedRecruitIds, setClosedRecruitIds] = useState([]);
   const [schedules, setSchedules] = useState([]);
   const [selectedParticipant, setSelectedParticipant] = useState(null);
+  const [openScheduleIds, setOpenScheduleIds] = useState([]);
 
   useEffect(() => {
-    (async () => {
-      const data = await getSchedules();
-      console.log(parseScheduleResponse(data, currentUserId));
-      setSchedules(parseScheduleResponse(data, currentUserId));
-    })();
-  }, []);
+  (async () => {
+    const data = await getSchedules();
+    console.log("📅 getSchedules result:", data);
+
+    const parsed = await parseScheduleResponse(
+      data,
+      currentUserId,
+      getParticipants,
+      getApprovedParticipantCount
+    );
+
+    console.log("📅 파싱된 일정 데이터:", parsed);
+    setSchedules(parsed);
+  })();
+}, []);
 
   const getScheduleStatus = (schedule) => {
     if (schedule.progressStatus === "UPCOMING") return "예정";
     if (schedule.progressStatus === "ONGOING") return "진행중";
-    return "완료";
+    return "예정";
   };
 
   // 필터 버튼
@@ -245,10 +260,16 @@ const ScheduleManagementPage = ({ currentUser }) => {
                 currentUserId={currentUserId}
                 status={getScheduleStatus(schedule)}
                 isRecruitClosed={closedRecruitIds.includes(schedule.id)}
-                onRecruitClose={() =>
-                  setClosedRecruitIds((prev) => [...prev, schedule.id])
-                }
+                onRecruitClose={() => setClosedRecruitIds((prev) => [...prev, schedule.id])}
                 setSelectedParticipant={setSelectedParticipant}
+                isOpen={openScheduleIds.includes(schedule.id)}
+                onToggleOpen={() =>
+                setOpenScheduleIds((prev) =>
+                  prev.includes(schedule.id)
+                  ? prev.filter((id) => id !== schedule.id)
+                : [...prev, schedule.id]
+    )
+  }
               />
             ))
           )}
@@ -278,8 +299,10 @@ const ScheduleCard = ({
   isRecruitClosed,
   onRecruitClose,
   setSelectedParticipant,
+  isOpen,
+  onToggleOpen,
 }) => {
-  const [open, setOpen] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
   const [participants, setParticipants] = useState(
     (schedule.participants || []).filter((p) => p.id !== currentUserId)
   );
@@ -294,38 +317,52 @@ const ScheduleCard = ({
     (p) => p.id === currentUserId
   );
   const isRejected = schedule.myJoinStatus === "REJECTED";
-
-  // 거절된 일정인 경우 open 상태를 강제로 false로 설정
-  const effectiveOpen = isRejected ? false : open;
+  const effectiveOpen = isRejected ? false : isOpen;
 
   const handleRecruitClose = () => onRecruitClose && onRecruitClose();
 
-  const handleApprove = async (index, participant) => {
+    const refreshParticipants = async () => {
     try {
-      await updateParticipantStatus(schedule.id, participant.id, "APPROVED");
-      setParticipants((prev) =>
-        prev.map((p, i) =>
-          i === index ? { ...p, status: "APPROVED", approved: true } : p
-        )
+      const updated = await getParticipants(schedule.id);
+      const approved = await getApprovedParticipantCount(schedule.id);
+      setParticipants(
+        updated.filter((p) => p.id !== currentUserId && p.status !== "REJECTED")
       );
-      setApprovedCount((prev) => prev + 1);
+      setApprovedCount(approved);
     } catch (error) {
-      alert("참여자 승인 실패");
+      console.error("참가자 목록 갱신 실패", error);
+      setErrorMsg("참가자 목록 갱신 실패");
     }
   };
 
-  const handleReject = async (index, participant) => {
-    try {
-      await updateParticipantStatus(schedule.id, participant.id, "REJECTED");
-      setParticipants((prev) =>
-        prev.map((p, i) =>
-          i === index ? { ...p, status: "REJECTED", approved: false } : p
-        )
-      );
-    } catch (error) {
-      alert("참여자 거절 실패");
-    }
-  };
+  // ✅ 수정: participant 인자 누락 → 전달함
+  const handleApprove = async (participantId) => {
+  if (actionLoading) return;
+  setActionLoading(true);
+  try {
+    await updateParticipantStatus(schedule.id, participantId, "APPROVED");
+    await refreshParticipants();
+  } catch (error) {
+    alert("참여자 승인 실패");
+  } finally {
+    setActionLoading(false);
+  }
+};
+
+
+  const handleReject = async (participantId) => {
+  if (actionLoading) return;
+  setActionLoading(true);
+  try {
+    await updateParticipantStatus(schedule.id, participantId, "REJECTED");
+    await refreshParticipants();
+  } catch (error) {
+    alert("참여자 거절 실패");
+  } finally {
+    setActionLoading(false);
+  }
+};
+
 
   // 모집 마감된 경우 승인된 참가자만 표시
   const visibleParticipants = [
@@ -354,7 +391,8 @@ const ScheduleCard = ({
           cursor: !isRejected && participantCount > 0 ? "pointer" : "default",
         }}
         onClick={() => {
-          if (!isRejected && participantCount > 0) setOpen((prev) => !prev);
+          if (!isRejected && participantCount > 0) onToggleOpen();
+
         }}
       >
         <div className="schedule-info">
@@ -464,13 +502,14 @@ const ScheduleCard = ({
                     <div>
                       <button
                         className="action-btn approve"
-                        onClick={() => handleApprove(index)}
+                        onClick={() => handleApprove(participant.id)}
+                        disabled={actionLoading}
                       >
                         ✓
                       </button>
                       <button
                         className="action-btn reject"
-                        onClick={() => handleReject(index)}
+                        onClick={() => handleReject(participant.id)}
                       >
                         ✕
                       </button>

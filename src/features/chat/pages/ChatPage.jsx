@@ -1,14 +1,30 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
+import ProfileImage from "../../../shared/components/ProfileImage";
+import { getDirectChatRooms, getGroupChatRooms, getChatMessages, getCurrentUser, getUsers, createDirectChatRoom } from "../api/chatApi";
+import { parseDirectChatRoomResponse, parseGroupChatRoomResponse, parseChatMessageResponse, parseUsersResponse, parseCurrentUserResponse } from "../dto/chatDto";
+import { wsManager } from "../ws/wsManager";
 
 const ChatPage = () => {
-  const [selectedChat, setSelectedChat] = useState("lily-schaden")
+  // 상태 관리
+  const [selectedChat, setSelectedChat] = useState(null)
   const [messageInput, setMessageInput] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedFile, setSelectedFile] = useState(null)
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+  const [chatType, setChatType] = useState("direct") // "direct" 또는 "group"
+  const [currentUser, setCurrentUser] = useState(null)
+  const [users, setUsers] = useState([])
+  const [directRooms, setDirectRooms] = useState([])
+  const [groupRooms, setGroupRooms] = useState([])
+  const [chatMessages, setChatMessages] = useState([])
+  const [currentRoomId, setCurrentRoomId] = useState(null)
+  const [loading, setLoading] = useState(false)
   const emojiPickerRef = useRef(null)
+  const messagesEndRef = useRef(null);
+
+  
 
   const emojis = [
     "😊", "😂", "🥰", "😍", "🤔", "😎", "😭", "😤", "🥺", "😴",
@@ -16,37 +32,245 @@ const ChatPage = () => {
     "❤️", "💕", "💖", "💯", "🔥", "⭐", "🎉", "🎊", "🌟", "✨",
   ]
 
-  const chatList = [
-    { id: "sorrel-barrows", name: "Sorrel Barrows", avatar: "S", avatarColor: "#f59e0b", lastMessage: "Lol", timestamp: "4 min ago", unreadCount: 1, isOnline: false },
-    { id: "lily-schaden", name: "Lily Schaden", avatar: "L", avatarColor: "#8b5cf6", lastMessage: "Typing...", timestamp: "10 min ago", unreadCount: 0, isOnline: true },
-    { id: "elin-flatley", name: "Elin Flatley", avatar: "E", avatarColor: "#10b981", lastMessage: "What time do", timestamp: "1 hour ago", unreadCount: 1, isOnline: false },
-    { id: "daisy-reynolds", name: "Daisy Reynolds", avatar: "D", avatarColor: "#3b82f6", lastMessage: "Amazing job!", timestamp: "5 hour ago", unreadCount: 0, isOnline: false },
-    { id: "chloris-nader", name: "Chloris Nader", avatar: "C", avatarColor: "#10b981", lastMessage: "To Sony", timestamp: "1 day ago", unreadCount: 0, isOnline: false },
-    { id: "peonie-hoeger", name: "Peonie Hoeger", avatar: "P", avatarColor: "#3b82f6", lastMessage: "Ok thanks", timestamp: "1 day ago", unreadCount: 0, isOnline: false },
-    { id: "jared-terry", name: "Jared Terry", avatar: "J", avatarColor: "#f59e0b", lastMessage: "See you then!", timestamp: "2 day ago", unreadCount: 0, isOnline: false },
-  ]
+  // 최초 1회 연결 + 알림 구독
 
-  for (let i = 1; i <= 50; i++) {
-    chatList.push({
-      id: `dummy-user-${i}`,
-      name: `Dummy User ${i}`,
-      avatar: String.fromCharCode(65 + (i % 26)),
-      avatarColor: ["#f59e0b", "#8b5cf6", "#10b981", "#3b82f6"][i % 4],
-      lastMessage: `Hello! This is dummy chat #${i}`,
-      timestamp: `${i} min ago`,
-      unreadCount: i % 3 === 0 ? 1 : 0,
-      isOnline: i % 5 === 0,
-    })
+
+useEffect(() => {
+  const manageChatSubscription = async () => {
+    if (!selectedChat || !selectedChat.roomId) return;
+
+    await wsManager.ensureConnected();
+
+    const isGroup = chatType === "group";
+
+    wsManager.subscribeChat(selectedChat.roomId, isGroup, (msg) => {
+      const myId = Number(wsManager.getCurrentUserId());
+      if (Number(msg.senderId) === myId) return;
+
+      const formattedMessages = {
+        ...msg,
+        displayTime: new Date(msg.timestamp).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit"
+        }),
+      };
+
+      setChatMessages(prev => {
+        const alreadyExists = prev.some(
+          m => m.timestamp === formattedMessages.timestamp && m.content === formattedMessages.content
+        );
+        if (alreadyExists) return prev;
+        return [...prev, formattedMessages];
+      });
+    });
+  };
+
+  manageChatSubscription();
+
+  // ❌ 더 이상 구독 해제하지 않음
+  // return () => {
+  //   wsManager.cleanupChatSubscriptions();
+  // };
+}, [selectedChat, chatType]);
+
+
+useEffect(() => {
+  if (messagesEndRef.current) {
+    messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+  }
+}, [chatMessages]);
+
+
+
+  // [GET /api/users/me] 현재 사용자 정보 가져오기
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const response = await getCurrentUser()
+        console.log("GET /api/users/me - 현재 사용자 정보 가져오기 성공:", response)
+        const userData = parseCurrentUserResponse(response)
+        setCurrentUser(userData)
+      } catch (error) {
+        console.error("Failed to fetch current user:", error)
+      }
+    }
+    fetchCurrentUser()
+  }, [])
+
+  // [GET /api/users] 모든 사용자 목록 가져오기
+// 기존 useEffect 삭제
+// useEffect(() => { fetchUsers() }, [])
+
+const fetchUsers = async () => {
+  try {
+    const response = await getUsers();
+    console.log("GET /api/users - 모든 사용자 목록 가져오기 성공:", response);
+    const usersData = parseUsersResponse(response);
+    setUsers(usersData);
+  } catch (error) {
+    console.error("Failed to fetch users:", error);
+  }
+};
+
+const startNewDirectChat = async (user) => {
+  try {
+    const response = await createDirectChatRoom(user.id);
+    console.log("1대1 채팅방 생성 성공:", response);
+
+    const newRoom = response.roomId ? response : parseDirectChatRoomResponse([response], currentUser)[0];
+
+    setDirectRooms((prevRooms) => {
+      const exists = prevRooms.some((room) => room.roomId === newRoom.roomId);
+      return exists ? prevRooms : [...prevRooms, newRoom];
+    });
+
+    setSelectedChat(newRoom);
+    setChatType("direct");
+
+    // ✅ 메시지 초기화 전에 API로 메시지 히스토리 먼저 가져오기
+    const messageHistory = await getChatMessages(newRoom.roomId); // 여긴 실제 API 함수로 대체
+    setChatMessages(messageHistory); // 초기 메시지 설정
+
+  } catch (error) {
+    console.error("DM 채팅방 생성 실패:", error);
+  }
+};
+
+
+
+
+  // [GET /api/chat/my-rooms/direct] DM 채팅방 목록 가져오기
+  useEffect(() => {
+    const fetchDirectRooms = async () => {
+      try {
+        const response = await getDirectChatRooms()
+        console.log("GET /api/chat/my-rooms/direct - DM 채팅방 목록 가져오기 성공:", response)
+        
+        // API 응답이 이미 UI에 맞는 형태인 경우 그대로 사용
+        if (response && Array.isArray(response) && response.length > 0 && response[0].lastMessage !== undefined) {
+          setDirectRooms(response)
+        } else {
+          // API 응답을 UI에 맞는 형태로 변환
+          
+          const formattedRooms = parseDirectChatRoomResponse(response, currentUser)
+          setDirectRooms(formattedRooms)
+        }
+      } catch (error) {
+        console.error("Failed to fetch direct rooms:", error)
+      }
+    }
+    fetchDirectRooms()
+  }, [])
+
+  // [GET /api/chat/my-rooms/group] 그룹 채팅방 목록 가져오기
+  useEffect(() => {
+    const fetchGroupRooms = async () => {
+      try {
+        const response = await getGroupChatRooms()
+        console.log("GET /api/chat/my-rooms/group - 그룹 채팅방 목록 가져오기 성공:", response)
+        
+        // API 응답이 이미 UI에 맞는 형태인 경우 그대로 사용
+        if (response && Array.isArray(response) && response.length > 0 && response[0].lastMessage !== undefined) {
+          setGroupRooms(response)
+        } else {
+          // API 응답을 UI에 맞는 형태로 변환
+          const formattedRooms = parseGroupChatRoomResponse(response, currentUser)
+          setGroupRooms(formattedRooms)
+        }
+      } catch (error) {
+        console.error("Failed to fetch group rooms:", error)
+      }
+    }
+    fetchGroupRooms()
+  }, [currentUser])
+
+  // [GET /api/chat/rooms/{roomId}/messages] 선택된 채팅방의 메시지 가져오기
+  useEffect(() => {
+    if (selectedChat && selectedChat.roomId) {
+      const fetchMessages = async () => {
+        try {
+          setLoading(true)
+          const response = await getChatMessages(selectedChat.roomId)
+          console.log(`GET /api/chat/rooms/${selectedChat.roomId}/messages - 선택된 채팅방의 메시지 가져오기 성공:`, response)
+          
+          // API 응답이 이미 UI에 맞는 형태인 경우 그대로 사용
+          if (response && Array.isArray(response) && response.length > 0 && response[0].sender !== undefined) {
+            setChatMessages(response)
+            setCurrentRoomId(selectedChat.roomId)
+            setLoading(false)
+          } else {
+            // API 응답을 UI에 맞는 형태로 변환
+            console.log("원본 응답:", response);
+            console.log("첫 메시지:", response.content?.[0]);
+            const formattedMessages = parseChatMessageResponse(response, currentUser, selectedChat)
+            const sortedMessages = [...formattedMessages].sort(
+  (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
+);
+            console.log("Formatted messages:", formattedMessages);
+            setChatMessages(sortedMessages)
+            setCurrentRoomId(selectedChat.roomId)
+            setLoading(false)
+          }
+        } catch (error) {
+          console.error("Failed to fetch messages:", error)
+          setLoading(false)
+        }
+      }
+      fetchMessages()
+    }
+  }, [selectedChat, currentUser])
+
+
+
+  // [SEND /pub/chat.direct.send/{currentRoomId}] DM 메시지 전송 (WebSocket)
+  // [SEND /pub/chat.group.send/{currentRoomId}] 그룹 메시지 전송 (WebSocket)
+const sendMessage = (message) => {
+
+
+  if (!currentRoomId || !message.trim()) return;
+
+  const recipient = chatType === "direct" ? selectedChat?.otherUserId : null;
+
+  const msgPayload = {
+  content: message,
+  type: "TALK",
+  ...(chatType === "direct" && { recipientId: recipient }),
+};
+
+  console.log("보내는 메시지 payload:", msgPayload);
+  console.log("🧪 payload 타입:", typeof msgPayload);
+
+  wsManager.sendMessage(currentRoomId, msgPayload, chatType === "group", recipient);
+
+  setChatMessages(prev => [
+    ...prev,
+    {
+      id: Date.now(),
+      sender: currentUser?.name || "me",
+      type: "text",
+      content: message,
+      timestamp: new Date().toISOString(),
+    }
+  ]);
+};
+
+
+
+  // 채팅 타입 변경 (DM/Group)
+  const handleChatTypeChange = (type) => {
+    setChatType(type)
+    setSelectedChat(null)
+    setChatMessages([])
   }
 
-  const [chatMessages, setChatMessages] = useState([
-    { id: 1, sender: "other", type: "text", content: "Hi Cedar. Send me the mockup file", timestamp: "2 day ago", avatar: "L", avatarColor: "#8b5cf6" },
-    { id: 2, sender: "me", type: "file", content: "MockupUpdate.pdf", timestamp: "1 day ago", fileIcon: "📄" },
-    { id: 3, sender: "other", type: "voice", content: "2:32", timestamp: "9:59 AM", avatar: "L", avatarColor: "#8b5cf6" },
-    { id: 4, sender: "me", type: "text", content: "OK Lily, I'm going to a meeting", timestamp: "9:59 AM" },
-  ])
+  // 채팅방 선택
+  const handleChatSelect = (chat) => {
+  wsManager.currentRoomId = null; // ✅ 강제 초기화
+  setSelectedChat(null);
+  setTimeout(() => setSelectedChat(chat), 0);
+};
 
-  const selectedChatData = chatList.find((chat) => chat.id === selectedChat)
+
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -60,15 +284,9 @@ const ChatPage = () => {
 
   const handleSendMessage = () => {
     if (messageInput.trim()) {
-      const newMessage = {
-        id: chatMessages.length + 1,
-        sender: "me",
-        type: "text",
-        content: messageInput,
-        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      }
-      setChatMessages((prev) => [...prev, newMessage])
+      sendMessage(messageInput)
       setMessageInput("")
+      console.log(currentRoomId, selectedChat?.recipientId)
     }
   }
 
@@ -81,21 +299,26 @@ const ChatPage = () => {
 
   /** 이미지 & 파일 업로드 수정 */
   const handleFileSelect = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      const isImage = file.type.startsWith("image/")
-      const newMessage = {
-        id: chatMessages.length + 1,
-        sender: "me",
-        type: isImage ? "image" : "file",
-        content: isImage ? URL.createObjectURL(file) : file.name,
-        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        fileIcon: isImage ? "🖼️" : "📄",
-      }
-      setChatMessages((prev) => [...prev, newMessage])
-      setSelectedFile(null)
-    }
+  const file = e.target.files[0];
+  if (file) {
+    const isImage = file.type.startsWith("image/");
+    const now = new Date();
+
+    const newMessage = {
+      id: chatMessages.length + 1,
+      sender: "me",
+      type: isImage ? "image" : "file",
+      content: isImage ? URL.createObjectURL(file) : file.name,
+      timestamp: now.toISOString(), // ✅ 정렬용
+      displayTime: now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }), // ✅ 표시용
+      fileIcon: isImage ? "🖼️" : "📄",
+    };
+
+    setChatMessages((prev) => [...prev, newMessage]);
+    setSelectedFile(null);
   }
+};
+
 
   const handleEmojiClick = (emoji) => {
     setMessageInput((prev) => prev + emoji)
@@ -103,6 +326,9 @@ const ChatPage = () => {
   }
 
   const toggleEmojiPicker = () => setShowEmojiPicker(!showEmojiPicker)
+
+  // 현재 표시할 채팅 목록
+  const currentChatList = chatType === "direct" ? directRooms : groupRooms
 
   return (
     <div className="chat-page">
@@ -123,106 +349,219 @@ const ChatPage = () => {
           </div>
           <div className="messages-header">
             <h3>Messages</h3>
-            <button className="dropdown-btn">▼</button>
+            <div className="chat-type-buttons">
+              <button 
+                className={`chat-type-btn ${chatType === "direct" ? "active" : ""}`}
+                onClick={() => handleChatTypeChange("direct")}
+              >
+                DM
+              </button>
+              <button 
+                className={`chat-type-btn ${chatType === "group" ? "active" : ""}`}
+                onClick={() => handleChatTypeChange("group")}
+              >
+                Group
+              </button>
+            </div>
           </div>
+
+          
+
+
+
           <div className="chat-list">
-            {chatList
-              .filter(chat =>
-                chat.name.toLowerCase().startsWith(searchQuery.toLowerCase())
-              )
-              .map(chat => (
-                <div
-                  key={chat.id}
-                  className={`chat-item ${selectedChat === chat.id ? "active" : ""}`}
-                  onClick={() => setSelectedChat(chat.id)}
-                >
-                  <div className="chat-avatar-container">
-                    <div className="chat-avatar" style={{ backgroundColor: chat.avatarColor }}>
-                      {chat.avatar}
+            {chatType === "direct" && (
+              // DM 모드: 사용자 목록과 기존 DM 채팅방 표시
+              <>
+                {users
+                  .filter(user => 
+                    user.id !== currentUser?.id && 
+                    user.email?.toLowerCase().includes(searchQuery.toLowerCase())
+                  )
+                  .map(user => (
+                    <div
+                      key={user.id}
+                      className="chat-item"
+                      onClick={() => startNewDirectChat(user)}
+                    >
+                      <div className="chat-avatar-container">
+                        <div className="chat-avatar" style={{ backgroundColor: "#8b5cf6", width: 40, height: 40, borderRadius: "50%", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <ProfileImage
+                            src={user.profileImage}
+                            alt={user.email?.charAt(0) || "상대방 프로필"}
+                            style={{ width: 40, height: 40, objectFit: "cover" }}
+                          />
+                        </div>
+                      </div>
+                      <div className="chat-info">
+                        <div className="chat-header-row">
+                          <span className="chat-name">{user.email}</span>
+                        </div>
+                        <div className="chat-preview-row">
+                          <span className="chat-preview">Start new chat</span>
+                        </div>
+                      </div>
                     </div>
-                    {chat.isOnline && <div className="online-indicator"></div>}
+                  ))}
+                {directRooms
+                  .filter(chat =>
+                    chat.name?.toLowerCase().includes(searchQuery.toLowerCase())
+                  )
+                  .map(chat => (
+                    <div
+                      key={chat.roomId || chat.id}
+                      className={`chat-item ${selectedChat?.roomId === chat.roomId ? "active" : ""}`}
+                      onClick={() => handleChatSelect(chat)}
+                    >
+                      <div className="chat-avatar-container">
+                        <div className="chat-avatar" style={{ backgroundColor: chat.avatarColor || "#8b5cf6", width: 40, height: 40, borderRadius: "50%", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <ProfileImage
+                            src={chat.profileImage}
+                            alt={chat.name?.charAt(0) || "상대방 프로필"}
+                            style={{ width: 40, height: 40, objectFit: "cover" }}
+                          />
+                        </div>
+                        {chat.isOnline && <div className="online-indicator"></div>}
+                      </div>
+                      <div className="chat-info">
+                        <div className="chat-header-row">
+                          <span className="chat-name">{chat.name}</span>
+                          <span className="chat-timestamp">{chat.timestamp}</span>
+                        </div>
+                        <div className="chat-preview-row">
+                          <span className="chat-preview">{chat.lastMessage}</span>
+                          {chat.unreadCount > 0 && <span className="unread-badge">{chat.unreadCount}</span>}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </>
+            )}
+            {chatType === "group" && (
+              // Group 모드: 그룹 채팅방만 표시
+              groupRooms
+                .filter(chat =>
+                  chat.name?.toLowerCase().includes(searchQuery.toLowerCase())
+                )
+                .map(chat => (
+                  <div
+                    key={chat.roomId || chat.id}
+                    className={`chat-item ${selectedChat?.roomId === chat.roomId ? "active" : ""}`}
+                    onClick={() => handleChatSelect(chat)}
+                  >
+                    <div className="chat-avatar-container">
+                      <div className="chat-avatar" style={{ backgroundColor: chat.avatarColor || "#10b981", width: 40, height: 40, borderRadius: "50%", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <ProfileImage
+                          src={chat.profileImage}
+                          alt={chat.name?.charAt(0) || "그룹 프로필"}
+                          style={{ width: 40, height: 40, objectFit: "cover" }}
+                        />
+                      </div>
+                      {chat.isOnline && <div className="online-indicator"></div>}
+                    </div>
+                    <div className="chat-info">
+                      <div className="chat-header-row">
+                        <span className="chat-name">{chat.name}</span>
+                        <span className="chat-timestamp">{chat.timestamp}</span>
+                      </div>
+                      <div className="chat-preview-row">
+                        <span className="chat-preview">{chat.lastMessage}</span>
+                        {chat.unreadCount > 0 && <span className="unread-badge">{chat.unreadCount}</span>}
+                      </div>
+                    </div>
                   </div>
-                  <div className="chat-info">
-                    <div className="chat-header-row">
-                      <span className="chat-name">{chat.name}</span>
-                      <span className="chat-timestamp">{chat.timestamp}</span>
-                    </div>
-                    <div className="chat-preview-row">
-                      <span className="chat-preview">{chat.lastMessage}</span>
-                      {chat.unreadCount > 0 && <span className="unread-badge">{chat.unreadCount}</span>}
-                    </div>
-                  </div>
-                </div>
-              ))}
+                ))
+            )}
           </div>
         </div>
 
         {/* 메인 영역 */}
         <div className="chat-main">
-          {selectedChatData && (
+          {selectedChat ? (
             <>
               <div className="chat-header">
                 <div className="chat-header-info">
-                  <div className="chat-avatar" style={{ backgroundColor: selectedChatData.avatarColor }}>
-                    {selectedChatData.avatar}
+                  <div className="chat-avatar" style={{ backgroundColor: selectedChat.avatarColor || "#8b5cf6" }}>
+                    {selectedChat.name?.charAt(0)}
                   </div>
                   <div className="chat-header-details">
-                    <h3 className="chat-header-name">{selectedChatData.name}</h3>
-                    <span className="chat-status">{selectedChatData.isOnline ? "● Active" : "Offline"}</span>
+                    <h3 className="chat-header-name">{selectedChat.name}</h3>
+                    <span className="chat-status">{selectedChat.isOnline ? "● Active" : "Offline"}</span>
                   </div>
                 </div>
               </div>
 
               {/* 메시지 영역 */}
               <div className="messages-container">
-                {chatMessages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`message ${message.sender === "me" ? "message-sent" : "message-received"}`}
-                  >
-                    {message.sender === "other" && (
-                      <div className="message-avatar" style={{ backgroundColor: message.avatarColor }}>
-                        {message.avatar}
-                      </div>
-                    )}
-                    <div className="message-content">
-                      {message.type === "text" && <div className="message-text">{message.content}</div>}
-                      {message.type === "image" && (
-                        <div className="message-image">
-                          <img src={message.content} alt="uploaded" style={{ maxWidth: "200px", borderRadius: "8px" }} />
-                        </div>
-                      )}
-                      {message.type === "file" && (
-                        <div className="message-file">
-                          <span className="file-icon">{message.fileIcon}</span>
-                          <span className="file-name">{message.content}</span>
-                        </div>
-                      )}
-                      {message.type === "voice" && (
-                        <div className="message-voice">
-                          <button className="voice-play-btn">▶</button>
-                          <div className="voice-waveform">
-                            <div className="waveform-bars">
-                              {Array.from({ length: 20 }).map((_, i) => (
-                                <div key={i} className="waveform-bar" style={{ height: `${Math.random() * 100}%` }}></div>
-                              ))}
-                            </div>
+                {loading ? (
+                  <div className="loading-messages">Loading messages...</div>
+                ) : (
+                  <>
+                    {chatMessages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`message ${message.sender === "me" ? "message-sent" : "message-received"}`}
+                        ref={messagesEndRef}
+                      >
+                        {message.sender === "other" && (
+                          <div>
+                          <div className="message-avatar" style={{ backgroundColor: message.avatarColor || "#8b5cf6", width: 40, height: 40, borderRadius: "50%", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <ProfileImage
+                              src={message.profileImage}
+                              alt={message.avatar || "상대방 프로필"}
+                              style={{ width: 40, height: 40, objectFit: "cover" }}
+                            />
                           </div>
-                          <span className="voice-duration">{message.content}</span>
+                          <span
+      className="message-sender-name"
+      style={{
+        fontSize: "12px",
+        color: "#666",
+        marginTop: "4px"
+      }}
+    >
+      {message.senderName}
+    </span>
+                          </div>
+                          
+                        )}
+                        <div className="message-content">
+                          {message.type === "text" && <div className="message-text">{message.content}</div>}
+                          {message.type === "image" && (
+                            <div className="message-image">
+                              <img src={message.content} alt="uploaded" style={{ maxWidth: "200px", borderRadius: "8px" }} />
+                            </div>
+                          )}
+                          {message.type === "file" && (
+                            <div className="message-file">
+                              <span className="file-icon">{message.fileIcon}</span>
+                              <span className="file-name">{message.content}</span>
+                            </div>
+                          )}
+                          {message.type === "voice" && (
+                            <div className="message-voice">
+                              <button className="voice-play-btn">▶</button>
+                              <div className="voice-waveform">
+                                <div className="waveform-bars">
+                                  {Array.from({ length: 20 }).map((_, i) => (
+                                    <div key={i} className="waveform-bar" style={{ height: `${Math.random() * 100}%` }}></div>
+                                  ))}
+                                </div>
+                              </div>
+                              <span className="voice-duration">{message.content}</span>
+                            </div>
+                          )}
+                          <div className="message-timestamp">{message.displayTime}</div>
                         </div>
-                      )}
-                      <div className="message-timestamp">{message.timestamp}</div>
-                    </div>
-                    {message.sender === "me" && (
-                      <div className="message-avatar me-avatar">
-                        <img src="/images/user-profile.jpg" alt="Me" />
+                        {/* 내가 보낸 메시지에는 프로필 사진(아바타) 없음 */}
                       </div>
-                    )}
-                  </div>
-                ))}
-                <div className="today-divider">
-                  <span>Today</span>
-                </div>
+                    ))}
+                    <div ref={messagesEndRef} />
+                    <div className="today-divider">
+                      <span>Today</span>
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* 입력 영역 */}
@@ -262,6 +601,10 @@ const ChatPage = () => {
                 </div>
               </div>
             </>
+          ) : (
+            <div className="no-chat-selected">
+              <p>Select a chat to start messaging</p>
+            </div>
           )}
         </div>
       </div>
