@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Edit } from "lucide-react";
-import { FallbackImage } from "@/shared";
+import { ProfileImage } from "@/shared";
 import {
   getUserProfile,
   updateUserBadge,
@@ -126,7 +126,7 @@ const ProfileManagementPage = ({ currentUser, onProfileUpdate }) => {
             className="profile-image-container"
             style={{ position: "relative" }}
           >
-            <FallbackImage
+            <ProfileImage
               src={userProfile.profileImgUrl}
               // alt 삭제
               className="profile-image-large"
