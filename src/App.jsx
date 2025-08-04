@@ -8,7 +8,6 @@ import "@/App.css";
 import { Toaster } from "react-hot-toast";
 import { wsManager } from "@/features/chat/ws/wsManager";
 
-
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -73,8 +72,6 @@ function App() {
       wsManager.stopHealthCheck?.();
     };
   }, [currentUser]);
-
-
 
   const handleLogout = async () => {
     try {
