@@ -20,18 +20,17 @@ jobs:
       - name: 📥 Checkout source code
         uses: actions/checkout@v3
 
-      - name: Setup Node & Enable pnpm
+      - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: "18"
-          cache: "pnpm" # ✅ pnpm 캐시 사용
-      - run: corepack enable # ✅ corepack 활성화 (pnpm 기본 지원)
+          cache: "npm" # ✅ npm 캐시 최적화
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile # ✅ npm ci 대신 pnpm 사용
+        run: npm ci # ✅ package-lock.json 기반 설치
 
       - name: Build and Export
-        run: pnpm build
+        run: npm run build
         env:
           VITE_SERVER_URL: ${{ secrets.VITE_SERVER_URL }}
 
@@ -44,6 +43,7 @@ jobs:
   cd:
     needs: ci
     runs-on: ubuntu-latest
+
     steps:
       - name: Download build artifact
         uses: actions/download-artifact@v4
