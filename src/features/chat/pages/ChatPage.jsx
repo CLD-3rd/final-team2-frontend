@@ -22,6 +22,7 @@ const ChatPage = () => {
   const [currentRoomId, setCurrentRoomId] = useState(null)
   const [loading, setLoading] = useState(false)
   const emojiPickerRef = useRef(null)
+  const messagesEndRef = useRef(null);
 
   
 
@@ -41,37 +42,43 @@ useEffect(() => {
     await wsManager.ensureConnected();
 
     const isGroup = chatType === "group";
-    const alreadySubscribed =
-      wsManager.currentRoomId === selectedChat.roomId &&
-      wsManager.currentChatType === chatType &&
-      wsManager.isActuallyConnected();
 
-    if (alreadySubscribed) return;
-
-    wsManager.cleanupChatSubscriptions(); // 이전 구독 해제
     wsManager.subscribeChat(selectedChat.roomId, isGroup, (msg) => {
       const myId = Number(wsManager.getCurrentUserId());
       if (Number(msg.senderId) === myId) return;
 
+      const formattedMessages = {
+        ...msg,
+        displayTime: new Date(msg.timestamp).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit"
+        }),
+      };
+
       setChatMessages(prev => {
         const alreadyExists = prev.some(
-          m => m.timestamp === msg.timestamp && m.content === msg.content
+          m => m.timestamp === formattedMessages.timestamp && m.content === formattedMessages.content
         );
         if (alreadyExists) return prev;
-        return [...prev, msg];
+        return [...prev, formattedMessages];
       });
     });
   };
 
   manageChatSubscription();
 
-  return () => {
-    wsManager.cleanupChatSubscriptions(); // 다른 채팅방 이동 시 구독 해제
-  };
+  // ❌ 더 이상 구독 해제하지 않음
+  // return () => {
+  //   wsManager.cleanupChatSubscriptions();
+  // };
 }, [selectedChat, chatType]);
 
 
-
+useEffect(() => {
+  if (messagesEndRef.current) {
+    messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+  }
+}, [chatMessages]);
 
 
 
@@ -144,6 +151,7 @@ const startNewDirectChat = async (user) => {
           setDirectRooms(response)
         } else {
           // API 응답을 UI에 맞는 형태로 변환
+          
           const formattedRooms = parseDirectChatRoomResponse(response, currentUser)
           setDirectRooms(formattedRooms)
         }
@@ -192,8 +200,14 @@ const startNewDirectChat = async (user) => {
             setLoading(false)
           } else {
             // API 응답을 UI에 맞는 형태로 변환
+            console.log("원본 응답:", response);
+            console.log("첫 메시지:", response.content?.[0]);
             const formattedMessages = parseChatMessageResponse(response, currentUser, selectedChat)
-            setChatMessages(formattedMessages)
+            const sortedMessages = [...formattedMessages].sort(
+  (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
+);
+            console.log("Formatted messages:", formattedMessages);
+            setChatMessages(sortedMessages)
             setCurrentRoomId(selectedChat.roomId)
             setLoading(false)
           }
@@ -218,11 +232,10 @@ const sendMessage = (message) => {
   const recipient = chatType === "direct" ? selectedChat?.otherUserId : null;
 
   const msgPayload = {
-    // roomId: currentRoomId,
-    content: message,
-    type: "TALK",
-    recipientId: recipient,
-  };
+  content: message,
+  type: "TALK",
+  ...(chatType === "direct" && { recipientId: recipient }),
+};
 
   console.log("보내는 메시지 payload:", msgPayload);
   console.log("🧪 payload 타입:", typeof msgPayload);
@@ -286,21 +299,26 @@ const sendMessage = (message) => {
 
   /** 이미지 & 파일 업로드 수정 */
   const handleFileSelect = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      const isImage = file.type.startsWith("image/")
-      const newMessage = {
-        id: chatMessages.length + 1,
-        sender: "me",
-        type: isImage ? "image" : "file",
-        content: isImage ? URL.createObjectURL(file) : file.name,
-        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        fileIcon: isImage ? "🖼️" : "📄",
-      }
-      setChatMessages((prev) => [...prev, newMessage])
-      setSelectedFile(null)
-    }
+  const file = e.target.files[0];
+  if (file) {
+    const isImage = file.type.startsWith("image/");
+    const now = new Date();
+
+    const newMessage = {
+      id: chatMessages.length + 1,
+      sender: "me",
+      type: isImage ? "image" : "file",
+      content: isImage ? URL.createObjectURL(file) : file.name,
+      timestamp: now.toISOString(), // ✅ 정렬용
+      displayTime: now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }), // ✅ 표시용
+      fileIcon: isImage ? "🖼️" : "📄",
+    };
+
+    setChatMessages((prev) => [...prev, newMessage]);
+    setSelectedFile(null);
   }
+};
+
 
   const handleEmojiClick = (emoji) => {
     setMessageInput((prev) => prev + emoji)
@@ -347,24 +365,9 @@ const sendMessage = (message) => {
             </div>
           </div>
 
-          {/* 여기 버튼 추가 */}
-<div style={{ padding: "10px 0" }}>
-  <button onClick={fetchUsers} style={{ width: "100%" }}>
-    사용자 검색
-  </button>
-</div>
+          
 
-{/* 검색된 사용자 목록 */}
-{users.length > 0 && (
-  <div style={{ padding: "10px" }}>
-    {users.map(user => (
-      <div key={user.id} style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}>
-        <span>{user.email}</span>
-        <button onClick={() => startNewDirectChat(user)}>DM</button>
-      </div>
-    ))}
-  </div>
-)}
+
 
           <div className="chat-list">
             {chatType === "direct" && (
@@ -498,8 +501,10 @@ const sendMessage = (message) => {
                       <div
                         key={message.id}
                         className={`message ${message.sender === "me" ? "message-sent" : "message-received"}`}
+                        ref={messagesEndRef}
                       >
                         {message.sender === "other" && (
+                          <div>
                           <div className="message-avatar" style={{ backgroundColor: message.avatarColor || "#8b5cf6", width: 40, height: 40, borderRadius: "50%", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
                             <ProfileImage
                               src={message.profileImage}
@@ -507,6 +512,18 @@ const sendMessage = (message) => {
                               style={{ width: 40, height: 40, objectFit: "cover" }}
                             />
                           </div>
+                          <span
+      className="message-sender-name"
+      style={{
+        fontSize: "12px",
+        color: "#666",
+        marginTop: "4px"
+      }}
+    >
+      {message.senderName}
+    </span>
+                          </div>
+                          
                         )}
                         <div className="message-content">
                           {message.type === "text" && <div className="message-text">{message.content}</div>}
@@ -534,11 +551,12 @@ const sendMessage = (message) => {
                               <span className="voice-duration">{message.content}</span>
                             </div>
                           )}
-                          <div className="message-timestamp">{message.timestamp}</div>
+                          <div className="message-timestamp">{message.displayTime}</div>
                         </div>
                         {/* 내가 보낸 메시지에는 프로필 사진(아바타) 없음 */}
                       </div>
                     ))}
+                    <div ref={messagesEndRef} />
                     <div className="today-divider">
                       <span>Today</span>
                     </div>

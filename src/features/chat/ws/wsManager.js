@@ -155,17 +155,23 @@ subscribeChat = async (roomId, isGroup, callback, isRecovery = false) => {
 
 
   sendMessage = (roomId, message, isGroup = false, recipientId = null) => {
-    const destination = isGroup
-      ? `/pub/chat.group.send/${roomId}`
-      : `/pub/chat.direct.send/${roomId}`;
-    if (!isGroup) message.recipientId = recipientId;
+  const destination = isGroup
+    ? `/pub/chat.group.send/${roomId}`
+    : `/pub/chat.direct.send/${roomId}`;
 
-    this.stompClient.send(destination, {}, JSON.stringify(message));
-    console.log("🧪 wsManager.sendMessage 호출됨");
-    console.log("destination:", destination);
-    console.log("payload:", message);
-    console.log("typeof payload:", typeof message);
+  // 새로운 객체 생성 (원본 message를 직접 수정하지 않음)
+  const payload = {
+    ...message,
+    ...(isGroup ? {} : { recipientId }),  // isGroup이 false일 때만 recipientId 포함
   };
+
+  this.stompClient.send(destination, {}, JSON.stringify(payload));
+
+  console.log("🧪 wsManager.sendMessage 호출됨");
+  console.log("destination:", destination);
+  console.log("payload:", payload);
+  console.log("typeof payload:", typeof payload);
+};
 
   // 반드시 connect 이후 실행
   subscribeNotifications = async (callback) => {

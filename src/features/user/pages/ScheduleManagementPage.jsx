@@ -5,13 +5,18 @@ import { useEffect, useState } from "react";
 import {
   getSchedules,
   updateParticipantStatus,
+  getApprovedParticipantCount,
+  getParticipants,
 } from "@/features/user/api/scheduleApi";
 import { parseScheduleResponse } from "@/features/user/dto/scheduleDto";
 import EvaluationModal from "@/features/user/modals/EvaluationModal";
+import { wsManager } from "@/features/chat/ws/wsManager";
 
 const ScheduleManagementPage = ({ currentUser }) => {
   // 오늘 날짜 0시 기준
-  const currentUserId = currentUser.id;
+  const currentUserId = Number(wsManager.getCurrentUserId());
+  if (!currentUserId) return null;
+  console.log("📅 현재 사용자 ID (from wsManager):", currentUserId);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -35,17 +40,26 @@ const ScheduleManagementPage = ({ currentUser }) => {
   const [selectedParticipant, setSelectedParticipant] = useState(null);
 
   useEffect(() => {
-    (async () => {
-      const data = await getSchedules();
-      console.log(parseScheduleResponse(data, currentUserId));
-      setSchedules(parseScheduleResponse(data, currentUserId));
-    })();
-  }, []);
+  (async () => {
+    const data = await getSchedules();
+    console.log("📅 getSchedules result:", data);
+
+    const parsed = await parseScheduleResponse(
+      data,
+      currentUserId,
+      getParticipants,
+      getApprovedParticipantCount
+    );
+
+    console.log("📅 파싱된 일정 데이터:", parsed);
+    setSchedules(parsed);
+  })();
+}, []);
 
   const getScheduleStatus = (schedule) => {
     if (schedule.progressStatus === "UPCOMING") return "예정";
     if (schedule.progressStatus === "ONGOING") return "진행중";
-    return "완료";
+    return "예정";
   };
 
   // 필터 버튼
@@ -300,15 +314,25 @@ const ScheduleCard = ({
 
   const handleRecruitClose = () => onRecruitClose && onRecruitClose();
 
+    const refreshParticipants = async () => {
+    try {
+      const updated = await getParticipants(schedule.id);
+      const approved = await getApprovedParticipantCount(schedule.id);
+      setParticipants(
+        updated.filter((p) => p.id !== currentUserId && p.status !== "REJECTED")
+      );
+      setApprovedCount(approved);
+    } catch (error) {
+      console.error("참가자 목록 갱신 실패", error);
+      setErrorMsg("참가자 목록 갱신 실패");
+    }
+  };
+
+  // ✅ 수정: participant 인자 누락 → 전달함
   const handleApprove = async (index, participant) => {
     try {
       await updateParticipantStatus(schedule.id, participant.id, "APPROVED");
-      setParticipants((prev) =>
-        prev.map((p, i) =>
-          i === index ? { ...p, status: "APPROVED", approved: true } : p
-        )
-      );
-      setApprovedCount((prev) => prev + 1);
+      await refreshParticipants();
     } catch (error) {
       alert("참여자 승인 실패");
     }
@@ -317,11 +341,7 @@ const ScheduleCard = ({
   const handleReject = async (index, participant) => {
     try {
       await updateParticipantStatus(schedule.id, participant.id, "REJECTED");
-      setParticipants((prev) =>
-        prev.map((p, i) =>
-          i === index ? { ...p, status: "REJECTED", approved: false } : p
-        )
-      );
+      await refreshParticipants();
     } catch (error) {
       alert("참여자 거절 실패");
     }
@@ -464,13 +484,13 @@ const ScheduleCard = ({
                     <div>
                       <button
                         className="action-btn approve"
-                        onClick={() => handleApprove(index)}
+                        onClick={() => handleApprove(index, participant)}
                       >
                         ✓
                       </button>
                       <button
                         className="action-btn reject"
-                        onClick={() => handleReject(index)}
+                        onClick={() => handleReject(index, participant)}
                       >
                         ✕
                       </button>

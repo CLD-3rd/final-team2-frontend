@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import {
+  useLockBodyScroll,
   Filterbar,
   InfiniteScrollWrapper,
   LoadingIndicator,
@@ -18,8 +19,8 @@ import toast from "react-hot-toast";
 const FeedPage = ({ currentUser, onFeedCountChange, onLoginModalOpen }) => {
   const [feeds, setFeeds] = useState([]);
 
-  
-  const [filters, setFilters] = useState({ sort: "recent" });
+  const [filters, setFilters] = useState({ sort: "view" });
+
 
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
@@ -29,6 +30,8 @@ const FeedPage = ({ currentUser, onFeedCountChange, onLoginModalOpen }) => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const isLoggedIn = !!currentUser;
+
+  useLockBodyScroll();
 
   // ✅ 필터 변경 시 초기화
   useEffect(() => {

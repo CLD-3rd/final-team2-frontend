@@ -13,6 +13,7 @@ const LocalCompanionCard = ({
   postData,
   onLoginModalOpen,
   onEdit,
+  onUpdateSuccess,
 }) => {
   const [loading, setLoading] = useState(true);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
@@ -36,7 +37,7 @@ const LocalCompanionCard = ({
         toast.success("모집글이 삭제되었습니다.");
         setIsMoreMenuOpen(false);
 
-        onUpdateSuccess?.(); // ✅ PlannedCompanionPage 새로고침 트리거
+        onUpdateSuccess?.(); // ✅ LocalCompanionPage 새로고침 트리거
       } catch (error) {
         toast.error(
           error.message || "모집글 삭제에 실패했습니다.\n다시 시도해주세요."
@@ -46,17 +47,26 @@ const LocalCompanionCard = ({
   };
 
     const handleCardClick = async () => {
-    const result = window.confirm("DM하시겠습니까?");
-    if (result) {
-      try {
-        await createDirectChatRoom(postData.author.id);
-        alert("DM 채팅방이 생성되었습니다!");
-        // 필요하다면 채팅방으로 이동 등 추가 동작
-      } catch (e) {
-        alert("채팅방 생성에 실패했습니다.");
-      }
-    }
-  };
+    console.log("postData 확인:", postData);
+  const result = window.confirm("DM하시겠습니까?");
+  if (!result) return;
+
+  const authorId = postData?.author?.userId;
+  if (!authorId) {
+    alert("유효한 작성자 ID가 없습니다.");
+    return;
+  }
+
+  try {
+    await createDirectChatRoom(authorId);
+    alert("DM 채팅방이 생성되었습니다!");
+    // TODO: 생성된 채팅방으로 이동 등의 후속 처리 추가 가능
+  } catch (e) {
+    alert("채팅방 생성에 실패했습니다.");
+    console.error("채팅방 생성 오류:", e);
+  }
+};
+
 
   return (
     <div className="local-companion-card">

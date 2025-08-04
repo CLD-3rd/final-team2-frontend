@@ -81,44 +81,17 @@ export const getUserReviewStats = async (userId) => {
 
 
 // ✅ 유저 뱃지 조회
+// ✅ 유저 뱃지 조회 - 엔드포인트 수정
 export const getUserBadges = async (userId) => {
   try {
-    const res = await axiosInstance.get(`/api/user/badge/badges/${userId}`);
+    const res = await axiosInstance.get(`/api/user/badge/${userId}`);
     if (res.status === 200 && res.data?.content) {
       return res.data;
     }
     return null;
   } catch (error) {
     console.error("뱃지 조회 실패", error);
-    // ✅ 테스트용 데이터
-    const testBadges = {
-      message: "뱃지조회",
-      content: {
-        userId: userId || 123,
-        badges: [
-          {
-            badgeTypeId: 5,
-            code: "LANDMARK_EIFFEL",
-            category: "LANDMARK",
-            name: "에펠탑 방문자",
-            description: "프랑스 파리의 에펠탑을 방문했습니다.",
-            imgUrl: "https://cdn.goteego.com/badges/eiffel.png",
-            issuedAt: "2025-07-15T17:34:00",
-          },
-          {
-            badgeTypeId: 6,
-            code: "LANDMARK_GERMAN",
-            category: "LANDMARK",
-            name: "독일 방문자",
-            description: "독일 프랑크프르트를 방문했습니다.",
-            imgUrl: "https://cdn.goteego.com/badges/frankf.png",
-            issuedAt: "2025-07-15T17:34:00",
-          },
-        ],
-      },
-    };
-    return testBadges;
+    // ... 이하 생략
   }
-
-  
 };
+

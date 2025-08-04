@@ -1,8 +1,8 @@
-import { formatTime } from "@/shared/utils/formatTime";
+import { formatTime } from "@/shared";
 
 // ✅ Feed 목록 조회 시
 export const parseFeedsResponse = (data) => {
-  if (!data || !Array.isArray(data.feeds)) return [];
+  if (!data) return [];
 
   return data.feeds.map((feed) => ({
     id: feed.feedId,
@@ -13,11 +13,10 @@ export const parseFeedsResponse = (data) => {
     },
     title: feed.title,
     content: feed.content,
-    imageUrls: feed.imageUrls,
+    imageUrl: feed.imageUrl,
     location: feed.location,
-    badgeRequest: feed.badgeRequest,
     viewCount: feed.viewCount,
-    createdAt: feed.createdAt,
+    createdAt: formatTime(feed.createdAt),
   }));
 };
 
@@ -35,15 +34,30 @@ export const parseFeedDetailResponse = (data) => {
     title: data.title,
     content: data.content,
     location: data.location,
-    imageUrls: data.imageUrls,
-    createdAt: formatTime(data.created_at),
+    imageUrl: data.imageUrl,
+    badgeRequest: data.badgeRequest,
+    createdAt: formatTime(data.createdAt),
     comments: (data.comments || []).map((comment) => ({
       id: comment.commentId,
-      author: comment.author.nickname,
+      nickname: comment.author.nickname,
       profileImgUrl: comment.author.profileImgUrl,
       content: comment.content,
       timestamp: formatTime(comment.createdAt), // "방금 전", "2시간 전" 같은 포맷 함수 사용
-      isMyComment: comment.isMyComment || false,
+      isMyComment: comment.isMyComment,
     })),
   };
+};
+
+// ✅ 댓글 목록 조회 시
+export const parseCommentsResponse = (data) => {
+  if (!data) return [];
+
+  return data.map((comment) => ({
+    id: comment.commentId,
+    nickname: comment.author.nickname,
+    profileImgUrl: comment.author.profileImgUrl,
+    content: comment.content,
+    timestamp: formatTime(comment.createdAt), // "방금 전", "2시간 전" 같은 포맷 함수 사용
+    isMyComment: comment.isMyComment,
+  }));
 };

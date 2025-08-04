@@ -13,7 +13,7 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState("planned-companion");
+  const [currentPage, setCurrentPage] = useState("feed");
   const [feedCount, setFeedCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
@@ -34,22 +34,45 @@ function App() {
   };
 
   useEffect(() => {
-  if (!currentUser) return;
+    if (!currentUser) return;
 
-  wsManager.connect()
-    .then(() => {
-      wsManager.subscribeNotifications((msg) => {
-        console.log("🔔 알림 수신:", msg);
-      });
-      wsManager.startHealthCheck?.();
-    })
-    .catch(err => console.error("❌ WS 연결 실패:", err));
+    const initWebSocket = async () => {
+      try {
+        await wsManager.connect();
 
-  return () => {
-    wsManager.disconnect(); // 필요 시 정리
-    wsManager.stopHealthCheck?.();
-  };
-}, [currentUser]);
+        // ✅ 알림 구독
+        wsManager.subscribeNotifications((msg) => {
+          console.log("🔔 알림 수신:", msg);
+          // 알림 토스트나 UI 업데이트 등 가능
+        });
+
+        // ✅ 모든 채팅방 구독
+        const directRooms = await getDirectChatRooms();
+        const groupRooms = await getGroupChatRooms();
+        const allRooms = [...(directRooms || []), ...(groupRooms || [])];
+
+        allRooms.forEach((room) => {
+          const isGroup = room.type === "GROUP" || !!room.groupName;
+          wsManager.subscribeChat(room.roomId, isGroup, (msg) => {
+            console.log("📥 채팅 수신:", msg);
+            // 알림이든 전역상태 저장이든 여기에 구현 가능
+          });
+        });
+
+        // ✅ 헬스체크 시작
+        wsManager.startHealthCheck?.();
+      } catch (err) {
+        console.error("❌ WebSocket 초기화 실패:", err);
+      }
+    };
+
+    initWebSocket();
+
+    return () => {
+      wsManager.disconnect();
+      wsManager.stopHealthCheck?.();
+    };
+  }, [currentUser]);
 
 
 
@@ -58,6 +81,7 @@ function App() {
       const success = await logoutUser();
       if (success) {
         setCurrentUser(null);
+        window.location.reload(); // ✅ 페이지 새로고침
       }
     } catch (err) {
       console.error("로그아웃 실패:", err);

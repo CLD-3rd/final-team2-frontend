@@ -13,6 +13,7 @@ export const parseTravelPostsResponse = (data) => {
         startTime: post.startTime,
         endTime: post.endTime,
         author: post.author,
+        viewCount: post.viewCount,
         participants: post.participants,
         maxParticipants: post.maxParticipants,
         image: post.imageUrl,
