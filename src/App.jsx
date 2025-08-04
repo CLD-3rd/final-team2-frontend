@@ -26,6 +26,7 @@ function App() {
     };
     fetchCurrentUser();
   }, []);
+  
 
   const handleLogin = async () => {
     setIsLoginModalOpen(false);

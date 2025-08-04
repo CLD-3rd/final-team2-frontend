@@ -1,8 +1,9 @@
 import { axiosInstance } from "@/shared";
 
 export const submitReview = async (reviewData) => {
+  const userId = reviewData.reviewerId; // 필수
   try {
-    const res = await axiosInstance.post("/api/reviews", reviewData, {
+    const res = await axiosInstance.post(`/api/review/${userId}`, reviewData, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         "Content-Type": "application/json",
