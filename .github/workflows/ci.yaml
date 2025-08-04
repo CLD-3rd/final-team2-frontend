@@ -27,12 +27,13 @@ jobs:
           cache: "npm" # ✅ npm 캐시 최적화
 
       - name: Install dependencies
-        run: npm ci # ✅ package-lock.json 기반 설치
+        run: npm ci --ignore-scripts=false
 
       - name: Build and Export
         run: npm run build
         env:
           VITE_SERVER_URL: ${{ secrets.VITE_SERVER_URL }}
+          ROLLUP_USE_ESM: true
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
