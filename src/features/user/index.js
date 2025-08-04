@@ -17,3 +17,6 @@ export { default as TravelTagEditModal } from "./modals/TravelTagEditModal";
 export { default as LoginPage } from "./pages/LoginPage";
 export { default as ProfileManagementPage } from "./pages/ProfileManagementPage";
 export { default as ScheduleManagementPage } from "./pages/ScheduleManagementPage";
+
+// ✅ Constants
+export { TRAVEL_TAG_GROUPS } from "./constants/travelTags";
