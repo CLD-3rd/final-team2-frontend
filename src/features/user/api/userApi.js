@@ -68,7 +68,6 @@ export const updateUserProfile = async (payload) => {
   }
 };
 
-
 // ✅ 사용자 표시 뱃지 수정
 export const updateUserBadge = async (badgeIds) => {
   try {
@@ -84,3 +83,19 @@ export const updateUserBadge = async (badgeIds) => {
   }
 };
 
+// ✅ 사용자 여행 성향 수정
+export const updateUserTravelTag = async (travelTagKeys) => {
+  try {
+    const res = await axiosInstance.put(`${BASE_URL}/travel-tags`, {
+      travelTagKeys,
+    });
+    return true;
+  } catch (error) {
+    const message =
+      error.response?.data?.message ||
+      "사용자 여행 성향 수정 중 오류가 발생했습니다.";
+    console.error("사용자 여행 성향 수정 실패:", message);
+
+    throw new Error(message);
+  }
+};

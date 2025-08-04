@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { Edit } from "lucide-react";
-import { FallbackImage } from "@/shared";
+import { ProfileImage } from "@/shared";
 import {
+  TRAVEL_TAG_GROUPS,
   getUserProfile,
+  updateUserTravelTag,
   updateUserBadge,
   ProfileEditModal,
   TravelTagEditModal,
@@ -72,14 +74,42 @@ const ProfileManagementPage = ({ currentUser, onProfileUpdate }) => {
     });
   };
 
-  const handleTravelTagSave = (finalTags) => {
-    const updatedProfile = {
-      ...userProfile,
-      travelTags: finalTags,
-    };
-    setUserProfile(updatedProfile);
-    onProfileUpdate(updatedProfile); // 전역 상태 업데이트
-    console.log("Travel tag data saved:", finalTags);
+  const handleTravelTagSave = async (selectedTagKeys) => {
+    try {
+      setLoading(true);
+      await updateUserTravelTag(selectedTagKeys);
+
+      // ✅ key → {key, description} 변환
+      const allOptions = [
+        ...TRAVEL_TAG_GROUPS.personality,
+        ...TRAVEL_TAG_GROUPS.destination,
+        ...TRAVEL_TAG_GROUPS.activity,
+        ...TRAVEL_TAG_GROUPS.style,
+        ...TRAVEL_TAG_GROUPS.drinking,
+        ...TRAVEL_TAG_GROUPS.smoking,
+      ];
+
+      const mappedTags = selectedTagKeys.map((key) => {
+        const match = allOptions.find((opt) => opt.key === key);
+        return match
+          ? { key: match.key, description: match.label }
+          : { key, description: key };
+      });
+
+      // ✅ UI 업데이트
+      const updatedProfile = {
+        ...userProfile,
+        travelTags: mappedTags,
+      };
+
+      setUserProfile(updatedProfile);
+      onProfileUpdate(updatedProfile); // 전역 상태 업데이트
+      toast.success("여행 성향이 성공적으로 수정되었습니다!");
+    } catch (error) {
+      toast.error(error.message || "여행 성향 수정에 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleProfileSave = (updatedProfile) => {
@@ -90,6 +120,7 @@ const ProfileManagementPage = ({ currentUser, onProfileUpdate }) => {
   // 뱃지 저장 핸들러 추가
   const handleBadgeSave = async (selectedBadges) => {
     try {
+      setLoading(true);
       // selectedBadges는 Badge 객체 배열
       const badgeIds = selectedBadges.map((badge) => badge.id);
 
@@ -103,9 +134,11 @@ const ProfileManagementPage = ({ currentUser, onProfileUpdate }) => {
       setUserProfile(updatedProfile);
       onProfileUpdate(updatedProfile);
 
-      toast.success("표시할 뱃지가 업데이트되었습니다!");
+      toast.success("표시할 뱃지가 수정되었습니다!");
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.message || "여행 성향 수정에 실패했습니다.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -126,7 +159,7 @@ const ProfileManagementPage = ({ currentUser, onProfileUpdate }) => {
             className="profile-image-container"
             style={{ position: "relative" }}
           >
-            <FallbackImage
+            <ProfileImage
               src={userProfile.profileImgUrl}
               // alt 삭제
               className="profile-image-large"
