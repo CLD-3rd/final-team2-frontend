@@ -88,8 +88,22 @@ function App() {
     }
   };
 
-  const handleProfileUpdate = (updatedProfile) => {
-    setCurrentUser(updatedProfile); // ✅ 전역 currentUser 업데이트
+  const handleProfileUpdate = async (updatedProfile) => {
+    // 기존 데이터와 병합
+    setCurrentUser((prev) => ({
+      ...prev,
+      ...updatedProfile,
+    }));
+
+    // 서버에서 최신 정보 다시 가져오기 (비동기)
+    try {
+      const freshUser = await getCurrentUser();
+      if (freshUser) {
+        setCurrentUser(freshUser);
+      }
+    } catch (err) {
+      console.error("유저 정보 재동기화 실패:", err);
+    }
   };
 
   const openLoginModal = () => setIsLoginModalOpen(true);
