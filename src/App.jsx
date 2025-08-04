@@ -6,6 +6,8 @@ import AppRouter from "@/AppRouter";
 import { LoginModal, getCurrentUser, logoutUser } from "@/features/user";
 import "@/App.css";
 import { Toaster } from "react-hot-toast";
+import { wsManager } from "@/features/chat/ws/wsManager";
+
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -30,6 +32,49 @@ function App() {
     const user = await getCurrentUser();
     if (user) setCurrentUser(user);
   };
+
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const initWebSocket = async () => {
+      try {
+        await wsManager.connect();
+
+        // ✅ 알림 구독
+        wsManager.subscribeNotifications((msg) => {
+          console.log("🔔 알림 수신:", msg);
+          // 알림 토스트나 UI 업데이트 등 가능
+        });
+
+        // ✅ 모든 채팅방 구독
+        const directRooms = await getDirectChatRooms();
+        const groupRooms = await getGroupChatRooms();
+        const allRooms = [...(directRooms || []), ...(groupRooms || [])];
+
+        allRooms.forEach((room) => {
+          const isGroup = room.type === "GROUP" || !!room.groupName;
+          wsManager.subscribeChat(room.roomId, isGroup, (msg) => {
+            console.log("📥 채팅 수신:", msg);
+            // 알림이든 전역상태 저장이든 여기에 구현 가능
+          });
+        });
+
+        // ✅ 헬스체크 시작
+        wsManager.startHealthCheck?.();
+      } catch (err) {
+        console.error("❌ WebSocket 초기화 실패:", err);
+      }
+    };
+
+    initWebSocket();
+
+    return () => {
+      wsManager.disconnect();
+      wsManager.stopHealthCheck?.();
+    };
+  }, [currentUser]);
+
+
 
   const handleLogout = async () => {
     try {

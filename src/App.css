@@ -2375,6 +2375,40 @@ body {
   color: #333;
 }
 
+.chat-type-buttons {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.chat-type-btn {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 2px solid var(--color-medium-tan);
+  background-color: var(--color-accent-light);
+  color: var(--color-dark-brown);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 60px;
+  text-align: center;
+}
+
+.chat-type-btn:hover {
+  background-color: var(--color-light-peach);
+  border-color: var(--color-warm-brown);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(139, 69, 19, 0.2);
+}
+
+.chat-type-btn.active {
+  background-color: var(--color-warm-brown);
+  color: white;
+  border-color: var(--color-dark-brown);
+  box-shadow: 0 2px 8px rgba(139, 69, 19, 0.3);
+}
+
 .dropdown-btn {
   background: none;
   border: none;
