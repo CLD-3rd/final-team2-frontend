@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { useLockBodyScroll } from "@/shared";
-import { TRAVEL_TAG_GROUPS } from "@/features/user/constants/travelTags";
+import { TRAVEL_TAG_GROUPS } from "@/features/user";
 
 const TravelTagEditModal = ({ onClose, userProfile, onSave }) => {
   useLockBodyScroll();
 
-  const existingTags = userProfile.travelTags || [];
+  const existingTags = userProfile.travelTags?.map((tag) => tag.key) || [];
 
   // ✅ 초기 데이터 파싱
   const parseExistingTags = (tags) => {
@@ -64,16 +64,18 @@ const TravelTagEditModal = ({ onClose, userProfile, onSave }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const finalTags = [
+    const selectedTags = [
       ...formData.selectedPersonalityTags,
       ...formData.selectedDestinationTags,
-      ...Object.keys(formData.activities).filter((k) => formData.activities[k]),
-    ];
-    if (formData.travelStyle) finalTags.push(formData.travelStyle);
-    if (formData.drinkingStyle) finalTags.push(formData.drinkingStyle);
-    if (formData.smokingStyle) finalTags.push(formData.smokingStyle);
+      ...Object.keys(formData.activities).filter(
+        (key) => formData.activities[key]
+      ), // true인 key만 추가
+      formData.travelStyle || null,
+      formData.drinkingStyle || null,
+      formData.smokingStyle || null,
+    ].filter(Boolean); // null 제거
 
-    onSave(finalTags);
+    onSave(selectedTags); // UI 즉시 반영
     onClose();
   };
 
