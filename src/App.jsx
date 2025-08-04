@@ -8,7 +8,6 @@ import "@/App.css";
 import { Toaster } from "react-hot-toast";
 
 function App() {
-  console.log(import.meta.env.VITE_API_BASE_URL);
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
