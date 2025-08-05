@@ -41,7 +41,10 @@ const MainContent = ({
           />
         );
       case "schedule":
-        return <ScheduleManagementPage currentUser={currentUser} />;
+        console.log("📅 현재 사용자:", currentUser);
+        return <ScheduleManagementPage
+          currentUser={currentUser}
+          onProfileUpdate={onProfileUpdate} />;
       case "chat":
         return <ChatPage />;
       case "support":

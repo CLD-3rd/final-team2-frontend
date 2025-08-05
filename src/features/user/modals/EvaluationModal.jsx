@@ -4,7 +4,8 @@ import { useState } from "react";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 import { submitReview } from "@/features/user/api/reviewApi";
 
-const EvaluationModal = ({ participant, onClose, onSubmit, onReport }) => {
+const EvaluationModal = ({ participant, onClose, onSubmit, onReport, currentUserId }) => {
+
   const [rating, setRating] = useState(0); // 별점 (0 ~ 5)
   const [hover, setHover] = useState(null);
   const [comment, setComment] = useState("");
@@ -12,11 +13,15 @@ const EvaluationModal = ({ participant, onClose, onSubmit, onReport }) => {
   const handleSubmit = async (e) => {
   e.preventDefault();
   try {
+    console.log("포스트아이디: ", participant.postId);
+    console.log("리뷰 대상 participant:", participant);
+    console.log("전송할 revieweeId:", participant.id);
+    console.log("전송할 reviewerId:", currentUserId);
     await submitReview({
-      post_id: participant.postId,   // 여행 ID
+      postId: participant.postId,   // 여행 ID
       reviewerId: currentUserId,     // 로그인한 사용자 ID
-      revieweeId: participant.user_id, // 평가 대상자 ID
-      overallRating: rating,
+      revieweeId: participant.id, // 평가 대상자 ID
+      rating: rating,
       comment: comment,
     });
     onSubmit({ rating, comment, participant }); // 기존 콜백 호출

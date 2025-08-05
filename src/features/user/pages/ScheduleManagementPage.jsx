@@ -14,9 +14,10 @@ import { wsManager } from "@/features/chat/ws/wsManager";
 
 const ScheduleManagementPage = ({ currentUser }) => {
   // 오늘 날짜 0시 기준
-  const currentUserId = Number(wsManager.getCurrentUserId());
+  console.log("📅 원래 ID:", currentUser?.userId);
+  const currentUserId = currentUser?.userId;
+  console.log("📅 현재 사용자 ID:", currentUserId);
   if (!currentUserId) return null;
-  console.log("📅 현재 사용자 ID (from wsManager):", currentUserId);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -57,10 +58,17 @@ const ScheduleManagementPage = ({ currentUser }) => {
   })();
 }, []);
 
+useEffect(() => {
+  // 테스트용: 일정 1번, 유저 ID 3번을 승인 처리
+  updateParticipantStatus(1, 3, "APPROVED")
+    .then(() => console.log("✅ 강제 승인 완료"))
+    .catch((e) => console.error("❌ 승인 실패", e));
+}, []);
+
   const getScheduleStatus = (schedule) => {
     if (schedule.progressStatus === "UPCOMING") return "예정";
     if (schedule.progressStatus === "ONGOING") return "진행중";
-    return "예정";
+    return "완료";
   };
 
   // 필터 버튼
@@ -138,6 +146,8 @@ const ScheduleManagementPage = ({ currentUser }) => {
       setSelectedDay(parsed.day);
     }
   };
+
+  
 
   const handleCalendarDayClick = (day) => {
     setSelectedDay(day);
@@ -276,7 +286,8 @@ const ScheduleManagementPage = ({ currentUser }) => {
         </div>
       </div>
       {/* 모달은 ScheduleManagementPage의 return 끝부분에 둔다 */}
-      {selectedParticipant && (
+      {selectedParticipant && ( <>
+      {console.log("🧾 선택된 참가자:", selectedParticipant)}
         <EvaluationModal
           participant={selectedParticipant}
           currentUserId={currentUserId}
@@ -287,6 +298,7 @@ const ScheduleManagementPage = ({ currentUser }) => {
           }}
           onReport={(p) => alert(`${p.name} 신고하기!`)}
         />
+        </>
       )}
     </div>
   );
@@ -334,6 +346,8 @@ const ScheduleCard = ({
       setErrorMsg("참가자 목록 갱신 실패");
     }
   };
+
+  
 
   // ✅ 수정: participant 인자 누락 → 전달함
   const handleApprove = async (participantId) => {
@@ -558,10 +572,14 @@ const ScheduleCard = ({
                   <button
                     className="evaluation-btn"
                     onClick={() => {
-                      if (!participant.isReviewed) {
-                        setSelectedParticipant(participant); // 평가 안 했으면 모달 열기
-                      }
-                    }}
+  if (!participant.isReviewed) {
+    console.log("🆔 현재 schedule.id:", schedule.id);
+    setSelectedParticipant({
+      ...participant,
+      postId: schedule.id, // 일정 ID 추가!
+    });
+  }
+}}
                     disabled={participant.isReviewed} // 평가완료면 비활성화
                     style={{
                       backgroundColor: participant.isReviewed
