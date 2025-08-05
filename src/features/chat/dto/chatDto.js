@@ -8,13 +8,14 @@ export const parseDirectChatRoomResponse = (response, currentUser) => {
     id: room.otherUserId,
     roomId: room.roomId,
     name: room.otherUserNickname,
-    lastMessage: "", // API에서 제공되지 않는 경우 빈 문자열
-    timestamp: "now", // API에서 제공되지 않는 경우 기본값
-    unreadCount: 0, // API에서 제공되지 않는 경우 기본값
-    isOnline: false, // API에서 제공되지 않는 경우 기본값
-    avatarColor: "#8b5cf6", // 기본 색상
+    lastMessage: room.lastMessage || "",
+    timestamp: room.lastMessageTimestamp || "now",
+    unreadCount: room.unreadCount || 0,
+    isOnline: false,
+    avatarColor: "#8b5cf6",
     otherUserId: room.otherUserId,
     otherUserEmail: room.otherUserEmail,
+    // profileImage: room.otherUserProfileImgUrl || "https://placeholder.com/40", // ✅ URL 수정
   }));
 };
 
@@ -26,11 +27,11 @@ export const parseGroupChatRoomResponse = (response, currentUser) => {
     id: room.roomId,
     roomId: room.roomId,
     name: room.groupName,
-    lastMessage: "", // API에서 제공되지 않는 경우 빈 문자열
-    timestamp: "now", // API에서 제공되지 않는 경우 기본값
+    lastMessage: "",
+    timestamp: "now",
     unreadCount: room.unreadCount,
     isOnline: room.participants?.some(p => p.userId !== currentUser?.id) || false,
-    avatarColor: "#3b82f6", // 그룹 채팅방 기본 색상
+    avatarColor: "#3b82f6",
     participants: room.participants,
     type: room.type
   }));
@@ -39,26 +40,27 @@ export const parseGroupChatRoomResponse = (response, currentUser) => {
 // DirectMessageResponse를 UI 형태로 변환
 export const parseChatMessageResponse = (response, currentUser, selectedChat) => {
   if (!response || !Array.isArray(response.content)) return [];
-  const myId = Number(wsManager.getCurrentUserId());
+
+  // ✅ 문제의 원인이었던 myId 가져오는 부분을 currentUser에서 직접 가져오도록 수정
+  const myId = currentUser?.id;
   
   return response.content.map((message, index) => {
     const isMe = Number(message.senderId) === myId;
+    const rawTimestamp = new Date(message.timestamp);
 
-    console.log("💬 senderId:", message.senderId, "myId:", myId, "isMe:", isMe);
-    const rawTimestamp = new Date(message.timestamp);  // 이걸 기준으로 정렬
-return {
-  id: index + 1,
-  sender: isMe ? "me" : "other",
-  type: message.type === "TALK" ? "text" : "system",
-  content: message.content,
-  timestamp: rawTimestamp.toISOString(), // 저장은 원본 유지
-  displayTime: rawTimestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }), // 표시용
-  avatar: !isMe ? message.senderName?.charAt(0) : null,
-  avatarColor: selectedChat?.avatarColor || "#8b5cf6",
-  profileImage: "https://via.placeholder.com/40",
-  senderName: message.senderName,
-  senderId: message.senderId
-};
+    return {
+      id: message.messageId || `msg-${rawTimestamp.getTime()}-${index}`, // 서버에서 고유 ID를 준다면 그것을 사용
+      sender: isMe ? "me" : "other",
+      type: message.type === "TALK" ? "text" : "system",
+      content: message.content,
+      timestamp: rawTimestamp.toISOString(),
+      displayTime: rawTimestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      avatar: !isMe ? message.senderName?.charAt(0) : null,
+      avatarColor: selectedChat?.avatarColor || "#8b5cf6",
+      profileImage: "https://placeholder.com/40", // ✅ URL 수정
+      senderName: message.senderName,
+      senderId: message.senderId
+    };
   });
 };
 
@@ -70,7 +72,7 @@ export const parseUsersResponse = (response) => {
     id: user.id,
     name: user.name,
     email: user.email,
-    profileImage: user.profileImage || "https://via.placeholder.com/40"
+    profileImage: user.profileImage || "https://placeholder.com/40" // ✅ URL 수정
   }));
 };
 
@@ -82,6 +84,6 @@ export const parseCurrentUserResponse = (response) => {
     id: response.id,
     name: response.name,
     email: response.email,
-    profileImage: response.profileImage || "https://via.placeholder.com/40"
+    profileImage: response.profileImage || "https://placeholder.com/40" // ✅ URL 수정
   };
-}; 
+};
