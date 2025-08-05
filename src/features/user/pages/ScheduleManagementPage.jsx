@@ -58,12 +58,12 @@ const ScheduleManagementPage = ({ currentUser }) => {
   })();
 }, []);
 
-useEffect(() => {
-  // 테스트용: 일정 1번, 유저 ID 3번을 승인 처리
-  updateParticipantStatus(1, 3, "APPROVED")
-    .then(() => console.log("✅ 강제 승인 완료"))
-    .catch((e) => console.error("❌ 승인 실패", e));
-}, []);
+// useEffect(() => {
+//   // 테스트용: 일정 1번, 유저 ID 3번을 승인 처리
+//   updateParticipantStatus(1, 3, "APPROVED")
+//     .then(() => console.log("✅ 강제 승인 완료"))
+//     .catch((e) => console.error("❌ 승인 실패", e));
+// }, []);
 
   const getScheduleStatus = (schedule) => {
     if (schedule.progressStatus === "UPCOMING") return "예정";
