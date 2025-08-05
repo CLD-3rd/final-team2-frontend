@@ -1,48 +1,57 @@
-// 서버에서 받은 일정 데이터를 ScheduleManagementPage 형태로 변환
-export const parseScheduleResponse = (rawData, currentUserId) => {
-  if (!rawData || !rawData.content) return [];
+export const parseScheduleResponse = async (
+  rawData,
+  currentUserId,
+  getParticipants,
+  getApprovedCount
+) => {
+  if (!rawData || !Array.isArray(rawData)) return [];
 
-  return rawData.content.map((item) => {
-    // 승인된 인원 수 계산
-    const approvedCount = (item.participants || []).filter((p) => p.status === "APPROVED").length;
+  return await Promise.all(
+    rawData.map(async (item) => {
+      try {
+        const [participants, approvedCount] = await Promise.all([
+          getParticipants(item.travelPostId),
+          getApprovedCount(item.travelPostId),
+        ]);
 
-    // 나 자신의 참가 상태 찾기
-    const myStatus =
-      (item.participants || []).find((p) => p.user_id === currentUserId)?.status || null;
+        const myStatus =
+          participants.find((p) => p.participantId === currentUserId)?.status ||
+          null;
 
-    return {
-      id: item.travel_post_id,
-      title: item.title,
-      location: item.location,
-      startDate: item.start_time,
-      endDate: item.end_time,
+        return {
+          id: item.travelPostId,
+          title: item.title,
+          location: item.location,
+          startDate: item.startTime,
+          endDate: item.endTime,
+          isReviewed: item.isReviewed ?? false,
+          myJoinStatus: myStatus,
 
-      // 일정 전체 리뷰 완료 여부
-      isReviewed: item.is_reviewed ?? false,
-      myJoinStatus: myStatus,
+          owner: item.author
+            ? {
+                id: item.author.userId,
+                name: item.author.nickname,
+                image:
+                  item.author.profileImgUrl || "/images/default-user.png",
+              }
+            : null,
 
-      owner: item.owner
-        ? {
-            id: item.owner.user_id,
-            name: item.owner.nickname,
-            image: item.owner.image || "/images/default-user.png",
-            isReviewed: item.owner.is_reviewed ?? false,
-          }
-        : null,
+          participants: participants.map((p) => ({
+            id: p.participantId,
+            name: p.participantNickname,
+            status: p.status,
+            approved: p.status === "APPROVED",
+            image: p.profileImgUrl || "/images/default-user.png",
+          })),
 
-      participants: (item.participants || []).map((p) => ({
-        id: p.user_id,
-        name: p.nickname,
-        status: p.status,
-        approved: p.status === "APPROVED",
-        image: p.image || "/images/default-user.png",
-        isReviewed: p.is_reviewed ?? false,
-      })),
-
-      approvedCount,
-      recruitLimit: item.recruit_limit ?? 0,
-
-      progressStatus: item.progress_status, // "UPCOMING" | "ONGOING" | "COMPLETED"
-    };
-  });
+          approvedCount,
+          recruitLimit: item.maxParticipants ?? 0,
+          progressStatus: item.progressStatus ?? null,
+        };
+      } catch (err) {
+        console.error("❌ 파싱 실패:", item.travelPostId, err);
+        return null;
+      }
+    })
+  ).then((results) => results.filter(Boolean));
 };

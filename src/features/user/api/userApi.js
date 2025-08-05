@@ -68,6 +68,7 @@ export const updateUserProfile = async (payload) => {
   }
 };
 
+
 // ✅ 사용자 표시 뱃지 수정
 export const updateUserBadge = async (badgeIds) => {
   try {
@@ -82,3 +83,4 @@ export const updateUserBadge = async (badgeIds) => {
     throw new Error(message);
   }
 };
+
