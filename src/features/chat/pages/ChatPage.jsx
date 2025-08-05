@@ -204,9 +204,7 @@ const ChatPage = () => {
             try {
                 setLoading(true);
                 const groupRoomsResponse = await getGroupChatRooms();
-                // 그룹 채팅방 DTO 파서가 필요하다면 여기에 추가
-                // setGroupRooms(parseGroupChatRoomResponse(groupRoomsResponse, currentUser));
-                setGroupRooms(groupRoomsResponse); // 임시로 직접 설정
+                setGroupRooms(parseGroupChatRoomResponse(groupRoomsResponse, currentUser));
             } catch (error) {
                 console.error("그룹 채팅방 목록 로딩 실패:", error);
             } finally {
