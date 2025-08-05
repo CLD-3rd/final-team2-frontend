@@ -1,5 +1,14 @@
 import { wsManager } from "../ws/wsManager";
 
+
+// 타임스탬프를 "오후 8:18" 같은 형식으로 바꿔주는 헬퍼 함수
+const formatTimestamp = (isoString) => {
+    if (!isoString) return "";
+    const date = new Date(isoString);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
+
+
 // DirectChatRoomDto를 UI 형태로 변환
 export const parseDirectChatRoomResponse = (response, currentUser) => {
   if (!response || !Array.isArray(response)) return [];
@@ -19,22 +28,22 @@ export const parseDirectChatRoomResponse = (response, currentUser) => {
   }));
 };
 
-// GroupChatRoomDto를 UI 형태로 변환
-export const parseGroupChatRoomResponse = (response, currentUser) => {
-  if (!response || !Array.isArray(response)) return [];
-  
-  return response.map(room => ({
-    id: room.roomId,
-    roomId: room.roomId,
-    name: room.groupName,
-    lastMessage: "",
-    timestamp: "now",
-    unreadCount: room.unreadCount,
-    isOnline: room.participants?.some(p => p.userId !== currentUser?.id) || false,
-    avatarColor: "#3b82f6",
-    participants: room.participants,
-    type: room.type
-  }));
+// GroupChatRoomDto UI 형태로 변환
+export const parseGroupChatRoomResponse = (rawData, currentUser) => {
+    if (!rawData || !Array.isArray(rawData)) return [];
+
+    return rawData.map(room => {
+        // 서버 응답(room)을 UI 컴포넌트(chat)가 사용할 객체로 변환
+        return {
+            roomId: room.roomId,
+            name: room.groupName, // 서버의 'groupName'을 UI의 'name'으로 매핑
+            lastMessage: room.lastMessage || "아직 메시지가 없습니다.", // 메시지가 null일 경우 기본값 설정
+            timestamp: formatTimestamp(room.lastMessageTimestamp), // 타임스탬프 형식 변환
+            unreadCount: room.unreadCount || 0,
+            profileImage: "/images/default-group.png", // 그룹 채팅방 기본 프로필 이미지
+            // UI에서 필요한 기타 필드들...
+        };
+    });
 };
 
 // DirectMessageResponse를 UI 형태로 변환
@@ -87,3 +96,4 @@ export const parseCurrentUserResponse = (response) => {
     profileImage: response.profileImage || "https://placeholder.com/40" // ✅ URL 수정
   };
 };
+
