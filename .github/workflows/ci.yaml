@@ -59,7 +59,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::194722398200:role/GotEEgo-Frontend-Deploy-Role
+          role-to-assume: arn:aws:iam::194722398200:role/goteego-frontend-deploy-role
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ secrets.AWS_REGION }}
 
