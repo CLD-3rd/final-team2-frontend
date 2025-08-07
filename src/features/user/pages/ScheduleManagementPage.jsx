@@ -42,28 +42,28 @@ const ScheduleManagementPage = ({ currentUser }) => {
   const [openScheduleIds, setOpenScheduleIds] = useState([]);
 
   useEffect(() => {
-  (async () => {
-    const data = await getSchedules();
-    console.log("📅 getSchedules result:", data);
+    (async () => {
+      const data = await getSchedules();
+      console.log("📅 getSchedules result:", data);
 
-    const parsed = await parseScheduleResponse(
-      data,
-      currentUserId,
-      getParticipants,
-      getApprovedParticipantCount
-    );
+      const parsed = await parseScheduleResponse(
+        data,
+        currentUserId,
+        getParticipants,
+        getApprovedParticipantCount
+      );
 
-    console.log("📅 파싱된 일정 데이터:", parsed);
-    setSchedules(parsed);
-  })();
-}, []);
+      console.log("📅 파싱된 일정 데이터:", parsed);
+      setSchedules(parsed);
+    })();
+  }, []);
 
-// useEffect(() => {
-//   // 테스트용: 일정 1번, 유저 ID 3번을 승인 처리
-//   updateParticipantStatus(1, 3, "APPROVED")
-//     .then(() => console.log("✅ 강제 승인 완료"))
-//     .catch((e) => console.error("❌ 승인 실패", e));
-// }, []);
+  // useEffect(() => {
+  //   // 테스트용: 일정 1번, 유저 ID 3번을 승인 처리
+  //   updateParticipantStatus(1, 3, "APPROVED")
+  //     .then(() => console.log("✅ 강제 승인 완료"))
+  //     .catch((e) => console.error("❌ 승인 실패", e));
+  // }, []);
 
   const getScheduleStatus = (schedule) => {
     if (schedule.progressStatus === "UPCOMING") return "예정";
@@ -146,8 +146,6 @@ const ScheduleManagementPage = ({ currentUser }) => {
       setSelectedDay(parsed.day);
     }
   };
-
-  
 
   const handleCalendarDayClick = (day) => {
     setSelectedDay(day);
@@ -270,34 +268,37 @@ const ScheduleManagementPage = ({ currentUser }) => {
                 currentUserId={currentUserId}
                 status={getScheduleStatus(schedule)}
                 isRecruitClosed={closedRecruitIds.includes(schedule.id)}
-                onRecruitClose={() => setClosedRecruitIds((prev) => [...prev, schedule.id])}
+                onRecruitClose={() =>
+                  setClosedRecruitIds((prev) => [...prev, schedule.id])
+                }
                 setSelectedParticipant={setSelectedParticipant}
                 isOpen={openScheduleIds.includes(schedule.id)}
                 onToggleOpen={() =>
-                setOpenScheduleIds((prev) =>
-                  prev.includes(schedule.id)
-                  ? prev.filter((id) => id !== schedule.id)
-                : [...prev, schedule.id]
-    )
-  }
+                  setOpenScheduleIds((prev) =>
+                    prev.includes(schedule.id)
+                      ? prev.filter((id) => id !== schedule.id)
+                      : [...prev, schedule.id]
+                  )
+                }
               />
             ))
           )}
         </div>
       </div>
       {/* 모달은 ScheduleManagementPage의 return 끝부분에 둔다 */}
-      {selectedParticipant && ( <>
-      {console.log("🧾 선택된 참가자:", selectedParticipant)}
-        <EvaluationModal
-          participant={selectedParticipant}
-          currentUserId={currentUserId}
-          onClose={() => setSelectedParticipant(null)}
-          onSubmit={(data) => {
-            console.log("평가 제출:", data);
-            setSelectedParticipant(null);
-          }}
-          onReport={(p) => alert(`${p.name} 신고하기!`)}
-        />
+      {selectedParticipant && (
+        <>
+          {console.log("🧾 선택된 참가자:", selectedParticipant)}
+          <EvaluationModal
+            participant={selectedParticipant}
+            currentUserId={currentUserId}
+            onClose={() => setSelectedParticipant(null)}
+            onSubmit={(data) => {
+              console.log("평가 제출:", data);
+              setSelectedParticipant(null);
+            }}
+            onReport={(p) => alert(`${p.name} 신고하기!`)}
+          />
         </>
       )}
     </div>
@@ -333,7 +334,7 @@ const ScheduleCard = ({
 
   const handleRecruitClose = () => onRecruitClose && onRecruitClose();
 
-    const refreshParticipants = async () => {
+  const refreshParticipants = async () => {
     try {
       const updated = await getParticipants(schedule.id);
       const approved = await getApprovedParticipantCount(schedule.id);
@@ -347,36 +348,32 @@ const ScheduleCard = ({
     }
   };
 
-  
-
   // ✅ 수정: participant 인자 누락 → 전달함
   const handleApprove = async (participantId) => {
-  if (actionLoading) return;
-  setActionLoading(true);
-  try {
-    await updateParticipantStatus(schedule.id, participantId, "APPROVED");
-    await refreshParticipants();
-  } catch (error) {
-    alert("참여자 승인 실패");
-  } finally {
-    setActionLoading(false);
-  }
-};
-
+    if (actionLoading) return;
+    setActionLoading(true);
+    try {
+      await updateParticipantStatus(schedule.id, participantId, "APPROVED");
+      await refreshParticipants();
+    } catch (error) {
+      alert("참여자 승인 실패");
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   const handleReject = async (participantId) => {
-  if (actionLoading) return;
-  setActionLoading(true);
-  try {
-    await updateParticipantStatus(schedule.id, participantId, "REJECTED");
-    await refreshParticipants();
-  } catch (error) {
-    alert("참여자 거절 실패");
-  } finally {
-    setActionLoading(false);
-  }
-};
-
+    if (actionLoading) return;
+    setActionLoading(true);
+    try {
+      await updateParticipantStatus(schedule.id, participantId, "REJECTED");
+      await refreshParticipants();
+    } catch (error) {
+      alert("참여자 거절 실패");
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   // 모집 마감된 경우 승인된 참가자만 표시
   const visibleParticipants = [
@@ -406,7 +403,6 @@ const ScheduleCard = ({
         }}
         onClick={() => {
           if (!isRejected && participantCount > 0) onToggleOpen();
-
         }}
       >
         <div className="schedule-info">
@@ -572,14 +568,14 @@ const ScheduleCard = ({
                   <button
                     className="evaluation-btn"
                     onClick={() => {
-  if (!participant.isReviewed) {
-    console.log("🆔 현재 schedule.id:", schedule.id);
-    setSelectedParticipant({
-      ...participant,
-      postId: schedule.id, // 일정 ID 추가!
-    });
-  }
-}}
+                      if (!participant.isReviewed) {
+                        console.log("🆔 현재 schedule.id:", schedule.id);
+                        setSelectedParticipant({
+                          ...participant,
+                          postId: schedule.id, // 일정 ID 추가!
+                        });
+                      }
+                    }}
                     disabled={participant.isReviewed} // 평가완료면 비활성화
                     style={{
                       backgroundColor: participant.isReviewed
