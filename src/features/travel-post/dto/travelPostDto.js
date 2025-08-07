@@ -16,7 +16,7 @@ export const parseTravelPostsResponse = (data) => {
         viewCount: post.viewCount,
         participants: post.participants,
         maxParticipants: post.maxParticipants,
-        image: post.imageUrl,
+        imageUrl: post.imageUrl,
         createdAt: formatTime(post.createdAt),
         similarity: post.similarity ?? null, // 로그인 사용자일 때만
       }));

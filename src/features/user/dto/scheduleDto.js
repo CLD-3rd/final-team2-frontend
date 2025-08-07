@@ -46,7 +46,7 @@ export const parseScheduleResponse = async (
 
           approvedCount,
           recruitLimit: item.maxParticipants ?? 0,
-          progressStatus: item.progressStatus ?? null,
+          progressStatus: item.status ?? null,
         };
       } catch (err) {
         console.error("❌ 파싱 실패:", item.travelPostId, err);

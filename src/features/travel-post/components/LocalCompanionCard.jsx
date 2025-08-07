@@ -5,8 +5,7 @@ import { useLockBodyScroll, getLocationLabel, ProfileImage } from "@/shared";
 import { deleteTravelPost } from "@/features/travel-post";
 import StarRatings from "react-star-ratings";
 import toast from "react-hot-toast";
-import { createDirectChatRoom } from '@/features/chat/api/chatApi';
-
+import { createDirectChatRoom } from "@/features/chat/api/chatApi";
 
 const LocalCompanionCard = ({
   currentUser,
@@ -46,27 +45,26 @@ const LocalCompanionCard = ({
     }
   };
 
-    const handleCardClick = async () => {
+  const handleCardClick = async () => {
     console.log("postData 확인:", postData);
-  const result = window.confirm("DM하시겠습니까?");
-  if (!result) return;
+    const result = window.confirm("DM하시겠습니까?");
+    if (!result) return;
 
-  const authorId = postData?.author?.userId;
-  if (!authorId) {
-    alert("유효한 작성자 ID가 없습니다.");
-    return;
-  }
+    const authorId = postData?.author?.userId;
+    if (!authorId) {
+      alert("유효한 작성자 ID가 없습니다.");
+      return;
+    }
 
-  try {
-    await createDirectChatRoom(authorId);
-    alert("DM 채팅방이 생성되었습니다!");
-    // TODO: 생성된 채팅방으로 이동 등의 후속 처리 추가 가능
-  } catch (e) {
-    alert("채팅방 생성에 실패했습니다.");
-    console.error("채팅방 생성 오류:", e);
-  }
-};
-
+    try {
+      await createDirectChatRoom(authorId);
+      alert("DM 채팅방이 생성되었습니다!");
+      // TODO: 생성된 채팅방으로 이동 등의 후속 처리 추가 가능
+    } catch (e) {
+      alert("채팅방 생성에 실패했습니다.");
+      console.error("채팅방 생성 오류:", e);
+    }
+  };
 
   return (
     <div className="local-companion-card">
@@ -74,7 +72,7 @@ const LocalCompanionCard = ({
         {/* ⭐ 별점 표시 */}
         <div className="card-rating">
           <StarRatings
-            rating={postData?.author?.rating || 0} // 기본값 0
+            rating={postData?.author?.averageRating || 0} // 기본값 0
             starRatedColor="#ffd700" // 별 색상 (골드)
             numberOfStars={5}
             name="rating"
@@ -117,7 +115,11 @@ const LocalCompanionCard = ({
       <div className="card-main-content">
         <h3 className="card-title">{postData.title}</h3>
 
-        <div className="card-author-info" onClick={handleCardClick} style={{ cursor: 'pointer' }}>
+        <div
+          className="card-author-info"
+          onClick={handleCardClick}
+          style={{ cursor: "pointer" }}
+        >
           <ProfileImage
             src={postData.author.profileImgUrl}
             alt={postData.author.nickname}
@@ -133,13 +135,13 @@ const LocalCompanionCard = ({
       </div>
 
       {/* 태그 */}
-      {/* <div className="card-tags">
-        {postData.author.tags.map((tag, index) => (
+      <div className="card-tags">
+        {postData.author.travelTags.map((tag, index) => (
           <span key={index} className="tag">
-            {tag}
+            {tag.description}
           </span>
         ))}
-      </div> */}
+      </div>
     </div>
   );
 };

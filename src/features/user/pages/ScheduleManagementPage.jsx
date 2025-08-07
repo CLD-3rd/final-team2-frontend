@@ -58,13 +58,6 @@ const ScheduleManagementPage = ({ currentUser }) => {
   })();
 }, []);
 
-useEffect(() => {
-  // 테스트용: 일정 1번, 유저 ID 3번을 승인 처리
-  updateParticipantStatus(1, 3, "APPROVED")
-    .then(() => console.log("✅ 강제 승인 완료"))
-    .catch((e) => console.error("❌ 승인 실패", e));
-}, []);
-
   const getScheduleStatus = (schedule) => {
     if (schedule.progressStatus === "UPCOMING") return "예정";
     if (schedule.progressStatus === "ONGOING") return "진행중";
@@ -337,9 +330,18 @@ const ScheduleCard = ({
     try {
       const updated = await getParticipants(schedule.id);
       const approved = await getApprovedParticipantCount(schedule.id);
-      setParticipants(
-        updated.filter((p) => p.id !== currentUserId && p.status !== "REJECTED")
-      );
+         // ✅ 정규화: 어디서 오든 같은 형태로 맞춤
+    const normalized = updated
+    .map((p) => ({
+       id: p.participantId,                       // ← 반드시 id 필드에 userId를 넣어둠
+      name: p.participantNickname,
+      status: p.status,
+      approved: p.status === "APPROVED",
+      image: p.profileImgUrl || "/images/default-user.png",
+    }))
+    .filter((p) => p.id !== currentUserId && p.status !== "REJECTED");
+  setParticipants(normalized);
+
       setApprovedCount(approved);
     } catch (error) {
       console.error("참가자 목록 갱신 실패", error);
@@ -556,7 +558,7 @@ const ScheduleCard = ({
           {effectiveOpen && (
             <div className="participants-section">
               {visibleParticipants.map((participant, index) => (
-                <div key={index} className="participant-row">
+                <div key={participant.id} className="participant-row">
                   <div className="participant-info">
                     <ProfileImage
                       src={participant.image}
