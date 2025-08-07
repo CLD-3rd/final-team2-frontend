@@ -36,14 +36,15 @@ export const getGroupChatRooms = async () => {
 };
 
 // 특정 채팅방의 메시지 내역 조회
-export const getChatMessages = async (roomId) => {
+export const getChatMessages = async (roomId, page = 0, size=20) => {
   try {
-    const response = await axiosInstance.get(`/api/chat/rooms/${roomId}/messages`);
+    const response = await axiosInstance.get(`/api/chat/rooms/${roomId}/messages`,
+      { params: { page, size, sort: "timestamp,desc" }}
+    );
     return response.data;
   } catch (error) {
     console.error('채팅방 메시지 내역 조회 실패:', error);
-    console.warn("API 호출 실패, mock 데이터 사용");
-    return mockChatMessages;
+    return { content: [], last: true, number: page, size };
   }
 };
 

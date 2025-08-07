@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Header, Sidebar } from "@/shared";
 import AppRouter from "@/AppRouter";
 import { LoginModal, getCurrentUser, logoutUser } from "@/features/user";
@@ -32,25 +32,25 @@ function App() {
     if (user) setCurrentUser(user);
   };
 
+  const handleGlobalNotification = useCallback((notification) => {
+  console.log("🔔 알림 수신 (전역):", notification);
+  toast.success(
+    <div>
+      <strong>{notification.title || '새 알림'}</strong>
+      <p>{notification.content}</p>
+    </div>,
+    { duration: 5000 }
+  );
+}, []);
+
+const handleGlobalMessage = useCallback((message) => {
+  console.log("📥 1:1 메시지 수신 (전역):", message);
+}, []);
+
   // 👇 수정된 웹소켓 연결 로직
   useEffect(() => {
     if (!currentUser) return;
 
-    // 핸들러 함수들을 useEffect 내부에서 직접 정의합니다.
-    const handleGlobalNotification = (notification) => {
-      console.log("🔔 알림 수신 (전역):", notification);
-      toast.success(
-        <div>
-          <strong>{notification.title || '새 알림'}</strong>
-          <p>{notification.content}</p>
-        </div>,
-        { duration: 5000 }
-      );
-    };
-
-    const handleGlobalMessage = (message) => {
-      console.log("📥 1:1 메시지 수신 (전역):", message);
-    };
 
     const initWebSocket = async () => {
       try {
@@ -72,7 +72,7 @@ function App() {
       wsManager.unsubscribe('/user/queue/notifications', handleGlobalNotification);
       wsManager.unsubscribe('/user/queue/messages', handleGlobalMessage);
     };
-  }, [currentUser]);
+  }, [currentUser, handleGlobalNotification, handleGlobalMessage]);
 
   const handleLogout = async () => {
     try {

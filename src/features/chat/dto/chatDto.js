@@ -90,8 +90,8 @@ export const parseCurrentUserResponse = (response) => {
   if (!response) return null;
   
   return {
-    id: response.id,
-    name: response.name,
+    id: response.userId ?? response.id,
+    name: response.userName ?? response.name ?? "Unknown User",
     email: response.email,
     profileImage: response.profileImage || "https://placeholder.com/40" // ✅ URL 수정
   };

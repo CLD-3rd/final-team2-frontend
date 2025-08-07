@@ -46,6 +46,12 @@ const PlannedCompanionPage = ({ currentUser, onLoginModalOpen }) => {
         filters,
         pageNum
       );
+
+      console.log("📦 [fetchPosts] 받은 게시글 수:", newPosts.length);
+      console.log("📄 pageNum:", pageNum, "append:", append);
+      console.log("📃 posts 내용:", newPosts);
+      console.log("📌 totalPages:", pageInfo.totalPages);
+
       setPosts((prev) => (append ? [...prev, ...newPosts] : newPosts));
       setHasMore(pageNum + 1 < pageInfo.totalPages);
     } catch (error) {

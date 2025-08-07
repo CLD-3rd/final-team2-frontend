@@ -5,6 +5,7 @@ import ProfileImage from "../../../shared/components/ProfileImage";
 import { getDirectChatRooms, getGroupChatRooms, getChatMessages, getCurrentUser, getUsers, createDirectChatRoom } from "../api/chatApi";
 import { parseDirectChatRoomResponse, parseGroupChatRoomResponse, parseChatMessageResponse, parseUsersResponse, parseCurrentUserResponse } from "../dto/chatDto";
 import { wsManager } from "../ws/wsManager";
+import { is } from "date-fns/locale";
 
 const ChatPage = () => {
     const [selectedChat, setSelectedChat] = useState(null);
@@ -23,6 +24,10 @@ const ChatPage = () => {
     const emojiPickerRef = useRef(null);
     const messagesEndRef = useRef(null);
     const currentRoomIdRef = useRef(null);
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+    const [initialScrollDone, setInitialScrollDone] = useState(false);
+
 
     const emojis = [
         "😊", "😂", "🥰", "😍", "🤔", "😎", "😭", "😤", "🥺", "😴",
@@ -50,6 +55,7 @@ const ChatPage = () => {
                 const userResponse = await getCurrentUser();
                 const userData = parseCurrentUserResponse(userResponse);
                 setCurrentUser(userData);
+                console.log("me:", userData.id);
 
                 // 분리된 함수를 사용해 초기 채팅방 목록과 전체 유저 목록을 동시에 가져옵니다.
                 await Promise.all([
@@ -118,10 +124,14 @@ const ChatPage = () => {
         if (chatType !== 'group' || !selectedChat?.roomId) return;
         const groupSubDestination = `/sub/chat/room/${selectedChat.roomId}`;
         const handleGroupMessage = (msg) => {
-            if (Number(msg.senderId) === currentUser?.id) return;
-            const formattedMessage = { ...msg, displayTime: new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) };
-            setChatMessages(prev => [...prev, formattedMessage]);
-        };
+  const isMe = Number(msg.senderId) === Number(currentUser?.id);
+  const formattedMessage = {
+    ...msg,
+    sender: isMe ? "me" : "other",           // DM처럼 sender 세팅
+    displayTime: new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+  };
+  setChatMessages(prev => [...prev, formattedMessage]);
+};
         const manageGroupSubscription = async () => {
             await wsManager.connect();
             wsManager.subscribe(groupSubDestination, handleGroupMessage);
@@ -133,19 +143,34 @@ const ChatPage = () => {
     }, [selectedChat, chatType, currentUser]);
 
     useEffect(() => {
-        if (messagesEndRef.current) {
-            messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-        }
-    }, [chatMessages]);
+    if (!initialScrollDone && messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ behavior: "auto" });
+        isAtBottomRef.current = true; // 초기 스크롤 후 하단에 있다고 가정
+        setInitialScrollDone(true);
+    } 
+}, [chatMessages, initialScrollDone]);
 
     useEffect(() => {
         if (selectedChat && selectedChat.roomId) {
             const fetchMessages = async () => {
                 try {
-                    const response = await getChatMessages(selectedChat.roomId);
+                    const response = await getChatMessages(selectedChat.roomId, page, 20);
                     const formattedMessages = parseChatMessageResponse(response, currentUser, selectedChat);
                     const sortedMessages = [...formattedMessages].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-                    setChatMessages(sortedMessages);
+                    
+                    // ✅ 여기서 최근 10개 콘솔로 확인
+        console.table(
+          sortedMessages.slice(-10).map(m => ({
+            id: m.id,
+            sender: m.sender,            // DTO가 세팅했는지
+            senderId: m.senderId,        // 비교에 쓰는 값 있는지
+            me: String(m.senderId) === String(currentUser?.id),
+          }))
+        );
+                    if(page ===0){setChatMessages(sortedMessages);}
+                    else{
+                        setChatMessages(prev => [...sortedMessages, ...prev]);}
+                    setHasMore(!response.last);    
                     setCurrentRoomId(selectedChat.roomId);
                 } catch (error) {
                     console.error("메시지 로딩 실패:", error);
@@ -153,11 +178,84 @@ const ChatPage = () => {
             };
             fetchMessages();
         }
-    }, [selectedChat, currentUser]);
+    }, [selectedChat, currentUser, page]);
+
+
+    
+    const messagesContainerRef = useRef(null);
+    const prevScrollHeightRef = useRef(0);
+    const loadingOlderRef = useRef(false);
+
+    const BOTTOM_THRESHOLD = 80;               // 하단 근처 허용 오차(px)
+const isAtBottomRef = useRef(true);        // 현재 사용자가 하단에 있었는지 추적
+
+const calcIsAtBottom = () => {
+const el = messagesContainerRef.current;
+if (!el) return true;
+return el.scrollHeight - el.scrollTop - el.clientHeight <= BOTTOM_THRESHOLD;
+};
+
+
+const handleScroll = () => {
+const el = messagesContainerRef.current;
+if (!el) return;
+if (el.scrollTop === 0 && hasMore && !loadingOlderRef.current) {
+    loadingOlderRef.current = true;                 // 프리펜드 시작
+    prevScrollHeightRef.current = el.scrollHeight;  // 기존 전체 높이 저장
+    setPage((p) => p + 1);                          // 다음 페이지 로드
+}
+
+    isAtBottomRef.current = calcIsAtBottom();
+};
+
+useEffect(() => {
+  if (!isAtBottomRef.current) return;         // 하단에 있을 때만 수행
+
+const el = messagesContainerRef.current;
+if (!el) return;
+
+  // DOM 페인트 이후에 확실히 바닥으로
+requestAnimationFrame(() => {
+    el.scrollTop = el.scrollHeight;
+});
+}, [chatMessages]);
+
+
+// ✅ 3) 프리펜드 때만 보정 (통일된 보정 useEffect)
+useEffect(() => {
+  if (!loadingOlderRef.current) return; // 프리펜드가 아닐 때는 보정하지 않음
+
+const el = messagesContainerRef.current;
+if (!el) return;
+const delta = el.scrollHeight - prevScrollHeightRef.current;
+  el.scrollTop = delta;                 // 화면 위치 유지
+  loadingOlderRef.current = false;      // 프리펜드 종료
+}, [chatMessages]);
+
+useEffect(() => {
+const el = messagesContainerRef.current;
+if (!el) return;
+
+const isAtBottom =
+    Math.abs(el.scrollHeight - el.scrollTop - el.clientHeight) < 16;
+
+if (isAtBottom && messagesEndRef.current) {
+    messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+}
+}, [chatMessages]);
+
 
     const handleChatSelect = (chat) => {
         if (selectedChat?.roomId === chat.roomId) return;
         setSelectedChat(chat);
+
+        setChatMessages([]);
+setPage(0);
+setHasMore(true);
+setInitialScrollDone(false);
+
+loadingOlderRef.current = false;
+prevScrollHeightRef.current = 0;
     };
 
     const sendMessage = (message) => {
@@ -180,6 +278,7 @@ const ChatPage = () => {
     const handleSendMessage = () => {
         if (messageInput.trim()) {
             sendMessage(messageInput);
+            
         }
     };
 
@@ -321,13 +420,15 @@ const ChatPage = () => {
                                 </div>
                             </div>
                             
-                            <div className="messages-container">
+                            <div className="messages-container" 
+                            ref={messagesContainerRef} 
+                            onScroll={handleScroll}>
                                 {loading && chatMessages.length === 0 ? (
                                     <div className="loading-messages">Loading messages...</div>
                                 ) : (
                                     <>
                                         {chatMessages.map((message) => {
-                                            const isMe = message.sender === "me";
+                                            const isMe = Number(message.senderId) === Number(currentUser?.id);
                                             return (
                                                 <div
                                                     key={message.id}
@@ -341,10 +442,12 @@ const ChatPage = () => {
                                                         />
                                                     )}
                                                     
-                                                    <div className="message-content">
-                                                        {!isMe && (
-                                                            <div className="sender-name">{message.senderName}</div>
-                                                        )}
+                                                    <div
+        className="message-content"
+        /* 👇 내 메시지는 오른쪽으로 밀어붙이기 */
+        style={isMe ? { marginLeft: "auto", textAlign: "right" } : undefined}
+      >
+        {!isMe && <div className="sender-name">{message.senderName}</div>}
 
                                                         <div className="message-bubble">
                                                             <div className="message-text">{message.content}</div>

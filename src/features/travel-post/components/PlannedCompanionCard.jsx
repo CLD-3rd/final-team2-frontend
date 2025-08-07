@@ -34,8 +34,6 @@ const PlannedCompanionCard = ({
           error.message ||
             "사전 동행 모집 참여 신청에 실패했습니다.\n다시 시도해주세요."
         );
-      } finally {
-        onUpdateSuccess?.();
       }
     }
   };
@@ -84,7 +82,7 @@ const PlannedCompanionCard = ({
         <div className="description">{postData.content}</div>
         <div className="card-actions">
           <button className="participants-count-btn">
-            {postData.participants}/{postData.maxParticipants}
+            {postData.participants+1}/{postData.maxParticipants+1}
           </button>
           <button className="join-btn" onClick={(e) => handleJoinClick(e)}>
             같이 갈래요
