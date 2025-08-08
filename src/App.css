@@ -1586,6 +1586,30 @@ body {
   color: #999;
 }
 
+.post-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.post-meta-left {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.post-author {
+  font-weight: 500;
+  color: #666;
+}
+
+.post-author,
+.post-location {
+  line-height: 1.4;
+}
+
 .post-location {
   font-size: 14px;
   color: #666;
