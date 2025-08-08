@@ -39,6 +39,7 @@ export const parseFeedDetailResponse = (data) => {
     createdAt: formatTime(data.createdAt),
     comments: (data.comments || []).map((comment) => ({
       id: comment.commentId,
+      userId: comment.author.userId,
       nickname: comment.author.nickname,
       profileImgUrl: comment.author.profileImgUrl,
       content: comment.content,

@@ -1364,6 +1364,17 @@ body {
   color: #333;
 }
 
+.comment-author-badge {
+  background-color: #e0c68c; /* 노란색 배경 */
+  color: #4b3f2f;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  margin-left: 8px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
 .comment-timestamp {
   font-size: 12px;
   color: #999;
