@@ -322,6 +322,9 @@ const FeedDetailModal = ({
                     <span className="comment-author">{comment.nickname}</span>
                     <span className="comment-timestamp">
                       {comment.timestamp}
+                      {comment.userId === feedData.author.userId && (
+                        <span className="comment-author-badge">작성자</span>
+                      )}
                     </span>
                     {/* 댓글 수정/삭제 버튼 */}
                     {comment.isMyComment && isLoggedIn && (

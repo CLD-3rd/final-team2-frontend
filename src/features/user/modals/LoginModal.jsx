@@ -1,5 +1,5 @@
 "use client";
-import { useLockBodyScroll } from "@/shared";
+import { useLockBodyScroll, FallbackImage } from "@/shared";
 
 const LoginModal = ({ onClose, onLogin }) => {
   const handleGoogleLogin = () => {
@@ -20,8 +20,8 @@ const LoginModal = ({ onClose, onLogin }) => {
         <div className="login-modal-body">
           <div className="login-logo-section">
             <div className="login-logo">
-              <img
-                src="/images/login-character.png"
+              <FallbackImage
+                src="/images/login-logo.png"
                 alt="GotEEgo Character"
                 className="login-character-image-original"
               />

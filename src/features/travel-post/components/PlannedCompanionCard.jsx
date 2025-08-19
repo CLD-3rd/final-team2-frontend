@@ -54,9 +54,12 @@ const PlannedCompanionCard = ({
               <h3 className="post-title">{postData.title}</h3>
             </div>
             <div className="post-row">
-              <p className="post-location">
-                {getLocationLabel(postData.location)}
-              </p>
+              <div className="post-meta-left">
+                <p className="post-author">{postData.author.nickname}</p>
+                <p className="post-location">
+                  {getLocationLabel(postData.location)}
+                </p>
+              </div>
               <p className="post-date">{postData.createdAt}</p>
             </div>
           </div>
@@ -82,7 +85,7 @@ const PlannedCompanionCard = ({
         <div className="description">{postData.content}</div>
         <div className="card-actions">
           <button className="participants-count-btn">
-            {postData.participants+1}/{postData.maxParticipants+1}
+            {postData.participants + 1}/{postData.maxParticipants + 1}
           </button>
           <button className="join-btn" onClick={(e) => handleJoinClick(e)}>
             같이 갈래요
