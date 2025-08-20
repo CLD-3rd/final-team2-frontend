@@ -1,42 +1,31 @@
-// ✅ ISO 문자열 → 상대 시간 or YYYY-MM-DD 포맷
 export const formatTime = (isoDate) => {
-  // 1. ISO 문자열을 UTC 기준으로 파싱
+  // UTC 기준 Date 객체 생성
   const utcDate = new Date(isoDate);
 
-  // 2. KST 시간대로 변환
-  const kstDate = new Date(
-    utcDate.toLocaleString("en-US", { timeZone: "Asia/Seoul" })
-  );
-  const now = new Date(
-    new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" })
-  );
+  // KST 기준으로 9시간 더함
+  const kstOffset = 9 * 60 * 60 * 1000;
+  const kstDate = new Date(utcDate.getTime() + kstOffset);
+  const now = new Date(Date.now());
 
-  const diff = Math.floor((now - date) / 1000); // 초 단위 차이
-  const diffInDays = Math.floor(diff / 86400); // 일 단위 차이
+  const diff = Math.floor((now - kstDate) / 1000); // 초 차이
+  const diffInDays = Math.floor(diff / 86400);
   const diffInMonths =
     now.getMonth() -
-    date.getMonth() +
-    12 * (now.getFullYear() - date.getFullYear()); // 월 차이
-  const diffInYears = now.getFullYear() - date.getFullYear(); // 년 차이
+    kstDate.getMonth() +
+    12 * (now.getFullYear() - kstDate.getFullYear());
+  const diffInYears = now.getFullYear() - kstDate.getFullYear();
 
   if (diff < 60) return "방금 전";
   if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
   if (diffInDays < 7) return `${diffInDays}일 전`;
-
-  // 일주일 이상 → 1주, 2주, 3주 등
   if (diffInDays < 30) return `${Math.floor(diffInDays / 7)}주 전`;
-
-  // 한 달 이상 → 1개월, 2개월
   if (diffInMonths < 12) return `${diffInMonths}개월 전`;
-
-  // 1년 이상 → 1년, 2년
   if (diffInYears < 2) return `1년 전`;
   if (diffInYears < 3) return `2년 전`;
 
-  // 3년 이상 → YYYY-MM-DD
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+  return `${kstDate.getFullYear()}-${String(kstDate.getMonth() + 1).padStart(
     2,
     "0"
-  )}-${String(date.getDate()).padStart(2, "0")}`;
+  )}-${String(kstDate.getDate()).padStart(2, "0")}`;
 };
