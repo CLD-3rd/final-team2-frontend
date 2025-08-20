@@ -1,7 +1,16 @@
 // ✅ ISO 문자열 → 상대 시간 or YYYY-MM-DD 포맷
 export const formatTime = (isoDate) => {
-  const date = new Date(isoDate);
-  const now = new Date();
+  // 1. ISO 문자열을 UTC 기준으로 파싱
+  const utcDate = new Date(isoDate);
+
+  // 2. KST 시간대로 변환
+  const kstDate = new Date(
+    utcDate.toLocaleString("en-US", { timeZone: "Asia/Seoul" })
+  );
+  const now = new Date(
+    new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" })
+  );
+
   const diff = Math.floor((now - date) / 1000); // 초 단위 차이
   const diffInDays = Math.floor(diff / 86400); // 일 단위 차이
   const diffInMonths =
